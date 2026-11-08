@@ -758,3 +758,8 @@ Reworded the report to use “VPN connection” and describe the three result st
 ## 2026-11-08 — Add a direct-download Windows installer
 
 Added a self-contained Windows installer that embeds the complete app bundle, extracts only validated relative paths within the signed-in user’s Local AppData program folder, adds a Start Menu entry, and opens the existing confirmation-first family setup. The release ZIP now contains this one-download installer and a short start guide. A native package self-check is configured for successful extraction and path-traversal rejection. The C# installer cross-published as win-x64 with .NET 10.0.403 and warnings treated as errors; PowerShell Core parsed the package builder, focused source/documentation checks passed, and the full Linux suite passed 230 tests with no skips. The native Windows extraction self-check, UI, installer launch, and Task Scheduler flow have not run on Windows.
+
+
+## 2026-11-08 — Exercise Windows archive extraction on Linux
+
+Moved archive path validation and extraction into a platform-neutral .NET library used by the Windows installer. A separate .NET test executable runs the same code against valid synthetic packages, traversal and rooted paths, symlink attributes, case-insensitive duplicates, file/folder conflicts, and incomplete packages; invalid archives are rejected before the destination is created. All extraction tests passed on Linux, the Windows installer cross-published for win-x64 with warnings treated as errors, and focused Python and workflow checks passed. GitHub Actions now has a Linux job for these .NET tests, and the Windows package job depends on it. Native Windows file extraction and UI remain unverified.

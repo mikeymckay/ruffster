@@ -2,11 +2,10 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.Reflection;
 using System.Windows.Forms;
+using FamilyActivity.WindowsInstall;
 
 internal static class Program
 {
-    private const int MaxEntries = 20000;
-    private const long MaxExpandedBytes = 2L * 1024 * 1024 * 1024;
     private static readonly string InstallFolder = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "Family Activity");
 
@@ -36,7 +35,7 @@ internal static class Program
         var destination = Path.Combine(Path.GetTempPath(), "Family Activity installer self-test-" + Guid.NewGuid().ToString("N"));
         try
         {
-            ExtractBundle(bundle, destination);
+            BundleExtractor.Extract(bundle, destination);
             if (File.ReadAllText(Path.Combine(destination, "FamilyActivitySetup.exe")) != "synthetic setup" ||
                 File.ReadAllText(Path.Combine(destination, "FamilyActivityCore", "FamilyActivityCore.exe")) != "synthetic core")
                 throw new InvalidOperationException("The installer did not extract its synthetic package.");
@@ -47,7 +46,7 @@ internal static class Program
             unsafeBundle.Position = 0;
             try
             {
-                ExtractBundle(unsafeBundle, destination + "-unsafe");
+                BundleExtractor.Extract(unsafeBundle, destination + "-unsafe");
                 throw new InvalidOperationException("The installer accepted a path outside its destination.");
             }
             catch (InvalidDataException) { }
@@ -70,57 +69,7 @@ internal static class Program
     {
         using var input = Assembly.GetExecutingAssembly().GetManifestResourceStream("FamilyActivityBundle.zip")
             ?? throw new InvalidDataException("The Family Activity package is missing from this installer.");
-        ExtractBundle(input, destination);
-    }
-
-    private static void ExtractBundle(Stream input, string destination)
-    {
-        var root = Path.GetFullPath(destination).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
-        var entries = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        using var archive = new ZipArchive(input, ZipArchiveMode.Read, true);
-        if (archive.Entries.Count is 0 or > MaxEntries) throw new InvalidDataException("The installer package has an invalid number of files.");
-        long expanded = 0;
-        var setupPresent = false;
-        var corePresent = false;
-        foreach (var entry in archive.Entries)
-        {
-            var name = entry.FullName.Replace('\\', '/');
-            var directory = name.EndsWith('/');
-            var relative = directory ? name[..^1] : name;
-            if (string.IsNullOrWhiteSpace(relative) || relative.StartsWith('/') || Path.IsPathRooted(relative) ||
-                relative.Contains(':') || relative.Split('/').Any(part => part is "" or "." or ".."))
-                throw new InvalidDataException("The installer package contains an unsafe file path.");
-            var unixType = (entry.ExternalAttributes >> 16) & 0xF000;
-            if (unixType == 0xA000) throw new InvalidDataException("The installer package must not contain symbolic links.");
-            var target = Path.GetFullPath(Path.Combine(root, relative.Replace('/', Path.DirectorySeparatorChar)));
-            if (!target.StartsWith(root, StringComparison.OrdinalIgnoreCase))
-                throw new InvalidDataException("The installer package contains a file outside its install folder.");
-            if (!entries.Add(target)) throw new InvalidDataException("The installer package contains duplicate file paths.");
-            if (!directory)
-            {
-                expanded = checked(expanded + entry.Length);
-                if (expanded > MaxExpandedBytes) throw new InvalidDataException("The installer package is unexpectedly large.");
-                setupPresent |= relative.Equals("FamilyActivitySetup.exe", StringComparison.OrdinalIgnoreCase);
-                corePresent |= relative.Equals("FamilyActivityCore/FamilyActivityCore.exe", StringComparison.OrdinalIgnoreCase);
-            }
-        }
-        if (!setupPresent || !corePresent) throw new InvalidDataException("The installer package is incomplete.");
-        Directory.CreateDirectory(root);
-        foreach (var entry in archive.Entries)
-        {
-            var name = entry.FullName.Replace('\\', '/');
-            var directory = name.EndsWith('/');
-            var relative = directory ? name[..^1] : name;
-            var target = Path.GetFullPath(Path.Combine(root, relative.Replace('/', Path.DirectorySeparatorChar)));
-            if (directory) Directory.CreateDirectory(target);
-            else
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-                using var source = entry.Open();
-                using var output = new FileStream(target, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-                source.CopyTo(output);
-            }
-        }
+        BundleExtractor.Extract(input, destination);
     }
 
     private sealed class InstallerForm : Form

@@ -104,6 +104,8 @@ class DocumentationSiteTests(unittest.TestCase):
         project = (ROOT / 'native/windows/FamilyActivityStatus.csproj').read_text(encoding='utf-8')
         self.assertIn('os: [ubuntu-latest, macos-latest, windows-latest]', workflow)
         self.assertIn('windows-package-check', workflow)
+        self.assertIn('windows-bundle-extractor', workflow)
+        self.assertIn('native/windows/bundle-extractor-tests/FamilyActivity.BundleExtractor.Tests.csproj', workflow)
         self.assertIn('macos-package-check', workflow)
         self.assertIn('scripts/validate-macos-install-flow.py', workflow)
         self.assertIn("dotnet-version: '10.0.x'", workflow)

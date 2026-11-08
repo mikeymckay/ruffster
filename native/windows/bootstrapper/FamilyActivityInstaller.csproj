@@ -9,6 +9,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../bundle-extractor/FamilyActivity.BundleExtractor.csproj" />
     <EmbeddedResource Include="$(FamilyBundlePath)" LogicalName="FamilyActivityBundle.zip" />
   </ItemGroup>
   <Target Name="RequireFamilyBundle" BeforeTargets="PrepareForBuild" Condition="'$(FamilyBundlePath)' == ''">

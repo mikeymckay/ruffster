@@ -14,7 +14,8 @@ class WindowsSetupDisclosureTests(unittest.TestCase):
 
     def test_direct_download_installer_embeds_bundle_and_checks_extraction_paths(self):
         root = Path(__file__).parents[1]
-        source = (root / 'native/windows/bootstrapper/Program.cs').read_text(encoding='utf-8')
+        source = (root / 'native/windows/bundle-extractor/BundleExtractor.cs').read_text(encoding='utf-8')
+        installer = (root / 'native/windows/bootstrapper/Program.cs').read_text(encoding='utf-8')
         project = (root / 'native/windows/bootstrapper/FamilyActivityInstaller.csproj').read_text(encoding='utf-8')
         builder = (root / 'scripts/build-windows-preview.ps1').read_text(encoding='utf-8')
         self.assertIn('FamilyActivityBundle.zip', project)
@@ -23,9 +24,11 @@ class WindowsSetupDisclosureTests(unittest.TestCase):
         self.assertIn('MaxExpandedBytes', source)
         self.assertIn('FamilyActivitySetup.exe', source)
         self.assertIn('FamilyActivityCore/FamilyActivityCore.exe', source)
-        self.assertIn('Monitoring will not start until the next screen', source)
-        self.assertIn('TryCreateShortcut(target)', source)
-        self.assertIn('Open Family Activity setup and parent dashboard', source)
+        self.assertIn('Monitoring will not start until the next screen', installer)
+        self.assertIn('TryCreateShortcut(target)', installer)
+        self.assertIn('Open Family Activity setup and parent dashboard', installer)
+        self.assertIn('file and folder at the same path', source)
+        self.assertIn('outside its install folder', source)
         self.assertIn('FamilyActivityInstaller.exe', builder)
         self.assertIn('--self-test', builder)
 

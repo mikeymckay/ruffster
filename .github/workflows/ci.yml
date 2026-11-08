@@ -9,6 +9,17 @@ permissions:
   contents: read
 
 jobs:
+  windows-bundle-extractor:
+    name: Test Windows installer archive extraction
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Test valid bundles and reject unsafe archives
+        run: dotnet run --project native/windows/bundle-extractor-tests/FamilyActivity.BundleExtractor.Tests.csproj -c Release
+
   tests:
     name: Tests (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -33,7 +44,7 @@ jobs:
     name: Build Windows preview (no artifact published)
     runs-on: windows-latest
     timeout-minutes: 15
-    needs: tests
+    needs: [tests, windows-bundle-extractor]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
