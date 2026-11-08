@@ -100,6 +100,18 @@ class MacInstallTests(unittest.TestCase):
         args=plistlib.loads(Path(result['plist']).read_bytes())['ProgramArguments']
         self.assertEqual(args[args.index('--retention-days')+1],'7')
 
+    def test_packaged_launch_agent_is_associated_with_its_host_app(self):
+        bundle_contents = self.root / 'Family Activity.app' / 'Contents'
+        runtime = bundle_contents / 'Resources' / 'runtime'
+        package = runtime / 'family_activity'
+        package.mkdir(parents=True)
+        (package / '__main__.py').write_text('')
+        (bundle_contents / 'Info.plist').write_bytes(plistlib.dumps({'CFBundleIdentifier': 'org.example.family'}))
+        result = install(self.key, self.exe, runtime, self.exe, self.exe, self.home, 123,
+                         runner=self.launch)
+        definition = plistlib.loads(Path(result['plist']).read_bytes())
+        self.assertEqual(definition['AssociatedBundleIdentifiers'], ['org.example.family'])
+
     def test_installer_supports_synthetic_only_collection_validation(self):
         result = install(self.key, self.exe, self.source, self.exe, self.exe, self.home, 123,
                          runner=self.launch, collect_network=False,

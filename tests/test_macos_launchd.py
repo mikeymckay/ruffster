@@ -26,6 +26,15 @@ class MacLaunchdTests(unittest.TestCase):
         self.assertEqual(plist['ProgramArguments'][:2], ['/tmp/FamilyActivityCore', 'agent'])
         self.assertNotIn('-m', plist['ProgramArguments'])
 
+    def test_associated_bundle_identifier_is_recorded_for_local_network_privacy(self):
+        plist = plistlib.loads(agent_plist('org.example.agent', '/tmp/FamilyActivityCore', '/tmp/runtime',
+                                           '/tmp/db', '/tmp/key', '/tmp/fg', '/tmp/status', frozen=True,
+                                           associated_bundle_id='org.example.family'))
+        self.assertEqual(plist['AssociatedBundleIdentifiers'], ['org.example.family'])
+        with self.assertRaisesRegex(ValueError, 'bundle identifier'):
+            agent_plist('org.example.agent', '/tmp/FamilyActivityCore', '/tmp/runtime', '/tmp/db',
+                        '/tmp/key', '/tmp/fg', '/tmp/status', associated_bundle_id='bad/id')
+
     def test_optional_network_identity_key_is_passed_to_agent(self):
         args = plistlib.loads(agent_plist('org.example.network', '/usr/bin/python3', '/opt/family',
                                           '/tmp/db', '/tmp/key', '/tmp/fg', '/tmp/status',

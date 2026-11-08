@@ -68,7 +68,8 @@ def install(public_key, python, source, foreground, status, home, uid, *, label=
         label, str(python), str(source), str(database), str(key_path),
         str(foreground), str(status), frozen=frozen, retention_days=retention_days,
         network_key=str(network_key_path), collect_network=collect_network,
-        collect_network_settings=collect_network_settings)
+        collect_network_settings=collect_network_settings,
+        associated_bundle_id=macos_launchd.bundle_identifier_for_path(source))
     for path in (python, foreground, status):
         if not Path(path).is_file() or not os.access(path, os.X_OK): raise ValueError('required executable is unavailable')
     if not Path(source).is_dir() or (not frozen and not (Path(source) / 'family_activity' / '__main__.py').is_file()):

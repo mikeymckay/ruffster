@@ -35,7 +35,8 @@ with open(sys.argv[1], 'wb') as file:
     plistlib.dump({'CFBundleName':'Family Activity Preview', 'CFBundleDisplayName':'Family Activity Preview',
                    'CFBundleIdentifier':'org.familyactivity.preview', 'CFBundleExecutable':'FamilyActivitySetup',
                    'CFBundlePackageType':'APPL', 'CFBundleShortVersionString':'0.1.0',
-                   'CFBundleVersion':'1', 'NSHighResolutionCapable':True}, file)
+                   'CFBundleVersion':'1', 'NSHighResolutionCapable':True,
+                   'NSLocalNetworkUsageDescription': 'Family Activity uses your local network when you connect a parent computer or send an encrypted report.'}, file)
 PY
 "$APP/Contents/MacOS/FamilyActivitySetup" --check-bundle
 test -s "$APP/Contents/Resources/LICENSE"

@@ -251,6 +251,12 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertNotIn('Download encrypted key backup', dashboard)
         self.assertIn('the sender shows two digits, and the receiver enters them', product)
         self.assertIn('digits only find the nearby computer', product)
+        install = (SITE / 'install.html').read_text(encoding='utf-8')
+        faq = (SITE / 'faq.html').read_text(encoding='utf-8')
+        self.assertIn('not for activity monitoring', install)
+        self.assertIn('System Settings → Privacy &amp; Security → Local Network', install)
+        self.assertIn('not for monitoring', faq)
+        self.assertIn('System Settings → Privacy &amp; Security → Local Network', faq)
         self.assertIn('Set up parent access', script)
         self.assertIn('exactly six digits', script)
 
@@ -295,6 +301,10 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('hugeIntervalHeartbeat == .paused', native_status)
         self.assertIn('Monitoring status self-check failed:', native_status)
         self.assertIn('helpers/status" --self-test-state', builder)
+        self.assertIn('NSLocalNetworkUsageDescription', builder)
+        self.assertIn('connect a parent computer or send an encrypted report', builder)
+        launchd = (ROOT / 'family_activity/macos_launchd.py').read_text(encoding='utf-8')
+        self.assertIn('AssociatedBundleIdentifiers', launchd)
 
     def test_macos_package_runs_frozen_parent_dashboard_smoke_check(self):
         builder = (ROOT / 'scripts/build-macos-preview.sh').read_text(encoding='utf-8')
@@ -350,6 +360,6 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('exec /bin/sleep 60', lifecycle_check)
         self.assertIn('validate-macos-install-flow.py', guide)
         self.assertIn('zero valid identities', status)
-        self.assertIn('<b>233</b><span>Linux development tests passed · 4 PowerShell checks skipped</span>', status)
-        self.assertIn('<b>231</b><span>Mac tests passed · 2 Node.js and 4 PowerShell checks skipped (237 run)</span>', status)
+        self.assertIn('<b>235</b><span>Linux development tests passed · 4 PowerShell checks skipped (239 run)</span>', status)
+        self.assertIn('<b>233</b><span>Mac tests passed · 2 Node.js and 4 PowerShell checks skipped (239 run)</span>', status)
         self.assertIn('Two-digit report pairing over home Wi-Fi', status)
