@@ -722,3 +722,8 @@ Cross-published the current `native/windows/FamilyActivityStatus.csproj` for `wi
 ## 2026-11-08 — Prepare the source tree for GitHub
 
 Initialized a local `main` branch because the project checkout previously had no Git metadata. No remote was added and nothing was pushed. Extended `.gitignore` for local environment files, operating-system metadata, logs, caches, and distribution output while preserving an explicit `.env.example` exception. Regression checks now cover the expanded ignore list. All 24 documentation-site tests passed; `git diff --cached --check` passed; and the staged source list plus a credential-pattern scan were reviewed. Created initial commit `0c4377b` with 110 source, documentation, test, and synthetic screenshot files. The ignored unsigned preview archive, temporary screenshots, Python environment, and generated build output were not committed. GitHub repository selection, Pages activation, and native CI remain pending.
+
+
+## 2026-11-08 — Simplify and fit the optional browser popup
+
+Rewrote the child's browser popup copy to remove the implementation term “temporary reset flag,” state the domain-only example and privacy exclusions directly, explain browser-switch/pause gaps, and make the saved pause/gap state optional detail. The initial connected and paused views each render at 340×598px in a 340×600px Chrome viewport without horizontal overflow. axe-core found zero WCAG 2.1 A/AA or best-practice violations in both mocked states, and the screenshot was visually reviewed. All seven browser-channel tests passed, followed by the complete Linux suite (222 tests, no skips). Chrome and native-messaging APIs were mocked; this did not install or run the extension or validate the Mac/Windows bridge.
