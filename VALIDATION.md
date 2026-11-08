@@ -872,3 +872,8 @@ The Pages home page now includes the optional experimental macOS process-byte su
 ## 2026-11-08 — Repeat live macOS agent lifecycle validation
 
 Ran `scripts/validate-macos-agent-runtime.py` on the test Mac’s macOS 26.6 / Apple-silicon host using the real installer and LaunchAgent code with a temporary home directory, synthetic foreground helper, generated test key, and native status helper. The agent encrypted three fictional app samples, reconstructed a 9.0-second gap after process suspension, restarted under a new PID after SIGKILL, and recorded a 0.2-second restart gap. Graceful termination closed the session. Uninstall stopped the job and retained the encrypted report as designed; the harness then removed its temporary home, key, database, helper, and plist. It confirmed the disposable LaunchAgent was removed. This verifies logged-in user-session behavior and visible-helper readiness; it does not verify actual reboot/login without a session, UI appearance/VoiceOver, sleep/wake, or family usability.
+
+
+## 2026-11-08 — Check live macOS interface counters
+
+Ran the current `family_activity.macos.network_counters()` adapter on the test Mac’s Mac against `/usr/sbin/netstat -ibn`. It parsed 25 link-layer interfaces, then a synthetic HTTPS request to `example.com` was followed by increased interface counters. The validation printed only the count of parsed interfaces and whether counters increased; it did not retain addresses, cumulative totals, or a report. This checks adapter output and direction of change on the current macOS build; it does not attribute bytes to the request, prove all interfaces are independent, or validate counter behavior across sleep, interface changes, or VPN tunnels.
