@@ -75,7 +75,7 @@ def _validate_windows_heartbeat_ipc(setup):
     return True
 
 
-def _validate_frozen_report_timezone(connection, port, token, temporary_root):
+def _validate_frozen_report_timezone(connection, port, token, temporary_root, core):
     """Open a saved IANA schedule and report inside the frozen parent process."""
     from family_activity.encrypted_agent_store import EncryptedAgentStore
     from family_activity.public_key_file import decode
@@ -118,13 +118,22 @@ def _validate_frozen_report_timezone(connection, port, token, temporary_root):
         raise RuntimeError('the packaged parent could not export its temporary public key')
 
     activity = Path(temporary_root) / 'timezone-report.sqlite3'
+    exported = Path(temporary_root) / 'timezone-report-export.sqlite3'
     writer = EncryptedAgentStore(activity, decode(public), 30)
     try:
         writer.event('start')
+        writer.event('foreground', application=['PREVIEW_FILE_RETURN_SAMPLE', 'org.example.preview'])
+        writer.event('foreground', application=['PREVIEW_FILE_RETURN_SAMPLE', 'org.example.preview'])
         writer.event('stop')
     finally:
         writer.close()
-    status, _, _ = request('POST', '/api/import', activity.read_bytes(), 'application/octet-stream')
+    export = _run([str(core), 'export-report', '--db', str(activity), '--output', str(exported)])
+    if export.returncode or not exported.is_file():
+        raise RuntimeError('the frozen report exporter failed: ' + export.stderr.strip())
+    report_bytes = exported.read_bytes()
+    if b'PREVIEW_FILE_RETURN_SAMPLE' in report_bytes:
+        raise RuntimeError('the exported report contains a synthetic plaintext app name')
+    status, _, _ = request('POST', '/api/import', report_bytes, 'application/octet-stream')
     if status != 200:
         raise RuntimeError('the packaged parent could not import a temporary encrypted report')
     schedule = {'timezone': 'Europe/Vienna', 'days': [0, 1, 2, 3, 4], 'start': '08:30', 'end': '15:00'}
@@ -138,7 +147,9 @@ def _validate_frozen_report_timezone(connection, port, token, temporary_root):
     if (data.get('report_timezone') != 'Europe/Vienna' or
             not data.get('traffic_contexts', {}).get('schedule_configured')):
         raise RuntimeError('the packaged parent did not apply the IANA report time zone')
-    return 'frozen IANA schedule/report check passed (Europe/Vienna)'
+    if b'PREVIEW_FILE_RETURN_SAMPLE' not in report:
+        raise RuntimeError('the packaged parent did not decrypt the exported synthetic report')
+    return 'frozen encrypted file export/import and IANA schedule/report checks passed (Europe/Vienna)'
 
 
 def validate(package_path):
@@ -198,7 +209,7 @@ def validate(package_path):
                 if status.status != 403:
                     raise RuntimeError('the frozen parent API did not reject an unauthenticated request')
                 timezone_check = _validate_frozen_report_timezone(
-                    connection, parsed.port, parsed.fragment, root)
+                    connection, parsed.port, parsed.fragment, root, core)
             finally:
                 connection.close()
         finally:

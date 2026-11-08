@@ -320,6 +320,9 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn("'agent', 'share', 'export-report'", smoke)
         self.assertIn("'parent', '--no-browser'", smoke)
         self.assertIn("status.status != 403", smoke)
+        self.assertIn("'export-report', '--db'", smoke)
+        self.assertIn('PREVIEW_FILE_RETURN_SAMPLE', smoke)
+        self.assertIn('encrypted file export/import round-trip passed', smoke)
         self.assertIn('macos-package-check:', workflow)
         self.assertIn('build-macos-preview.sh', workflow)
 
@@ -333,6 +336,8 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn("'--url-file'", smoke)
         self.assertIn("'--stop-file'", smoke)
         self.assertIn('status.status != 403', smoke)
+        self.assertIn("'export-report', '--db'", smoke)
+        self.assertIn('PREVIEW_FILE_RETURN_SAMPLE', smoke)
         self.assertIn('Windows named-event heartbeat passed.', smoke)
         self.assertIn("if os.name != 'nt':", smoke)
         self.assertIn('--self-test-status-ipc', smoke)

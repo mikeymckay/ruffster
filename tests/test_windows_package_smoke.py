@@ -34,7 +34,7 @@ class WindowsPackageSmokeTests(unittest.TestCase):
 
         self.assertIn('loopback dashboard', result)
         self.assertIn('unauthenticated API rejection', result)
-        self.assertIn('frozen IANA schedule/report check passed (Europe/Vienna)', result)
+        self.assertIn('frozen encrypted file export/import and IANA schedule/report checks passed (Europe/Vienna)', result)
         self.assertIn('Windows named-event check skipped on this host.', result)
 
     def test_windows_builder_bundles_iana_timezone_data(self):
