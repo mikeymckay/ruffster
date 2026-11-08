@@ -11,6 +11,40 @@ from family_activity.encrypted_agent_store import EncryptedAgentStore
 from family_activity.encrypted_view import open_projection
 
 class EncryptedViewTests(unittest.TestCase):
+    def test_sessions_from_two_child_databases_keep_separate_device_identity(self):
+        with tempfile.TemporaryDirectory() as folder:
+            parent = PrivateKey.generate()
+            source_paths = [Path(folder) / f'child-{index}.sqlite3' for index in range(2)]
+            device_ids = set()
+            for path in source_paths:
+                writer = EncryptedAgentStore(path, parent.public_key, 30)
+                device_ids.add(writer.device_id)
+                writer.event('start')
+                writer.event('tick', application=['StudyApp', 'example.app'])
+                writer.close()
+            self.assertEqual(len(device_ids), 2)
+
+            merged_path = Path(folder) / 'merged.sqlite3'
+            writer = EncryptedAgentStore(merged_path, parent.public_key, 30)
+            writer.close()
+            merged = sqlite3.connect(merged_path)
+            for source_path in source_paths:
+                source = sqlite3.connect(source_path)
+                merged.executemany('INSERT INTO encrypted_events(expires_on, ciphertext) VALUES (?, ?)',
+                                   source.execute('SELECT expires_on, ciphertext FROM encrypted_events ORDER BY id'))
+                source.close()
+            merged.commit()
+            merged.close()
+
+            db, incomplete = open_projection(merged_path, parent)
+            self.assertFalse(incomplete)
+            sessions = db.execute('SELECT device_id, started_at, stopped_at FROM sessions ORDER BY id').fetchall()
+            self.assertEqual({row[0] for row in sessions}, device_ids)
+            self.assertEqual(len(sessions), 2)
+            self.assertTrue(all(row[2] is None for row in sessions))
+            self.assertEqual(db.execute('SELECT COUNT(DISTINCT session_id) FROM foreground_samples').fetchone()[0], 2)
+            db.close()
+
     def test_process_network_event_reconstruction_requires_opt_in_status(self):
         with tempfile.TemporaryDirectory() as tmp:
             parent = PrivateKey.generate(); path = Path(tmp) / 'process-traffic.sqlite3'

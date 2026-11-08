@@ -17,6 +17,23 @@ from family_activity import encrypted_store, store
 from family_activity.encrypted_agent_store import EncryptedAgentStore
 
 class EncryptedAgentTests(unittest.TestCase):
+    def test_device_identity_is_stable_across_agent_restarts_and_encrypted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = PrivateKey.generate()
+            path = Path(tmp) / 'activity.sqlite3'
+            first = EncryptedAgentStore(path, parent.public_key, 30)
+            device_id = first.device_id
+            first.event('start')
+            first.close()
+            second = EncryptedAgentStore(path, parent.public_key, 30)
+            self.assertEqual(second.device_id, device_id)
+            second.event('stop')
+            second.close()
+            events = sqlite3.connect(path).execute('SELECT ciphertext FROM encrypted_events ORDER BY id').fetchall()
+            decrypted = [encrypted_store.open_event(parent, row[0]) for row in events]
+            self.assertEqual({event['device_id'] for event in decrypted}, {device_id})
+            self.assertNotIn(device_id.encode(), path.read_bytes())
+
     def test_opted_in_process_network_samples_are_encrypted_and_labeled(self):
         from unittest.mock import patch
         from family_activity.__main__ import agent

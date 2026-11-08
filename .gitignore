@@ -18,6 +18,7 @@ dist/
 *.pem
 *.p12
 *.pfx
+*.device-id
 
 .venv/
 build/

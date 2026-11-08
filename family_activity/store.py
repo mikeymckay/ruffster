@@ -34,7 +34,8 @@ def initialize(db):
     db.executescript("""
         CREATE TABLE IF NOT EXISTS sessions (
           id INTEGER PRIMARY KEY, started_at TEXT NOT NULL,
-          heartbeat_at TEXT NOT NULL, stopped_at TEXT
+          heartbeat_at TEXT NOT NULL, stopped_at TEXT,
+          device_id TEXT NOT NULL DEFAULT 'legacy'
         );
         CREATE TABLE IF NOT EXISTS foreground_samples (
           id INTEGER PRIMARY KEY, session_id INTEGER NOT NULL, sampled_at TEXT NOT NULL,
@@ -75,17 +76,22 @@ def initialize(db):
           FOREIGN KEY(session_id) REFERENCES sessions(id)
         );
     """)
+    columns = {row[1] for row in db.execute('PRAGMA table_info(sessions)')}
+    if 'device_id' not in columns:
+        db.execute("ALTER TABLE sessions ADD COLUMN device_id TEXT NOT NULL DEFAULT 'legacy'")
+        db.commit()
 
 
-def start(db, timestamp=None):
+def start(db, timestamp=None, device_id='legacy'):
     timestamp = timestamp or now()
     with db:
-        for sid, heartbeat in db.execute("SELECT id, heartbeat_at FROM sessions WHERE stopped_at IS NULL").fetchall():
+        for sid, heartbeat in db.execute("SELECT id, heartbeat_at FROM sessions WHERE stopped_at IS NULL AND device_id = ?", (device_id,)).fetchall():
             # A backward clock makes the interval unknowable; don't invent a negative gap.
             if timestamp >= heartbeat:
                 db.execute("INSERT INTO gaps(session_id, from_at, to_at) VALUES (?, ?, ?)", (sid, heartbeat, timestamp))
             db.execute("UPDATE sessions SET stopped_at = ? WHERE id = ?", (heartbeat, sid))
-        return db.execute("INSERT INTO sessions(started_at, heartbeat_at) VALUES (?, ?)", (timestamp, timestamp)).lastrowid
+        return db.execute("INSERT INTO sessions(started_at, heartbeat_at, device_id) VALUES (?, ?, ?)",
+                          (timestamp, timestamp, device_id)).lastrowid
 
 
 def heartbeat(db, sid, timestamp=None):

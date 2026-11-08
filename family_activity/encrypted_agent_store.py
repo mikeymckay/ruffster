@@ -12,7 +12,7 @@ from pathlib import Path
 import sqlite3
 import uuid
 from nacl.public import PublicKey
-from . import encrypted_store, store
+from . import device_identity, encrypted_store, store
 
 LEGACY_EXPIRY_VERSION = 1
 EXPIRY_VERSION = 2
@@ -82,6 +82,7 @@ class EncryptedAgentStore:
         self.public_key = public_key
         self.retention_days = retention_days
         self.session_id = uuid.uuid4().hex
+        self.device_id = device_identity.load_or_create(path)
 
     def event(self, event_type, **fields):
         now = datetime.now(timezone.utc)
@@ -89,7 +90,10 @@ class EncryptedAgentStore:
         # record may be removed earlier that day because precise event timestamps
         # are encrypted and cannot be inspected by the child-side agent.
         expires_on = (now.date() + timedelta(days=self.retention_days)).isoformat()
-        event = {'type': event_type, 'session': self.session_id, 'at': now.isoformat(timespec='microseconds'), **fields}
+        event = {'type': event_type, **fields}
+        event['session'] = self.session_id
+        event['device_id'] = self.device_id
+        event['at'] = fields.get('at', now.isoformat(timespec='microseconds'))
         ciphertext = encrypted_store.seal_event(self.public_key, event)
         with self.db:
             self.db.execute('INSERT INTO encrypted_events(expires_on, ciphertext) VALUES (?, ?)', (expires_on, ciphertext))

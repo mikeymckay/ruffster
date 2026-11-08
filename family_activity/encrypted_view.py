@@ -29,6 +29,15 @@ def _network_intervals(value):
     return value
 
 
+def _device_id(event):
+    value = event.get('device_id', 'legacy')
+    if value == 'legacy':
+        return value
+    if not isinstance(value, str) or not re.fullmatch(r'[0-9a-f]{32}', value):
+        raise ValueError('invalid encrypted device identity')
+    return value
+
+
 def open_projection(path, private_key):
     """Open an encrypted file read-only and reconstruct its contents in memory."""
     if not isinstance(private_key, PrivateKey):
@@ -67,23 +76,26 @@ def _project(source, private_key):
         for ciphertext, in source.execute('SELECT ciphertext FROM encrypted_events ORDER BY id'):
             event = encrypted_store.open_event(private_key, ciphertext)
             typ, session, at = event.get('type'), event.get('session'), event.get('at')
+            device_id = _device_id(event)
+            session_key = (device_id, session)
             if not isinstance(session, str) or not session or not _valid_time(at):
                 raise ValueError('invalid encrypted event')
             if typ == 'start':
-                if session in sessions:
+                if session_key in sessions:
                     raise ValueError('duplicate session start')
-                sessions[session] = store.start(memory, at)
-                process_network_states[session] = None
+                sessions[session_key] = store.start(memory, at, device_id)
+                process_network_states[session_key] = None
                 continue
             if typ not in {'heartbeat', 'stop', 'foreground', 'network', 'network_identity', 'website', 'tick', 'network_settings', 'gap', 'process_network', 'process_network_status'}:
                 raise ValueError('unsupported encrypted event')
-            if session not in sessions:
+            if session_key not in sessions:
                 # Retention may remove a start before newer records expire.
                 incomplete = True
                 sid = memory.execute('INSERT INTO sessions(started_at, heartbeat_at) VALUES (?, ?)',
                                      ('Start unavailable', at)).lastrowid
-                sessions[session] = sid
-            sid = sessions[session]
+                memory.execute('UPDATE sessions SET device_id = ? WHERE id = ?', (device_id, sid))
+                sessions[session_key] = sid
+            sid = sessions[session_key]
             if typ == 'tick':
                 store.heartbeat(memory, sid, at)
                 if 'application' in event:
@@ -113,15 +125,15 @@ def _project(source, private_key):
             elif typ == 'process_network_status':
                 state = event.get('state')
                 if (state not in {'enabled', 'disabled', 'unavailable', 'unsupported'}
-                        or process_network_states.get(session) in {'disabled', 'unavailable', 'unsupported'}):
+                        or process_network_states.get(session_key) in {'disabled', 'unavailable', 'unsupported'}):
                     raise ValueError('invalid process network status')
-                process_network_states[session] = state
+                process_network_states[session_key] = state
                 memory.execute('INSERT INTO process_network_status(session_id, sampled_at, state) VALUES (?, ?, ?)',
                                (sid, at, state))
             elif typ == 'process_network':
                 process = event.get('process')
                 received, sent = event.get('received_bytes'), event.get('sent_bytes')
-                if (process_network_states.get(session) != 'enabled'
+                if (process_network_states.get(session_key) != 'enabled'
                         or not isinstance(process, str) or not process or len(process) > 128
                         or any(ord(char) < 32 for char in process)
                         or not all(isinstance(value, int) and not isinstance(value, bool)

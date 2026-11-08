@@ -174,7 +174,8 @@ def encrypt_legacy_database(source_path, public_key_path, output_path, retention
             if name not in tables:
                 continue
             columns = {row[1] for row in source.execute(f'PRAGMA table_info("{name}")')}
-            if columns != expected:
+            accepted = (expected, expected | {'device_id'}) if name == 'sessions' else (expected,)
+            if columns not in accepted:
                 raise ValueError('source activity database schema is unsupported')
             if name in OPTIONAL_EMPTY_SCHEMA and source.execute(f'SELECT 1 FROM "{name}" LIMIT 1').fetchone() is not None:
                 raise ValueError('source contains newer process network records that this migration cannot preserve')

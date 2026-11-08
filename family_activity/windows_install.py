@@ -228,7 +228,7 @@ def install(public_key, python_exe, source_directory, status_exe, local_app_data
         user = f'{domain}\\{username}' if domain and username else username
     if not isinstance(user, str) or not user.strip() or any(c in user for c in '\r\n\x00'):
         raise ValueError('the current interactive account could not be identified')
-    sidecars = [Path(str(database) + suffix) for suffix in ('-wal', '-shm', '-journal', '.lock')]
+    sidecars = [Path(str(database) + suffix) for suffix in ('-wal', '-shm', '-journal', '.lock', '.device-id')]
     if any(_has_linklike_component(path, Path(local_app_data))
            for path in (folder, key_path, network_key_path, database, metadata, *sidecars)):
         raise ValueError('application data must not use symbolic links or reparse points')
@@ -336,9 +336,9 @@ def uninstall(local_app_data=None, *, runner=_run, delete_data=False):
     folder, key_path, network_key_path, database, metadata = _data_paths(local_app_data)
     # Validate every path before stopping the agent or changing Task Scheduler.
     if any(_has_linklike_component(path, Path(local_app_data))
-           for path in (folder, metadata, key_path, network_key_path, database)):
+           for path in (folder, metadata, key_path, network_key_path, database, Path(str(database) + '.device-id'))):
         raise ValueError('application data must not use symbolic links or reparse points')
-    files = [key_path, network_key_path, database] + [Path(str(database) + suffix)
+    files = [key_path, network_key_path, database, Path(str(database) + '.device-id')] + [Path(str(database) + suffix)
                                    for suffix in ('-wal', '-shm', '-journal', '.lock')]
     if delete_data and any(_has_linklike_component(path, folder) for path in files):
         raise ValueError('application data contains a symbolic link or reparse point; refusing to delete it')

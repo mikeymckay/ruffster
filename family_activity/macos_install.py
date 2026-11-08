@@ -227,7 +227,7 @@ def uninstall(home, uid, *, label=DEFAULT_LABEL, runner=_run, delete_data=False)
         raise ValueError('agent definition changed; refusing to remove it automatically')
     files_to_delete = None
     if delete_data:
-        files_to_delete = [key_path, network_key_path, database] + [Path(str(database) + suffix)
+        files_to_delete = [key_path, network_key_path, database, Path(str(database) + '.device-id')] + [Path(str(database) + suffix)
                                         for suffix in ('-wal', '-shm', '-journal', '.lock')]
         if any(path.is_symlink() for path in files_to_delete):
             raise ValueError('application data contains a symbolic link; refusing to delete it')
