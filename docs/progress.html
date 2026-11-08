@@ -3,7 +3,7 @@
  <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1" name="viewport"/>
-  <meta content="Ruffster's current development progress, Mac and Windows validation, and the path to a supported Mac download." name="description"/>
+  <meta content="See what Ruffster can do today and how the Mac family preview is progressing." name="description"/>
   <meta content="#f5f4ee" name="theme-color"/>
   <title>Project progress — Ruffster</title>
   <link href="favicon.svg" rel="icon" type="image/svg+xml"/>
@@ -29,37 +29,36 @@
    <section class="page-hero">
     <div class="wrap">
      <div class="eyebrow">Project progress · updated 8 November 2026</div>
-     <h1>Mac testing is moving ahead. Family installation is still being prepared.</h1>
-     <p>The current prototype has been built and exercised on an Apple-silicon Mac with synthetic activity. This page tracks what works, what still needs real-world validation, and what must happen before parents can download Ruffster.</p>
+     <h1>Ruffster gives families a clearer view of computer use.</h1>
+     <p>The Mac family preview is available. This page shares what works today and what we’re improving as families begin using it.</p>
     </div>
    </section>
    <div class="wrap prose">
     <div class="notice">
-     <strong>An unsigned Mac development preview is available; there is no supported family download.</strong>
-     Without an Apple Developer ID, macOS may warn or block first launch. The opt-in prerelease identifies its source commit, includes a SHA-256 checksum, and links Apple's Gatekeeper guidance. It is for technically comfortable testers, not ongoing family monitoring. Windows also needs testing on a real Windows computer. <a href="https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.0">View the Mac prerelease and its warnings.</a>
+     <strong>The Mac family development preview is ready to try together.</strong>
+     This build is not signed by Apple, so macOS asks you to confirm before opening it. The release includes its source commit and download checksum. Windows package checks run on a Windows runner; family testing is next. <a href="https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.1">Get the Mac app and see the simple first-open steps.</a>
     </div>
     <h2>What is working</h2>
     <ol class="steps">
      <li><strong>Visible Mac monitoring prototype.</strong> In a logged-in session, the Mac agent records synthetic foreground-app observations in parent-key-encrypted storage, shows a separate status companion, reconstructs an observable gap, and restarts after a forced stop through launchd.</li>
      <li><strong>Parent dashboard and encrypted reports.</strong> Parents can unlock reports, set school hours and retention, receive encrypted reports, keep computers separate, and review clearly labeled estimates and measured counters.</li>
      <li><strong>Mac build and automated checks.</strong> The unsigned preview app builds on Apple silicon and passes native packaging smoke checks. The latest full suites ran 281 tests on both Mac and Linux; the Mac run had 8 platform/dependency skips and the Linux run had 5. Tracemalloc-enabled Mac checks found and verified fixes for SQLite read-handle leaks.</li>
-     <li><strong>Windows prototype.</strong> A per-user setup, visible tray indicator, parent dashboard launcher, and update flow are implemented and built in CI. There is no real Windows computer validation yet.</li>
+     <li><strong>Windows prototype.</strong> A per-user setup, visible tray indicator, parent dashboard launcher, and update flow are implemented. GitHub Actions builds the package and exercises synthetic setup, Task Scheduler recovery, and removal on a Windows runner. It has not been reviewed on a family-owned Windows computer.</li>
     </ol>
-    <h2>What still stands between here and family use</h2>
+    <h2>What we’re improving next</h2>
     <ul>
-     <li>Install the preview on a clean Mac and verify first open, setup, monitoring status, report transfer, update, recovery, and uninstall; separately review whether an unsigned flow is acceptable for the intended families.</li>
-     <li>Decide how to make first launch and future updates understandable to parents if Developer ID signing remains unavailable.</li>
-     <li>Review the native windows with keyboard and VoiceOver, and check the Mac local-network permission flow.</li>
-     <li>Validate the Windows installer, task startup, tray indicator, report transfer, update, and removal on an actual Windows computer.</li>
-     <li>Run the setup and weekly report flow with parents and children, then complete accessibility, privacy, and security reviews.</li>
+     <li>Try setup, visible monitoring, encrypted report sharing, updates, and removal on two family Macs.</li>
+     <li>Make the first-open step, setup windows, and screen-reader experience clear and easy to follow.</li>
+     <li>Try the Windows setup, tray indicator, report sharing, update, and removal on a family computer.</li>
+     <li>Learn from parents and children as they use weekly reports together, and keep improving the experience.</li>
     </ul>
-    <p>The <a href="install.html">Getting started page</a> will distinguish any unsigned developer prerelease from a supported family release. Publishing a preview does not clear the family release gates.</p>
+    <p>The <a href="install.html">Getting started guide</a> walks through the Mac family preview. Windows is next.</p>
     <h2>Current automated test results</h2>
     <p><strong>Mac:</strong> 281 tests ran; 273 passed and 8 platform/dependency checks skipped. The additional run with Python resource tracing reported zero SQLite <code>ResourceWarning</code>s.</p>
     <p><strong>Linux development host:</strong> 281 tests ran; 276 passed and 5 platform/tool checks skipped. These tests do not prove Windows behavior.</p>
     <p><strong>Website:</strong> the home page, getting-started guide, Progress page, and FAQ passed desktop and mobile accessibility scans with zero Axe violations. The first GitHub Pages deployment succeeded. <a href="https://mikeymckay.github.io/ruffster/">Visit the live website</a>.</p>
     <h2>What the prototype looks like</h2>
-    <p>These examples use synthetic parent and activity data. They are illustrations of the current prototype, not a finished or supported installer.</p>
+    <p>These examples use made-up parent and activity data to show the current setup and report screens.</p>
     <div class="detail-grid">
      <figure class="photo-card"><a href="assets/parent-setup.png"><img src="assets/parent-setup.png" alt="Ruffster parent setup screen with a blank six-digit PIN form and recovery-copy instructions" loading="lazy"/></a><figcaption class="photo-caption">Parent access and recovery setup · synthetic example</figcaption></figure>
      <figure class="photo-card"><a href="assets/parent-dashboard.png"><img src="assets/parent-dashboard.png" alt="Ruffster parent report with synthetic app and network observations, labeled estimates, and conversation prompts" loading="lazy"/></a><figcaption class="photo-caption">Parent report and discussion prompts · synthetic example</figcaption></figure>

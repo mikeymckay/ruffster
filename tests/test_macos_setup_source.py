@@ -29,9 +29,9 @@ class MacSetupSourceTests(unittest.TestCase):
 
         self.assertIn('showWelcomeWindow()', launch)
         self.assertNotIn('runModal()', welcome)
-        self.assertIn('This version is not ready for everyday family use', welcome)
-        self.assertIn('What this preview records', welcome)
-        self.assertIn('What it never records', welcome)
+        self.assertIn('Ruffster helps your family get a clearer picture', welcome)
+        self.assertIn('What Ruffster records', welcome)
+        self.assertIn('What stays private', welcome)
         self.assertIn('Network-interface bytes are not attributed to apps or websites', welcome)
         self.assertIn('Open parent dashboard', welcome)
         self.assertIn('Set up this Mac together…', welcome)

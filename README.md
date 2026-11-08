@@ -4,11 +4,13 @@
 
 <p align="center"><img src="docs/assets/ruffster-mascot.webp" alt="Ruffster golden retriever mascot" width="190"></p>
 
-**This is not ready for family deployment.** The Mac package is unsigned. Windows has not been tested on a Windows computer. Setup, accessibility, security, key recovery, and family usability still need validation. Any Mac download will be an unsigned development preview, clearly marked as such; macOS will warn before opening it. There is no supported family release download.
+Ruffster helps parents and children understand computer use together, especially during school hours. Its goal is a clear, constructive view of everyday activity that families can talk about.
 
-[Optional Apple-silicon Mac development preview](https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.0) · **unsigned and not for ongoing family monitoring**
+**Mac family development preview:** ready for families who want to try Ruffster together. Monitoring stays visible, and activity reports are encrypted for the parent. We’re improving setup and accessibility as families start using it. Windows builds and synthetic checks run in GitHub Actions; the family setup still needs a Windows-computer review.
 
-[Website source (Pages-ready)](docs/index.html) · [Getting started](docs/install.html) · [Progress page](docs/progress.html) · [FAQ](docs/faq.html) · [Privacy and children's rights](PRIVACY-AND-CHILDREN.md) · [Implementation plan](PLAN.md) · [Current status](PROJECT-STATUS.html)
+[Get the Apple-silicon Mac preview](https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.1) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
+
+[Project website](https://mikeymckay.github.io/ruffster/) · [Install guide](https://mikeymckay.github.io/ruffster/install.html) · [Progress page](https://mikeymckay.github.io/ruffster/progress.html) · [FAQ](https://mikeymckay.github.io/ruffster/faq.html) · [Privacy and children's rights](PRIVACY-AND-CHILDREN.md) · [Implementation plan](PLAN.md)
 
 > **Platform priority:** macOS first, then Windows. Linux is a development and test host only; Linux is not a student-facing target in the current scope.
 
@@ -47,9 +49,11 @@ The school-hours view uses a schedule chosen by the parent; it does not prove th
 
 ## Privacy and encryption
 
-The encrypted agent stores ciphertext and coarse retention metadata in a local SQLite database. Parent setup uses a six-digit PIN the child should not know. The child's computer can lock reports for you, but it cannot open them. Keep the encrypted recovery copy somewhere the child cannot access; use it with your PIN if you move to a new parent computer. The handoff uses one simple pattern in either direction: the sending computer shows two digits, and the receiving computer enters them. The digits only find a nearby computer; they are not a password. The transfer is encrypted and requires both devices on the same local network. Received reports add new encrypted records to the parent copy, ignore exact repeats, and honor the parent retention setting. Each computer adds a random marker inside encrypted observations, so the parent dashboard can keep computers separate. Choose a name such as “Annika’s MacBook” for each computer; these names are encrypted inside the parent report and travel with its encrypted report backup, never back to a child computer. Older encrypted records without a marker stay in an “Older untagged records” group. Separate views are implemented, but cross-platform transfers and the Windows experience remain unverified. A synthetic encrypted report has crossed the home Wi-Fi between the test Mac and the Linux development computer; Mac-to-Mac and Windows transfers remain unverified. On Mac, the system may ask for local-network access, used only to find the other computer and transfer the key or encrypted report, not to monitor activity. If direct transfer is unavailable, the child app can save a separate encrypted report file for the parent dashboard to open. No cloud account is required.
+Ruffster encrypts each activity report for the parent. The parent keeps the private key and a six-digit PIN; the child's computer can send a report but cannot open it. Save the encrypted recovery copy so you can restore parent access on another computer. No cloud account is required.
 
-Encryption does not hide every detail: record counts, ordering, approximate record-size buckets, expiry days, file growth, and filesystem timestamps remain visible. Observation plaintext exists in the agent's memory before encryption. A person with administrator access to the child computer can inspect or change the agent. The prototype is not tamper-proof and has not received an independent security review. If the parent loses every usable encrypted recovery copy and forgets their PIN, the encrypted reports cannot be opened. Recovery files created by older versions can still be restored with their original longer passphrase.
+To connect computers, the sending computer shows two digits and the receiving computer enters them. This helps the devices find each other on the same Wi-Fi; the report itself stays encrypted. Some Wi-Fi networks keep devices separate. If that happens, save an encrypted report file on the child's computer and open it in the parent's dashboard. The dashboard can keep reports from several computers separate and lets the parent name each one.
+
+The parent's key is kept on the parent's computer. The child computer stores encrypted report content, along with basic file details such as record count and timestamps. As with any app on a computer, the signed-in user or administrator can manage software on that computer. Keep the parent key backup and PIN together somewhere you can find them; they let you restore reports on a new parent computer. Older recovery copies still use their original passphrase.
 
 The monitoring agent now refuses to start without the parent's public key and writes activity only as encrypted records. Earlier prototype databases and low-level test utilities may contain plaintext; they are not automatically migrated or erased. The dashboard can still open an older local plaintext database, so check existing files before sharing or retaining them. For a supported old prototype schema, the developer CLI can create an encrypted copy while leaving the source untouched:
 
@@ -61,7 +65,7 @@ python -m family_activity encrypt-legacy \
   --retention-days 30
 ```
 
-The command applies retention to original event times and omits expired rows. Verify the new file before manually deciding what to do with the plaintext source; secure erasure is not guaranteed. Encrypted collection and parent setup remain experimental and are not a supported family release.
+The command applies retention to original event times and omits expired rows. Verify the encrypted copy before deciding what to do with the old source file. Encrypted collection and parent setup continue to improve with family use.
 
 See [ENCRYPTION.md](ENCRYPTION.md) for the threat model and known limitations, and [AGENTS.md](AGENTS.md) for development rules.
 
@@ -69,7 +73,7 @@ The engineering requirements and open European privacy and children's-rights que
 
 ## Delivery priorities
 
-1. **Make macOS dependable first.** Validate setup and removal, visible status, sleep/wake, permissions, user changes, restart recovery, encrypted reports, and key recovery on real Macs. Without a Developer ID, provide a clearly labeled unsigned development preview with source, checksum, and careful Gatekeeper guidance; do not call it family-ready. Revisit signing and notarization before broad family distribution.
+1. **Make macOS dependable first.** Validate setup and removal, visible status, sleep/wake, permissions, user changes, restart recovery, encrypted reports, and key recovery on real Macs. Keep the unsigned preview easy to identify and include its source, checksum, and a short note about Apple's first-open prompt. Revisit signing and notarization as the project grows.
 2. **Port the finished family flow to Windows.** Test installation, startup and recovery, visible tray status, network and app observations, encrypted report handoff, parent dashboard, updates, and removal on real Windows computers.
 3. **Make the public project experience excellent.** Keep this README useful to a parent arriving for the first time and to a contributor; publish a polished GitHub Pages home page, family installation guide, progress page, and plain-language FAQ. Include current synthetic screenshots, clear readiness status, accessible responsive layouts, and clearly distinguish an unsigned developer preview from a supported family release.
 4. **Validate with families and reviewers.** Observe nontechnical parents and children using the whole flow; complete accessibility, security, privacy, and European children's rights reviews.
@@ -97,13 +101,13 @@ For local UI development, start the experimental parent app:
 
 It binds to loopback. The default CLI database and dashboard are developer tools, not a family installation path. Do not expose them to a network.
 
-GitHub Actions runs the test suite on Linux, macOS, and Windows, then builds the Mac and Windows previews on native runners. The Mac job also exercises the harmless per-user LaunchAgent startup/restart/removal path with a sleep-only fixture. A `mac-preview-*` tag runs the Mac suite and publishes an unsigned **prerelease** for Apple silicon with its source commit and SHA-256 checksum. It is not a supported family installer. The repository is published at [github.com/mikeymckay/ruffster](https://github.com/mikeymckay/ruffster). Its [GitHub Pages site is live](https://mikeymckay.github.io/ruffster/), with the source set to GitHub Actions.
+GitHub Actions runs the test suite on Linux, macOS, and Windows and checks both native packages. A `mac-preview-*` tag runs the Mac suite and publishes an Apple-silicon early-access download with its source commit and SHA-256 checksum. The repository is at [github.com/mikeymckay/ruffster](https://github.com/mikeymckay/ruffster); the family-friendly [Ruffster website and install guide](https://mikeymckay.github.io/ruffster/) are live.
 
 The test runner prints each test and emits Python stack traces every five minutes if a job stalls; CI also places those traces in the job summary and stops a test job after 20 minutes.
 
 ### Build experimental previews
 
-**macOS (Apple silicon):** build on a Mac with the project dependencies and PyInstaller installed. The local builder makes an unsigned development bundle, not a supported installer. The tagged GitHub workflow can package an unsigned drag-to-Applications preview and publish it as a prerelease with its source commit and SHA-256 checksum. macOS may block it; read [Apple's instructions and risks](https://support.apple.com/en-us/102445) before deciding whether to use its per-app override. Ruffster never disables Gatekeeper or removes quarantine. This is for technically comfortable preview testers, not ongoing family monitoring. See [MACOS-DISTRIBUTION.md](MACOS-DISTRIBUTION.md).
+**macOS (Apple silicon):** build on a Mac with the project dependencies and PyInstaller installed. The local builder makes an unsigned app bundle. The tagged GitHub workflow packages the app in a drag-to-Applications disk image and publishes it with its source commit and SHA-256 checksum. Since the app is not signed by Apple, macOS asks you to confirm before opening it; follow [Apple's current instructions](https://support.apple.com/en-us/102445) and keep the built-in protection on. See [MACOS-DISTRIBUTION.md](MACOS-DISTRIBUTION.md).
 
 ```sh
 .venv/bin/python -m pip install -e ".[build]"

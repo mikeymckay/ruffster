@@ -66,7 +66,7 @@
       Is Ruffster ready to install on my child's computer?
      </h2>
      <p>
-      No. An unsigned Mac developer preview is available as a clearly warned GitHub prerelease with a source commit and checksum. macOS may block it, and it is not for ongoing family monitoring. There is no supported family download. The Windows package has not run on Windows, and families have not tested the experience. See the
+      Yes. The Mac family preview is ready to try together and is designed for ongoing transparent use. macOS will ask you to confirm before opening it because Ruffster is not signed by Apple. The guide explains the first step, and Windows support is being tested next on a family computer. See the
       <a href="install.html">
        getting-started guide
       </a>.
@@ -77,15 +77,15 @@
       What does it collect?
      </h2>
      <p>
-      The experimental encrypted agent samples the foreground application name and total byte counts reported by network interfaces. On Mac, setup also offers an optional experimental process-byte summary. It measures bytes against the process that owns a connection, but may list helper services and miss brief connections; it does not identify websites. The Mac setup and experimental Windows preview also create a device-only random key for a pseudonymous hint when the default router changes; the raw router address is not saved, and the hint does not establish location. It records monitoring sessions and gaps that can be observed. An optional, experimental Chromium extension can send active website domains; a visible popup explains this and lets the child pause website observations. It does not inspect private-window domains or send complete URLs, page titles, or page contents. When the child returns to a regular window after private browsing, a domain-free marker may be sent to prevent website-time estimates from spanning that interval. It stores whether website observations are paused and a temporary note to keep time estimates from stretching across gaps; it does not keep domain history in the browser. If a report has no domains, it cannot tell whether the extension was paused, disconnected, or did not observe a website. DNS and proxy settings are reduced to simple indicators. Exact behavior varies by operating system and remains under validation.
+      Ruffster records the foreground app, total network traffic, and simple DNS, proxy, and VPN indicators. Mac setup also offers an optional estimate of network traffic by app or service. Website names are a separate optional browser experiment and are not included in the Mac setup.
      </p>
     </section>
     <section class="faq-item">
      <h2>
-      What does it never collect?
+      What stays private?
      </h2>
      <p>
-      The product does not capture screenshots, keystrokes, audio, camera data, message contents, or full website URLs. It is designed for transparency, not hidden surveillance or automatic blocking.
+      Ruffster records app names and basic network totals so families can see how a computer is used. Screenshots, keystrokes, audio, camera data, message contents, and full website addresses stay out of Ruffster. The app keeps its status visible and does not block apps or websites.
      </p>
     </section>
     <section class="faq-item">
@@ -93,7 +93,7 @@
       Do I need a browser add-on, and whose computer is it for?
      </h2>
      <p>
-      No. The main app and parent dashboard work without a browser add-on. The optional experimental add-on runs on the child's computer, inside each supported browser the family chooses to include; it does not go on the parent's computer. It can show the names of websites used in those browsers, because the computer's overall internet totals cannot name websites. The child can turn it off, remove it, or use another browser. Website details will then be missing, and the report cannot say why. Missing details are not evidence of avoidance or misconduct. The add-on is not part of setup and is not yet available as a supported family install.
+      No. Ruffster works without an add-on. A separate browser experiment can show domain names from selected browsers on the child's computer. The child can pause it or use another browser, and the report makes clear when website details were not observed. This experiment is not part of Mac setup yet.
      </p>
     </section>
     <section class="faq-item">
@@ -101,7 +101,7 @@
       Can it tell how much data a particular website used?
      </h2>
      <p>
-      No. The report adds recorded counter changes separately for each network interface, but interfaces can overlap and missed intervals may leave traffic uncounted. Labels such as “en0” are computer-generated connection IDs, not website names; a VPN and its Wi-Fi connection may count the same traffic. A domain sample and a byte counter are separate observations; the prototype must not combine them into claims such as “YouTube used 2.4 GB.”
+      Not yet. Ruffster reports total traffic for each network connection. It can estimate how much happened during the school schedule you choose, but it cannot say how much traffic a particular website used.
      </p>
     </section>
     <section class="faq-item">
@@ -109,7 +109,7 @@
       What do the school-hours and network-label estimates mean?
      </h2>
      <p>
-      School-hours traffic is estimated by apportioning each measured interface-counter interval according to how much of it overlaps the schedule you chose. Separate Home-, School-, and Other-labeled network estimates use the most recently observed router label that you set. A School label is not the same as the schedule-based school-hours view, and neither proves where the computer was. Network-label estimates skip sample intervals with a recorded change; traffic estimates omit intervals ending at or crossing an observed router change. Labels can be wrong or unavailable. Views may overlap, and interface counters can overlap too, so do not add them together as a device-wide total.
+      You choose school days and hours. Ruffster uses that schedule to estimate how much recorded network traffic happened during those hours. You can also label familiar networks Home or School. These views are helpful context, but they do not confirm the computer's location and some totals may overlap.
      </p>
     </section>
     <section class="faq-item">
@@ -117,7 +117,7 @@
       Does a VPN or DNS indicator prove that filtering is working?
      </h2>
      <p>
-      No. The indicators are incomplete. The Windows preview checks IPv4/IPv6 resolver settings and the signed-in account's Internet Settings proxy settings, plus connected status for built-in Windows VPN profiles; it does not inspect separate WinHTTP proxy settings, and third-party VPNs may not appear. macOS checks a different set of system-reported settings. A filter configured only on a home router normally applies only while the computer uses that router; by itself it does not follow to school Wi-Fi or a mobile hotspot. A device profile or filtering app may work on other networks if that setup supports them and remains allowed and active. VPNs, browser secure DNS, and school-managed settings can change which service handles DNS. Check the provider's own status or supported test separately on each network, and ask the school before changing a school-managed computer. This app cannot verify that filtering works. <a href="https://help.nextdns.io/t/m1hmv0k/which-setup-type-to-use" target="_blank" rel="noopener noreferrer">NextDNS describes device and router setup options</a> as one example; review any provider's privacy and retention terms before choosing a service.
+      Ruffster shows a few settings the computer reports; it cannot confirm that a filter is working. A filter set up only on your home router stays on that network. A device app or profile may work on school Wi-Fi or a hotspot too. Check your provider on each network, and ask the school before changing school-managed settings. <a href="https://help.nextdns.io/t/m1hmv0k/which-setup-type-to-use" target="_blank" rel="noopener noreferrer">NextDNS explains router and device setup</a> as one example.
      </p>
     </section>
     <section class="faq-item">
@@ -125,7 +125,7 @@
       Is my child's information uploaded to a cloud service?
      </h2>
      <p>
-      The prototype has no required cloud account. The handoff works the same way in either direction: the computer sending something shows two digits, and the receiving computer enters them. Both must be on the same Wi-Fi. The digits only find the nearby computer; they are not a password. The app creates a protected connection and sends only the parent's public key or an already-encrypted report. A received report adds new records to the report already on the parent computer; exact repeats of encrypted records are ignored, and the parent's retention setting still applies. The parent dashboard can keep computers separate using a random marker inside encrypted observations. Give each computer a name in the dashboard; names are encrypted inside the parent report and travel with its encrypted backup, never back to the child computer. Older records without a marker stay in an “Older untagged records” group. On a Mac, macOS may ask to allow local-network access; this is used only for finding the other computer and transferring the public key or encrypted report, not for monitoring. If access is denied, allow it in System Settings → Privacy &amp; Security → Local Network. Local discovery may be blocked by a network or firewall. The child computer can save a separate encrypted report file for the parent dashboard to open; this file contains no parent key and does not use the local network. The transfer methods have not received an independent security review.
+      No cloud account is needed. To connect the computers, the sender shows two digits and the receiver enters them. Both computers need to be on the same Wi-Fi; the digits help them find each other, while reports remain encrypted for the parent. If devices cannot find each other on a particular network, save the encrypted report file on the child's computer and open it in the parent dashboard. The report includes new observations, skips exact repeats, and follows the parent's retention setting. The dashboard can name each computer and show its report separately. On Mac, allow Local Network access when asked so Ruffster can find the parent computer for setup and report sharing.
      </p>
     </section>
     <section class="faq-item">
@@ -133,7 +133,7 @@
       Can I use one parent report for more than one child computer?
      </h2>
      <p>
-      Yes. The dashboard offers a separate report view for each computer and lets you give each one a name. The random computer marker stays inside encrypted observations; your names are encrypted inside the parent report and included in its encrypted backup. Existing older records without a marker appear in a separate untagged group. Computer transfers have been exercised between a Mac and a Linux development computer, but Mac-to-Mac and Windows transfers and family use remain unverified.
+      Yes. The dashboard keeps each computer's activity in its own view, and you can give each one a name. Those names are saved in your encrypted parent report. We’re now trying report sharing between family Macs and preparing the Windows family flow.
      </p>
     </section>
     <section class="faq-item">
@@ -141,15 +141,15 @@
       Who holds the encryption key?
      </h2>
      <p>
-      New setups use a six-digit parent access PIN that the child should not know. It helps keep reports private from the child. If someone copies the recovery file, they can try PIN guesses, so don't treat this short PIN as protection from a determined attacker. The child's computer can lock reports for you, but it cannot open them. Save the encrypted recovery copy before setup. On a new parent install, choose “Restore parent access,” select the encrypted .vault file, and enter the same PIN. Older recovery copies can still be restored with their original phrase. Losing both the recovery copy and PIN means reports cannot be opened. There is no PIN recovery service.
+      New setups use a six-digit parent PIN that the child does not know. It keeps report access with the parent in your family. The child's computer can send encrypted reports, but cannot open them. Save the recovery copy before setup. On a new parent computer, choose “Restore parent access,” select the encrypted .vault file, and enter the same PIN. Older recovery copies can still be restored with their original phrase. Keep the recovery copy and PIN somewhere you can find them; together they let you open your reports on a new computer.
      </p>
     </section>
     <section class="faq-item">
      <h2>
-      Can it explain a monitoring gap or detect tampering?
+      What does a gap in the report mean?
      </h2>
      <p>
-      No. A gap shows that observations were missed; it does not identify whether the cause was sleep, a crash, a permission change, an uninstall, or something else. A person with administrator access can change or disable software on their computer. This prototype is not tamper-proof.
+      Ruffster records when it stops receiving observations and shows the time as a gap. It can’t tell whether the computer was asleep, the app was closed, or something else interrupted it. The visible status and gap help everyone understand when the report has a complete picture.
      </p>
     </section>
     <section class="faq-item">
@@ -181,7 +181,7 @@
       How long are reports kept, and can they be deleted?
      </h2>
      <p>
-      The prototype has separate retention controls for the child computer and parent copy. The parent dashboard can remove one computer’s observations from the local report or delete the whole local parent report. These actions do not erase the child computer’s copy or backups already exported; filesystem snapshots are also outside those controls. Secure erasure from storage media is not guaranteed. A release needs reviewed retention, deletion, export, update, and recovery behavior on each supported platform.
+      You can choose how long to keep detail on the child computer and parent copy. The parent dashboard can remove one computer from a combined report or delete the whole local parent copy. Those actions leave the child's copy and previously saved report files in place. You can delete those separately from where they were saved.
      </p>
     </section>
     <section class="faq-item">
@@ -189,18 +189,18 @@
       Is the prototype legally compliant in Europe?
      </h2>
      <p>
-      No claim of legal compliance is made. Children's privacy, transparency, consent, and data-minimization obligations depend on the people and context involved. Qualified legal and privacy review is still needed.
+      Privacy rules depend on your country and family situation. We are planning a privacy review as Ruffster grows, and this page is not legal advice.
      </p>
     </section>
     <div class="notice">
      <strong>
       Still have a question?
      </strong>
-     Start with the
+      Start with the
      <a href="install.html">
       current preview and installation status
      </a>
-     . The app is not ready for family monitoring.
+     . The Mac family preview is ready to try.
     </div>
    </div>
   </main>

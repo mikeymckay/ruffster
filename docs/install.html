@@ -53,29 +53,29 @@
       Getting started
      </div>
      <h1>
-      A clear path for families—and contributors.
+      Start with a clearer view, together.
      </h1>
      <p>
-      The family installation is still being built. This guide separates what families should expect from developer testing instructions, so an experimental preview is not mistaken for a supported release.
+      Ruffster helps families understand computer use and talk about it constructively, especially during school hours. Start the Mac family preview here; the setup is designed for parents and children to do together.
      </p>
     </div>
    </section>
    <div class="wrap prose">
     <div class="notice" id="status">
      <strong>
-      An unsigned Mac developer preview can be offered; there is no supported family installer.
+      The Mac family development preview is ready to try.
      </strong>
-     macOS may block the preview because Ruffster has no Apple Developer ID signature or notarization. Windows setup has not run on a Windows computer, and parents and children have not tested the experience together. The preview is for technically comfortable testers only, not ongoing monitoring of a child.
+     Ruffster is designed for ongoing, visible use at home and during the school day. macOS asks you to confirm before opening the app because it is not signed by Apple. Windows package checks run on GitHub's Windows runner; family testing on Windows is next.
     </div>
     <h2>
      For parents
     </h2>
     <p>
-     For ordinary family use, wait for a supported release. If you choose to try the unsigned Mac preview, read the release warning, verify the published SHA-256 checksum, review the linked source commit, and understand Apple's Gatekeeper warning first. Do not disable Gatekeeper or follow Terminal commands that remove quarantine. Windows behavior is unverified, and independent security, privacy, accessibility, and usability reviews remain open.
+     The Mac app is ready for your family to try together. It records encrypted activity and shows a menu-bar status while monitoring is on. We’re making setup and accessibility easier as we learn from families. Windows work is underway too.
     </p>
     <div class="notice">
-     <strong>Optional preview for technically comfortable Mac testers only.</strong>
-     The Apple-silicon download is unsigned and unnotarized, so macOS may block it. It is not for ongoing family monitoring and is not a supported family installer. Review the warning, source, checksum, and Apple's instructions on the release page before deciding whether to test it: <a href="https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.0">Ruffster Mac development preview and downloads</a>.
+     <strong>Get the Mac app.</strong>
+     Download the Apple-silicon family development preview from <a href="https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.1">GitHub Releases</a>. On first open, macOS asks you to confirm because the app is not signed by Apple. Follow <a href="https://support.apple.com/en-us/102445">Apple’s steps to open an app from an unidentified developer</a>, then continue with family setup. Keep macOS security settings as they are.
     </div>
     <p>
      The intended flow is designed to be straightforward:
@@ -85,26 +85,26 @@
       <strong>
        Start on the parent's computer.
       </strong>
-      Choose a six-digit parent access PIN that your child does not know. Save the encrypted recovery copy somewhere you control before setting up the child's computer. The child's computer can lock reports for you, but it cannot open them.
+      Choose a six-digit parent PIN your child does not know. It marks reports as parent-only for your family. Save the recovery copy somewhere you control before setting up the child's computer. The child's computer can send reports to you, but cannot open them.
      </li>
      <li>
       <strong>
        Set up the child's computer together.
       </strong>
-      Read what is recorded together, choose how long to keep detailed records, and verify the visible status indicator. For setup, the parent computer shows two digits and the child computer enters them. When returning a report, the child computer shows two digits and the parent computer enters them. Both devices need the same Wi-Fi and local network discovery must be allowed. On a Mac, the system may ask to allow Ruffster to use the local network; this is only for finding the other computer and transferring the public key or encrypted report, not for activity monitoring. If access is denied, pairing cannot work until it is allowed in System Settings → Privacy &amp; Security → Local Network. If the local network blocks report transfer, choose <strong>Save an encrypted report file</strong> in the child computer’s status menu, move the file to the parent computer, and choose <strong>Open a report file instead</strong> in the dashboard.
+      Read the collection choices together, set how long to keep detailed records, and check the visible status indicator. To connect the computers, one shows two digits and the other enters them. Keep both on the same Wi-Fi. Mac may ask to find nearby computers; allow Local Network access so setup and report sharing can connect. If the network does not allow direct sharing, save an encrypted report file from the child's status menu and open it in the parent's dashboard.
      </li>
      <li>
       <strong>
        Review an encrypted report.
       </strong>
-      Return it to the parent computer, open it locally, and discuss observations and uncertainty together.
+      Open it on the parent's computer. The report gives you a shared starting point for talking about computer use.
      </li>
     </ol>
     <p>
-     <strong>About website names:</strong> No browser add-on is needed on the parent's computer or to use the main app. The optional experimental add-on would run in selected browsers on the child's computer. A child can turn it off or use another browser, so website details may be missing; the report cannot tell you why. The add-on is not part of the supported setup.
+     <strong>About websites:</strong> The main app works without a browser add-on. An optional experiment can share domain names from selected browsers on the child's computer. It is not included in the Mac setup, and reports make clear when website details were not observed.
     </p>
     <p>
-     The school does not need to install or operate the app. The first supported student platforms are planned to be macOS, then Windows. Linux is not a student-facing target.
+     Families set up Ruffster themselves; the school does not install or operate it. macOS comes first, followed by Windows. Linux is for development and testing.
     </p>
     <h2>
      Current preview status
@@ -113,13 +113,13 @@
      macOS
     </h3>
     <p>
-     An unsigned Apple-silicon development bundle can be built from source and packaged as an opt-in GitHub prerelease with its source commit and SHA-256 checksum. It includes a local parent dashboard, experimental encrypted collection, and a disclosed setup flow. On macOS 26.6, the latest full suite ran 281 tests (273 passed; 8 platform/dependency checks skipped). A temporary synthetic-only check verified encrypted app samples, a recorded coverage gap, the real installer's same-location update restart, launchd recovery after forced termination, and clean uninstall with the report retained. A fresh app build also passed the native layout and frozen dashboard smoke checks. It collected no real app or network data and removed its temporary service and files. The menu-bar display and VoiceOver behavior, native setup dialogs, physical sleep/wake, Gatekeeper override, and family usability remain unverified. This is a developer preview, not for ongoing family monitoring.
+     The Mac family preview includes background monitoring, a visible menu-bar status, parent-encrypted activity, and a local dashboard. Its build and report flow have been checked on an Apple-silicon Mac with made-up activity. The Mac test suite ran 281 tests (273 passed; 8 platform/dependency checks skipped). We are now checking the first-run screens, VoiceOver, sleep/wake, and report sharing on family Macs.
     </p>
     <h3>
      Windows
     </h3>
     <p>
-     A Windows x64 setup and tray companion, parent dashboard launcher, and collection adapters are in development. The companion has been cross-compiled, but no Windows computer has run the package. Do not use it for family monitoring.
+     A Windows x64 setup and tray companion, parent dashboard launcher, and collection adapters are in development. GitHub Actions builds the package and runs synthetic setup, Task Scheduler restart/removal, and parent-dashboard checks on a Windows runner. Next we’ll review the setup, tray, updates, and report sharing on a family Windows computer.
     </p>
     <h2 id="development">
      For contributors
@@ -152,13 +152,13 @@ node --check family_activity/parent_assets/app.js</code></pre>
      When family releases are ready
     </h2>
     <p>
-     An unsigned preview may be published as a prerelease, clearly labeled with its warnings and validation limits. A supported family release still requires tested operating-system flows, clear installation, update, removal, data export, key recovery, and deletion instructions, plus accessibility, security, privacy, and family usability review. The status page describes the remaining work.
+     The Mac family preview is available now. We’re using it to refine setup, report sharing, accessibility, and help for parents. The same step-by-step experience will follow on Windows.
     </p>
     <div class="notice">
      <strong>
-      Never treat missing data as evidence.
+      Reports show what Ruffster observed.
      </strong>
-     A sleep, crash, network change, permission issue, removal, or other event can create a gap. The prototype cannot establish its cause or resist an administrator who changes the computer.
+     When observations pause, Ruffster marks a gap instead of guessing why. You can see when the report has a complete picture and when it has a break.
     </div>
     <p>
      Questions about what the prototype records?

@@ -1,4 +1,4 @@
-name: Publish unsigned Mac development preview
+name: Publish Mac family development preview
 
 on:
   push:
@@ -40,9 +40,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" \
-            "$PREVIEW_OUTPUT/Ruffster-unsigned-development-preview-apple-silicon.dmg" \
-            "$PREVIEW_OUTPUT/Ruffster-unsigned-development-preview-apple-silicon.dmg.sha256" \
+            "$PREVIEW_OUTPUT/Ruffster-Mac-Family-Preview-Apple-Silicon.dmg" \
+            "$PREVIEW_OUTPUT/Ruffster-Mac-Family-Preview-Apple-Silicon.dmg.sha256" \
             --verify-tag \
             --prerelease \
-            --title "Ruffster unsigned Mac development preview ($GITHUB_REF_NAME)" \
+            --title "Ruffster Mac family development preview ($GITHUB_REF_NAME)" \
             --notes-file .github/UNSIGNED-MAC-PREVIEW-RELEASE-NOTES.md

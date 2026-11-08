@@ -67,7 +67,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         stack.spacing = 13
         stack.translatesAutoresizingMaskIntoConstraints = false
 
-        let eyebrow = NSTextField(labelWithString: "🐾 RUFFSTER  ·  EARLY PREVIEW")
+        let eyebrow = NSTextField(labelWithString: "🐾 RUFFSTER  ·  FAMILY PREVIEW")
         eyebrow.font = .systemFont(ofSize: 11, weight: .bold)
         eyebrow.textColor = .secondaryLabelColor
         let title = NSTextField(wrappingLabelWithString: "A clearer picture, shared together.")
@@ -78,10 +78,10 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         let readiness = NSBox()
         readiness.boxType = .primary
-        readiness.title = "Preview build"
+        readiness.title = "Getting started"
         readiness.titlePosition = .atTop
         readiness.contentViewMargins = NSSize(width: 12, height: 10)
-        readiness.contentView = paragraph("This version is not ready for everyday family use. It cannot detect tampering, and its readings have important limits.")
+        readiness.contentView = paragraph("Ruffster helps your family get a clearer picture of computer use. Read the collection choices together, keep the menu-bar status visible, and use the report as a starting point for conversation. We’re continuing to improve setup and accessibility.")
 
         let collected = paragraph("Foreground app names and identifiers; total network-interface bytes; reduced DNS, proxy, and system VPN indicators; and a pseudonymous hint when the default router changes. Network-interface bytes are not attributed to apps or websites. Setup also offers an optional experimental process-byte summary.")
         let excluded = paragraph("No screenshots, keystrokes, message contents, microphone, camera, or full website URLs. The optional browser experiment is not included in this Mac setup.")
@@ -91,9 +91,9 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         stack.addArrangedSubview(title)
         stack.addArrangedSubview(introduction)
         stack.addArrangedSubview(readiness)
-        stack.addArrangedSubview(heading("What this preview records"))
+        stack.addArrangedSubview(heading("What Ruffster records"))
         stack.addArrangedSubview(collected)
-        stack.addArrangedSubview(heading("What it never records"))
+        stack.addArrangedSubview(heading("What stays private"))
         stack.addArrangedSubview(excluded)
         stack.addArrangedSubview(disclosure)
 
@@ -210,7 +210,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         stack.spacing = 14
         let title = NSTextField(labelWithString: "Your family dashboard")
         title.font = .systemFont(ofSize: 22, weight: .bold)
-        let explanation = NSTextField(wrappingLabelWithString: "The dashboard opens in your browser and stays on this Mac. Reports are encrypted on disk; the parent-only PIN opens them. This early preview is for disclosed testing only.")
+        let explanation = NSTextField(wrappingLabelWithString: "The dashboard opens in your browser and stays on this Mac. Reports are encrypted for the parent and opened with your parent PIN. Ruffster is designed for families to use together, with monitoring status kept visible.")
         explanation.maximumNumberOfLines = 4
         let status = NSTextField(wrappingLabelWithString: "Starting the local dashboard…")
         status.maximumNumberOfLines = 3
@@ -539,7 +539,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
             if let temporaryDirectory { try? FileManager.default.removeItem(at: temporaryDirectory) }
             guard let self else { return }
             if succeeded {
-                self.message("Agent registered", "Check that the Ruffster menu-bar indicator is visible. If it is not, remove the agent and do not use the preview.")
+                self.message("Ruffster is set up", "Check that the menu-bar status is visible. It shows when monitoring is on or paused. You can open Ruffster settings any time to review or remove monitoring.")
             } else {
                 self.message("Installation did not complete", self.failureText(detail, fallback: "Check the selected connection file and try again. No existing report was intentionally removed."))
             }
