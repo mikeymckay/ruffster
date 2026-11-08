@@ -31,6 +31,22 @@ class MacSetupSourceTests(unittest.TestCase):
         self.assertIn('Choose the maximum time to keep detailed records', source)
         self.assertIn('calendar-day rounding may remove them up to a day before that limit', source)
 
+    def test_mac_install_requires_child_acknowledgment_after_scrollable_disclosure(self):
+        source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')
+        start = source.index('private func reviewAndInstall')
+        end = source.index('@objc private func updateSetupConfirmation', start)
+        review = source[start:end]
+        self.assertIn('review.messageText = "Set up this Mac together?"', review)
+        self.assertIn('let disclosureScroll = NSScrollView', review)
+        self.assertIn('disclosureScroll.hasVerticalScroller = true', review)
+        self.assertIn('message contents, microphone, camera', review)
+        self.assertIn('let acknowledgement = NSButton(checkboxWithTitle:', review)
+        self.assertIn('I have explained this monitoring to the child', review)
+        self.assertIn('let installButton = review.addButton(withTitle: "Install for this account")', review)
+        self.assertIn('installConfirmationButton = installButton', review)
+        self.assertIn('installConfirmationButton?.isEnabled = false', review)
+        self.assertIn('response == .alertFirstButtonReturn, acknowledgement.state == .on', review)
+
     def test_parent_pairing_calls_fallback_a_connection_file(self):
         source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')
         self.assertIn('Choose connection file…', source)

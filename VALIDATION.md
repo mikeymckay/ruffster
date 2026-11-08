@@ -763,3 +763,8 @@ Added a self-contained Windows installer that embeds the complete app bundle, ex
 ## 2026-11-08 — Exercise Windows archive extraction on Linux
 
 Moved archive path validation and extraction into a platform-neutral .NET library used by the Windows installer. A separate .NET test executable runs the same code against valid synthetic packages, traversal and rooted paths, symlink attributes, case-insensitive duplicates, file/folder conflicts, and incomplete packages; invalid archives are rejected before the destination is created. All extraction tests passed on Linux, the Windows installer cross-published for win-x64 with warnings treated as errors, and focused Python and workflow checks passed. GitHub Actions now has a Linux job for these .NET tests, and the Windows package job depends on it. Native Windows file extraction and UI remain unverified.
+
+
+## 2026-11-08 — Require child disclosure confirmation on Mac
+
+Replaced the long final Mac install paragraph with a fixed-height scrollable collection/retention disclosure and added a parent acknowledgment checkbox that keeps “Install for this account” disabled until selected. Updated the dialog title and accessibility labels. Eight Mac setup source tests pass; this host does not have Swift/AppKit and SSH to the test Mac’s Mac timed out, so native compilation, layout, VoiceOver, and interaction remain unverified. The full Linux Python suite passed 231 tests with no skips.

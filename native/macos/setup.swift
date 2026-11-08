@@ -36,6 +36,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var welcomeWindow: NSWindow?
     private var operationProcess: Process?
     private var operationWindow: NSWindow?
+    private var installConfirmationButton: NSButton?
     init(runtime: Runtime) { self.runtime = runtime }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -427,18 +428,68 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
             return
         }
         let review = NSAlert()
-        review.messageText = "Install this disclosed preview?"
-        review.informativeText = "The agent will start at each sign-in and restart after it stops. It records foreground apps, interface traffic totals, a pseudonymous default-router change hint, and reduced DNS, proxy, and VPN settings. The router hint is not a location; the raw router address is not stored. Reports are locked on this Mac and can be opened on the parent's computer. Discuss this with the child before continuing. Choose the maximum time to keep detailed records on this computer. Records are removed while monitoring runs; calendar-day rounding may remove them up to a day before that limit. Uninstall keeps the encrypted report and Family Activity connection details unless you choose to delete them. Copies shared elsewhere are not affected. The status icon must be visible to the child. Keep this app in its current location; moving it may stop the agent."
+        review.messageText = "Set up this Mac together?"
+        review.informativeText = "Read what this preview records, choose how long to keep detailed records, and explain the monitoring to the child before setup."
+        let disclosureText = NSTextView()
+        disclosureText.frame = NSRect(x: 0, y: 0, width: 460, height: 190)
+        disclosureText.isEditable = false
+        disclosureText.isSelectable = true
+        disclosureText.drawsBackground = false
+        disclosureText.isVerticallyResizable = true
+        disclosureText.isHorizontallyResizable = false
+        disclosureText.textContainer?.widthTracksTextView = true
+        disclosureText.textContainer?.containerSize = NSSize(width: 430, height: .greatestFiniteMagnitude)
+        disclosureText.textContainerInset = NSSize(width: 6, height: 6)
+        disclosureText.string = """
+        While this account is signed in, Family Activity samples foreground app names, network-interface traffic totals, a pseudonymous hint when the default router changes, and basic DNS, proxy, and VPN settings. Network bytes are not attributed to apps or websites. The router hint is not a location, and the raw router address is not saved.
+
+        It does not record screenshots, keystrokes, message contents, microphone, camera, or full website addresses. Website domains are not included in this Mac setup.
+
+        The menu-bar status icon must stay visible to the child. Reports are locked on this Mac and can be opened on the parent's computer. Keep this app in its current location; moving it may stop monitoring.
+
+        Choose the maximum time to keep detailed records here. Records are removed while monitoring runs; calendar-day rounding may remove them up to a day before that limit. Removing monitoring keeps the encrypted report and Family Activity connection details unless you choose to delete them. Reports already shared elsewhere and other copies are not affected.
+        """
+        disclosureText.setAccessibilityLabel("Family Activity collection and retention details")
+        let disclosureScroll = NSScrollView(frame: NSRect(x: 0, y: 0, width: 460, height: 190))
+        disclosureScroll.hasVerticalScroller = true
+        disclosureScroll.hasHorizontalScroller = false
+        disclosureScroll.documentView = disclosureText
+        disclosureScroll.setAccessibilityLabel("Scrollable collection and retention details")
         let retention = NSPopUpButton(frame: NSRect(x: 0, y: 0, width: 230, height: 26), pullsDown: false)
         for days in [7, 30, 90, 180, 365] {
             retention.addItem(withTitle: "\(days) days")
             retention.lastItem?.representedObject = days
         }
         retention.selectItem(withTitle: "30 days")
-        review.accessoryView = retention
-        review.addButton(withTitle: "Install for this account")
+        retention.setAccessibilityLabel("Maximum detailed record retention")
+        let retentionRow = NSStackView(views: [NSTextField(labelWithString: "Keep detailed records for"), retention])
+        retentionRow.orientation = .horizontal
+        retentionRow.alignment = .centerY
+        retentionRow.spacing = 10
+        let acknowledgement = NSButton(checkboxWithTitle: "I have explained this monitoring to the child, and they understand it will run on this account.", target: self, action: #selector(updateSetupConfirmation(_:)))
+        acknowledgement.setAccessibilityLabel("Confirm the child understands monitoring will run on this account")
+        acknowledgement.setAccessibilityHelp("Read the collection details and discuss them with the child before enabling setup.")
+        acknowledgement.cell?.wraps = true
+        acknowledgement.cell?.usesSingleLineMode = false
+        let accessory = NSStackView(views: [disclosureScroll, retentionRow, acknowledgement])
+        accessory.orientation = .vertical
+        accessory.alignment = .leading
+        accessory.spacing = 10
+        disclosureScroll.translatesAutoresizingMaskIntoConstraints = false
+        acknowledgement.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            disclosureScroll.widthAnchor.constraint(equalToConstant: 460),
+            disclosureScroll.heightAnchor.constraint(equalToConstant: 190),
+            acknowledgement.widthAnchor.constraint(equalToConstant: 460),
+        ])
+        review.accessoryView = accessory
+        let installButton = review.addButton(withTitle: "Install for this account")
         review.addButton(withTitle: "Cancel")
-        guard review.runModal() == .alertFirstButtonReturn else { return }
+        installConfirmationButton = installButton
+        installConfirmationButton?.isEnabled = false
+        let response = review.runModal()
+        installConfirmationButton = nil
+        guard response == .alertFirstButtonReturn, acknowledgement.state == .on else { return }
         let retentionDays = retention.selectedItem?.representedObject as? Int ?? 30
         let arguments = ["-m", "family_activity", "mac-install", "--public-key", key.path,
                          "--source-directory", runtime.source, "--foreground-helper", runtime.foreground,
@@ -451,9 +502,13 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
             if succeeded {
                 self.message("Agent registered", "Check that the Family Activity menu-bar indicator is visible. If it is not, remove the agent and do not use the preview.")
             } else {
-                        self.message("Installation did not complete", self.failureText(detail, fallback: "Check the selected connection file and try again. No existing report was intentionally removed."))
+                self.message("Installation did not complete", self.failureText(detail, fallback: "Check the selected connection file and try again. No existing report was intentionally removed."))
             }
         }
+    }
+
+    @objc private func updateSetupConfirmation(_ sender: NSButton) {
+        installConfirmationButton?.isEnabled = sender.state == .on
     }
 
     private func removeAgent() {
