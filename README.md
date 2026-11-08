@@ -1,12 +1,10 @@
 # Ruffster
 
-**Make computer use easier to talk about.** Ruffster is an open-source family app that helps parents and children review computer use together. Monitoring stays visible, reports stay on the family's devices, and the report explains what it can show. Its golden retriever mascot is a friendly companion for family conversations.
+**Make computer use easier to talk about.** Ruffster helps parents and children look at everyday computer use together, especially during school hours. It gives families a clearer picture to discuss, keeps monitoring visible, and encrypts reports for the parent. Our golden retriever mascot is here to make those conversations feel a little easier.
 
 <p align="center"><img src="docs/assets/ruffster-mascot.webp" alt="Ruffster golden retriever mascot" width="190"></p>
 
-Ruffster helps parents and children understand computer use together, especially during school hours. Its goal is a clear, constructive view of everyday activity that families can talk about.
-
-**Mac family development preview:** ready for families who want to try Ruffster together. Monitoring stays visible, and activity reports are encrypted for the parent. We’re improving setup and accessibility as families start using it. Windows builds and synthetic checks run in GitHub Actions; the family setup still needs a Windows-computer review.
+**Mac family preview:** ready for families to try together. Install Ruffster on the parent Mac, then set up each child's Mac together and bring encrypted reports back to the parent dashboard. The visible status explains when Ruffster is running. The first-open guide explains macOS's confirmation for an app that has not yet been signed by Apple. Windows is next; the interactive family setup still needs a Windows-computer review.
 
 [Get the Apple-silicon Mac preview](https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.3) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
 

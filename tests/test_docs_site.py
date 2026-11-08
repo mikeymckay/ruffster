@@ -182,8 +182,8 @@ class DocumentationSiteTests(unittest.TestCase):
         guide = (SITE / 'install.html').read_text(encoding='utf-8')
         self.assertIn('macOS comes first', home)
         self.assertIn('Linux is for development and testing', guide)
-        self.assertIn('The Mac family development preview is ready to try', guide)
-        self.assertIn('designed for ongoing, visible use at home and during the school day', guide)
+        self.assertIn('The Mac family preview is ready for you to try together', guide)
+        self.assertIn('made for everyday family use at home and during the school day', guide)
         self.assertIn('Drag Ruffster into the Applications folder', guide)
         self.assertIn('Open parent dashboard', guide)
         self.assertIn('Set up this Mac together', guide)
@@ -286,9 +286,8 @@ class DocumentationSiteTests(unittest.TestCase):
         readme = (ROOT / 'family_activity/parent_assets/index.html').read_text(encoding='utf-8')
         guide = (SITE / 'install.html').read_text(encoding='utf-8')
         faq = (SITE / 'faq.html').read_text(encoding='utf-8')
-        self.assertIn('reports as parent-only for your family', guide)
-        self.assertIn('The child\'s computer can send reports to you, but cannot open them', guide)
-        self.assertIn('It keeps report access with the parent in your family', faq)
+        self.assertIn('Choose six numbers your child does not know', guide)
+        self.assertIn('Your PIN opens the parent dashboard, and reports are encrypted for the parent computer', faq)
         self.assertNotIn('separate public part', readme + guide + faq)
 
     def test_parent_access_and_pairing_copy_is_plain_and_honest_about_preview_codes(self):
@@ -442,7 +441,7 @@ class DocumentationSiteTests(unittest.TestCase):
 
     def test_progress_page_reports_current_preview_and_family_validation_gates(self):
         status = (SITE / 'progress.html').read_text(encoding='utf-8')
-        self.assertIn('The Mac family development preview is ready to try together', status)
+        self.assertIn('The Mac family preview is ready to try together', status)
         self.assertIn('What we’re improving next', status)
         self.assertIn('Get the Mac app and see the simple first-open steps', status)
         self.assertIn('family testing is next', status)
