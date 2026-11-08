@@ -1,6 +1,6 @@
 # Ruffster
 
-**Make computer use easier to talk about.** Ruffster is an open-source prototype for parents and children to review computer use together, with visible monitoring, local reports, and explicit limits on what the data can tell you. Its golden retriever mascot stands for a friendly family companion: present, easy to understand, and never there to judge.
+**Make computer use easier to talk about.** Ruffster is an open-source family app that helps parents and children review computer use together. Monitoring stays visible, reports stay on the family's devices, and the report explains what it can show. Its golden retriever mascot is a friendly companion for family conversations.
 
 <p align="center"><img src="docs/assets/ruffster-mascot.webp" alt="Ruffster golden retriever mascot" width="190"></p>
 
@@ -8,13 +8,13 @@ Ruffster helps parents and children understand computer use together, especially
 
 **Mac family development preview:** ready for families who want to try Ruffster together. Monitoring stays visible, and activity reports are encrypted for the parent. We’re improving setup and accessibility as families start using it. Windows builds and synthetic checks run in GitHub Actions; the family setup still needs a Windows-computer review.
 
-[Get the Apple-silicon Mac preview](https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.1) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
+[Get the Apple-silicon Mac preview](https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.2) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
 
 [Project website](https://mikeymckay.github.io/ruffster/) · [Install guide](https://mikeymckay.github.io/ruffster/install.html) · [Progress page](https://mikeymckay.github.io/ruffster/progress.html) · [FAQ](https://mikeymckay.github.io/ruffster/faq.html) · [Privacy and children's rights](PRIVACY-AND-CHILDREN.md) · [Implementation plan](PLAN.md)
 
 > **Platform priority:** macOS first, then Windows. Linux is a development and test host only; Linux is not a student-facing target in the current scope.
 
-## A look at the prototype
+## A look at Ruffster
 
 These full-page captures show the local parent dashboard's first-run PIN setup and a sample report. The report uses synthetic data only; no child's activity appears in these images. Select either image to view it at full size.
 
@@ -34,7 +34,7 @@ These full-page captures show the local parent dashboard's first-run PIN setup a
 - **Careful language.** Estimates remain estimates. Missing observations, unfamiliar networks, and configuration indicators are not evidence of intent.
 - **Minimal collection.** No screenshots, keystrokes, audio, camera, message contents, or full website URLs.
 
-## What the prototype can show
+## What Ruffster can show
 
 | Observation | Current behavior | Limit |
 | --- | --- | --- |
@@ -74,8 +74,8 @@ The engineering requirements and open European privacy and children's-rights que
 ## Delivery priorities
 
 1. **Make macOS dependable first.** Validate setup and removal, visible status, sleep/wake, permissions, user changes, restart recovery, encrypted reports, and key recovery on real Macs. Keep the unsigned preview easy to identify and include its source, checksum, and a short note about Apple's first-open prompt. Revisit signing and notarization as the project grows.
-2. **Port the finished family flow to Windows.** Test installation, startup and recovery, visible tray status, network and app observations, encrypted report handoff, parent dashboard, updates, and removal on real Windows computers.
-3. **Make the public project experience excellent.** Keep this README useful to a parent arriving for the first time and to a contributor; publish a polished GitHub Pages home page, family installation guide, progress page, and plain-language FAQ. Include current synthetic screenshots, clear readiness status, accessible responsive layouts, and clearly distinguish an unsigned developer preview from a supported family release.
+2. **Bring the family flow to Windows.** Test installation, startup and recovery, visible tray status, network and app observations, encrypted report handoff, parent dashboard, updates, and removal on real Windows computers.
+3. **Make the public project experience excellent.** Keep this README useful to a parent arriving for the first time and to a contributor; publish a polished GitHub Pages home page, family installation guide, progress page, and plain-language FAQ. Include current synthetic screenshots, clear readiness status, accessible responsive layouts, and clearly distinguish the unsigned family development preview from a signed and notarized release.
 4. **Validate with families and reviewers.** Observe nontechnical parents and children using the whole flow; complete accessibility, security, privacy, and European children's rights reviews.
 
 Linux remains a low-priority development and test host. It is not a student-facing platform target. The task list and release gates are in [PLAN.md](PLAN.md); the Pages design and launch checklist is in [GITHUB-PAGES.md](GITHUB-PAGES.md).

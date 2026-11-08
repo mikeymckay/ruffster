@@ -2,7 +2,7 @@
 
 `scripts/package-macos-candidate.sh` builds a drag-to-Applications disk image from the current preview sources, signs each Mach-O payload and the app with a Developer ID Application identity, notarizes and staples the app and disk image, and verifies their signatures. The disk image contains `Ruffster Preview.app` and an Applications shortcut. The underlying unsigned preview builder compiles all native helpers and runs `scripts/validate-macos-preview-bundle.py` against the built app, which starts the frozen parent dashboard on loopback with temporary data and checks that unauthenticated API requests are rejected. This smoke check does not install a LaunchAgent or open a native setup window.
 
-This produces a **signed preview candidate**, not a family release. It does not change the setup disclosures or satisfy the open accessibility, usability, privacy, security, and release gates. The project does not currently have the identity needed to use this route. The current path is an unsigned, opt-in development prerelease described below.
+This produces a **signed preview candidate**. It does not change the setup disclosures or satisfy the open accessibility, usability, privacy, and security work. The project does not currently have the identity needed to use this route. The current public path is the unsigned Mac family development preview described below.
 
 ## Unsigned preview without a Developer ID
 
@@ -10,12 +10,12 @@ Unsigned builds are less convenient and macOS may block them. Ruffster does not 
 
 The release workflow runs on the standard `macos-latest` Apple-silicon GitHub Actions runner when a `mac-preview-*` tag is pushed. It runs the Mac test suite, builds and smoke-checks the app, makes a drag-to-Applications disk image, and publishes a GitHub **prerelease** with:
 
-- a warning inside the disk image that says it is unsigned and not for ongoing family monitoring;
+- a note inside the disk image that explains the unsigned first-open step and invites families to review setup together;
 - the exact source commit in the release workflow and inside the disk image;
 - a SHA-256 checksum sidecar (integrity check only, not a digital signature);
 - release notes linking Apple's current Gatekeeper guidance.
 
-The workflow does not need a signing secret and does not claim that checksum verification authenticates a publisher. To create one, first review the changes and run the Mac workflow, then tag the reviewed commit with a name such as `mac-preview-0.1.0` and push that tag. Do not use a final version tag or describe this as a supported family installer. Only publish versions you are willing to make public as experimental software.
+The workflow does not need a signing secret and does not claim that checksum verification authenticates a publisher. To create a preview, first review the changes and run the Mac workflow, then tag the reviewed commit with a name such as `mac-preview-0.1.2` and push that tag. Do not use a final version tag or describe this as a signed or notarized installer. Label it as a family development preview and explain Apple's first-open prompt.
 
 For a local package on the real Mac, install build dependencies, then run:
 
@@ -56,7 +56,7 @@ scripts/package-macos-candidate.sh \
   "$(pwd)/dist"
 ```
 
-The output file is a notarized `.dmg` for the architecture of the build Mac. Open it, drag the app into Applications, eject the disk image, then open the copied app. The setup still describes this build as a preview and says it is not ready for family deployment.
+The output file is a notarized `.dmg` for the architecture of the build Mac. Open it, drag the app into Applications, eject the disk image, then open the copied app. The setup introduces the app, explains what it records, and offers separate actions to open the parent dashboard or set up this Mac for a child.
 
 ## Current validation state
 

@@ -28,7 +28,7 @@
   <main id="main">
    <section class="page-hero">
     <div class="wrap">
-     <div class="eyebrow">Project progress · updated 8 November 2026</div>
+     <div class="eyebrow">Project progress · updated 9 November 2026</div>
      <h1>Ruffster gives families a clearer view of computer use.</h1>
      <p>The Mac family preview is available. This page shares what works today and what we’re improving as families begin using it.</p>
     </div>
@@ -36,13 +36,13 @@
    <div class="wrap prose">
     <div class="notice">
      <strong>The Mac family development preview is ready to try together.</strong>
-     This build is not signed by Apple, so macOS asks you to confirm before opening it. The release includes its source commit and download checksum. Windows package checks run on a Windows runner; family testing is next. <a href="https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.1">Get the Mac app and see the simple first-open steps.</a>
+     This build is not signed by Apple, so macOS asks you to confirm before opening it. The release includes its source commit and download checksum. Windows package checks run on a Windows runner; family testing is next. <a href="https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.2">Get the Mac app and see the simple first-open steps.</a>
     </div>
     <h2>What is working</h2>
     <ol class="steps">
-     <li><strong>Visible Mac monitoring prototype.</strong> In a logged-in session, the Mac agent records synthetic foreground-app observations in parent-key-encrypted storage, shows a separate status companion, reconstructs an observable gap, and restarts after a forced stop through launchd.</li>
+     <li><strong>Visible Mac monitoring.</strong> In a logged-in session, the Mac agent records synthetic foreground-app observations in parent-key-encrypted storage, shows a separate status companion, reconstructs an observable gap, and restarts after a forced stop through launchd.</li>
      <li><strong>Parent dashboard and encrypted reports.</strong> Parents can unlock reports, set school hours and retention, receive encrypted reports, keep computers separate, and review clearly labeled estimates and measured counters.</li>
-     <li><strong>Mac family development preview.</strong> Version 0.1.1 is available with its source commit and download checksum. The DMG passed checksum and Apple disk-image verification on an Apple-silicon Mac; it was not installed. The native build also runs bundle and encrypted-report smoke checks.</li>
+     <li><strong>Mac family development preview.</strong> Version 0.1.2 updates the bundled parent dashboard with clearer family setup and report guidance. The native build also runs bundle and encrypted-report smoke checks.</li>
      <li><strong>Automated checks.</strong> The latest Mac suite ran 281 tests (273 passed; 8 platform/dependency checks skipped). The Linux development run passed all 282 tests with 5 platform/tool checks skipped. Tracemalloc-enabled Mac checks found and verified fixes for SQLite read-handle leaks.</li>
      <li><strong>Windows prototype.</strong> A per-user setup, visible tray indicator, parent dashboard launcher, and update flow are implemented. GitHub Actions builds the package and exercises synthetic setup, Task Scheduler recovery, and removal on a Windows runner. It has not been reviewed on a family-owned Windows computer.</li>
     </ol>
@@ -58,7 +58,7 @@
     <p><strong>Mac:</strong> the latest native run had 281 tests; 273 passed and 8 platform/dependency checks skipped. The additional run with Python resource tracing reported zero SQLite <code>ResourceWarning</code>s.</p>
     <p><strong>Linux development host:</strong> 282 tests passed; 5 platform/tool checks skipped. These tests do not prove Windows behavior.</p>
     <p><strong>Website:</strong> the home page, getting-started guide, Progress page, and FAQ passed desktop and mobile accessibility scans with zero Axe violations. The first GitHub Pages deployment succeeded. <a href="https://mikeymckay.github.io/ruffster/">Visit the live website</a>.</p>
-    <h2>What the prototype looks like</h2>
+    <h2>What a Ruffster report looks like</h2>
     <p>These examples use made-up parent and activity data to show the current setup and report screens.</p>
     <div class="detail-grid">
      <figure class="photo-card"><a href="assets/parent-setup.png"><img src="assets/parent-setup.png" alt="Ruffster parent setup screen with a blank six-digit PIN form and recovery-copy instructions" loading="lazy"/></a><figcaption class="photo-caption">Parent access and recovery setup · synthetic example</figcaption></figure>

@@ -167,7 +167,7 @@ class DocumentationSiteTests(unittest.TestCase):
     def test_github_pages_guide_matches_published_repository_state(self):
         guide = (ROOT / 'GITHUB-PAGES.md').read_text(encoding='utf-8')
         self.assertIn('repository is public, and its Pages source is configured to use GitHub Actions', guide)
-        self.assertIn('The first deployment succeeded at <https://mikeymckay.github.io/ruffster/>', guide)
+        self.assertIn('The live site and install guide are at <https://mikeymckay.github.io/ruffster/>', guide)
         self.assertIn('progress page', guide)
 
     def test_local_reports_and_key_material_are_ignored_by_source_control(self):
@@ -188,7 +188,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('Open parent dashboard', guide)
         self.assertIn('Set up this Mac together', guide)
         self.assertIn('background monitoring, a visible menu-bar status', guide)
-        self.assertIn('https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.1', guide)
+        self.assertIn('https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.2', guide)
         self.assertIn('VoiceOver', guide)
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
         self.assertIn('explicit screen-reader labels and help', readme)
@@ -296,7 +296,7 @@ class DocumentationSiteTests(unittest.TestCase):
         script = (ROOT / 'family_activity/parent_assets/app.js').read_text(encoding='utf-8')
         product = (ROOT / 'PRODUCT-DESIGN.md').read_text(encoding='utf-8')
         self.assertIn('Your parent access PIN', dashboard)
-        self.assertIn('six-digit PIN that your child doesn\'t know', dashboard)
+        self.assertIn('six-digit PIN your child doesn\'t know', dashboard)
         self.assertIn('Enter the two digits shown here on the child\'s setup screen', dashboard)
         self.assertIn('Show two digits', dashboard)
         self.assertIn('Download connection file', dashboard)

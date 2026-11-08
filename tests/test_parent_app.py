@@ -455,6 +455,9 @@ class ParentAppTests(unittest.TestCase):
         import sqlite3
         from datetime import datetime, timedelta, timezone
         self.login(); self.create_parent_key('638204')
+        self.assertEqual(self.request('POST', '/api/schedule', {
+            'timezone': 'UTC', 'days': list(range(7)), 'start': '09:00', 'end': '15:00'
+        })[0], 200)
         public = decode(self.request('GET', '/api/public')[2])
         now = datetime.now(timezone.utc) - timedelta(seconds=10)
 
@@ -495,6 +498,9 @@ class ParentAppTests(unittest.TestCase):
         from datetime import datetime, timedelta, timezone
         from family_activity import encrypted_view
         self.login(); self.create_parent_key('638204')
+        self.assertEqual(self.request('POST', '/api/schedule', {
+            'timezone': 'UTC', 'days': list(range(7)), 'start': '09:00', 'end': '15:00'
+        })[0], 200)
         public = decode(self.request('GET', '/api/public')[2])
         snapshots = []
         for filename, app in (('child-one.db', 'SyntheticAnnikaApp'),
