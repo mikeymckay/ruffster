@@ -132,6 +132,12 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('explicit screen-reader labels and help', readme)
         self.assertIn('actual VoiceOver behavior still need interactive review', readme)
 
+    def test_home_page_discloses_limits_of_optional_mac_process_totals(self):
+        home = (SITE / 'index.html').read_text(encoding='utf-8')
+        self.assertIn('optional experimental summary of bytes associated with processes', home)
+        self.assertIn('Which website used process-associated bytes', home)
+        self.assertIn('helper services may own connections', home)
+
     def test_filtering_guidance_explains_network_scope_and_school_settings(self):
         faq = (SITE / 'faq.html').read_text(encoding='utf-8')
         dashboard = (ROOT / 'family_activity/parent_assets/index.html').read_text(encoding='utf-8')
@@ -370,8 +376,8 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('exec /bin/sleep 60', lifecycle_check)
         self.assertIn('validate-macos-install-flow.py', guide)
         self.assertIn('zero valid identities', status)
-        self.assertIn('<b>253</b><span>Linux development tests passed · 4 PowerShell checks skipped (257 run)</span>', status)
-        self.assertIn('<b>251</b><span>Mac tests passed · 2 Node.js and 4 PowerShell checks skipped (257 run)</span>', status)
+        self.assertIn('<b>254</b><span>Linux development tests passed · 4 PowerShell checks skipped (258 run)</span>', status)
+        self.assertIn('<b>252</b><span>Mac tests passed · 2 Node.js and 4 PowerShell checks skipped (258 run)</span>', status)
         self.assertIn('Device connection decision', status)
         self.assertIn('cloud rendezvous service', status)
         self.assertIn('process traffic', status)

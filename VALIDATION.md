@@ -862,3 +862,8 @@ The full Linux suite then ran 255 tests and exposed two issues: the status page 
 ## 2026-11-08 — Require visible status for process traffic mode
 
 The process traffic sampler starts the native status companion, but the direct agent CLI had not required a status-helper path for that opt-in mode. Added an early argument check so a missing helper is rejected before creating the activity database; the error explains that app, process traffic, or network sampling requires the visible helper. A regression test covers the simulated macOS CLI path. Linux and Mac suites each pass 257 tests (four PowerShell skips on Linux; six dependency/platform skips on Mac). Rebuilt the unsigned Apple-silicon preview on the test Mac’s Mac; the native welcome layout, frozen command checks, loopback dashboard, authorization rejection, and encrypted report export/import round trip passed. A direct frozen-agent check also refused process traffic without a helper and created no database. No agent or LaunchAgent was started by this validation.
+
+
+## 2026-11-08 — Clarify process totals on the public overview
+
+The Pages home page now includes the optional experimental macOS process-byte summary alongside interface totals and says that process totals cannot identify websites; helper services may own connections and brief connections may be missed. Added a documentation regression check. Linux and Mac full suites each pass 258 tests (four PowerShell skips on Linux; six platform/dependency skips on Mac). The check was text and link coverage; no visual change was made to the layout, and no monitoring service ran.
