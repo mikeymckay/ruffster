@@ -83,7 +83,7 @@ Use Python 3.10 or newer. Linux is useful for running the shared tests, but test
 ```sh
 python3 -m venv .venv
 .venv/bin/python -m pip install -e .
-.venv/bin/python -m unittest discover -s tests -v
+.venv/bin/python scripts/run-tests.py
 node --check family_activity/parent_assets/app.js
 ```
 
@@ -96,6 +96,8 @@ For local UI development, start the experimental parent app:
 It binds to loopback. The default CLI database and dashboard are developer tools, not a family installation path. Do not expose them to a network.
 
 GitHub Actions runs the test suite on Linux, macOS, and Windows, then builds the Mac and Windows previews on their native runners. The Mac job also exercises the harmless per-user LaunchAgent startup/restart/removal path with a sleep-only fixture. Generated previews are discarded; CI does not publish install downloads. The repository is published at [github.com/mikeymckay/ruffster](https://github.com/mikeymckay/ruffster). The GitHub Pages source still needs to be set to **GitHub Actions** in the repository's [Pages settings](https://github.com/mikeymckay/ruffster/settings/pages) before the public website can go live.
+
+The test runner prints each test and emits Python stack traces every five minutes if a job stalls; CI stops a test job after 20 minutes.
 
 ### Build experimental previews
 
