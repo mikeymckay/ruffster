@@ -744,3 +744,7 @@ Focused network settings and PowerShell Core probe checks passed. Full Linux sui
 ## 2026-11-08 — Clarify the optional browser add-on
 
 Updated the public home page and FAQ to say the add-on runs in supported browsers on the child’s computer, is not installed on the parent’s computer, provides domain names because interface traffic totals cannot name websites, and is not currently part of a supported family setup. The dedicated copy regression and all 24 documentation-site tests pass. No browser add-on behavior or installation was tested by this wording change.
+
+## 2026-11-08 — Keep project status and add-on FAQ current
+
+Corrected the Windows status summary to reflect the built-in VPN profile indicator and replaced browser-extension implementation jargon in the parent-facing FAQ with a short description of the pause choice and temporary gap note. The 24 documentation-site tests pass, including explicit wording checks; `git diff --check` is clean.

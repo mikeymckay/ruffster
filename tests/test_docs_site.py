@@ -201,6 +201,8 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('Do I need a browser add-on, and whose computer is it for?', faq)
         self.assertIn('does not inspect private-window domains', faq)
         self.assertIn('not integrated into Mac setup', faq_text)
+        self.assertIn('temporary note to keep time estimates from stretching across gaps', faq_text)
+        self.assertNotIn('temporary continuity-reset flag', faq_text)
         self.assertIn('not evidence of avoidance or misconduct', faq)
 
     def test_privacy_and_childrens_rights_note_is_linked_and_clearly_scoped(self):
