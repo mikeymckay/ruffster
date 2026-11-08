@@ -184,7 +184,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('Linux is for development and testing', guide)
         self.assertIn('The Mac family development preview is ready to try', guide)
         self.assertIn('designed for ongoing, visible use at home and during the school day', guide)
-        self.assertIn('Drag <code>Ruffster Preview.app</code> into the Applications folder', guide)
+        self.assertIn('Drag Ruffster into the Applications folder', guide)
         self.assertIn('Open parent dashboard', guide)
         self.assertIn('Set up this Mac together', guide)
         self.assertIn('background monitoring, a visible menu-bar status', guide)
