@@ -1,0 +1,229 @@
+using System.Diagnostics;
+using System.Drawing;
+using System.Globalization;
+using System.Net;
+using System.Net.Sockets;
+using System.Windows.Forms;
+
+// Visible Windows notification-area companion for the disclosed preview.
+internal static class TrayCompanion
+{
+    private enum TrayState { Starting, On, Paused }
+    private static Process? activeShare;
+    private static Form? activeShareForm;
+
+    private static TrayState ResolveState(TimeSpan uptime, TimeSpan? lastHeartbeat, TimeSpan staleAfter)
+    {
+        if (lastHeartbeat is null) return uptime <= staleAfter ? TrayState.Starting : TrayState.Paused;
+        return uptime - lastHeartbeat.Value <= staleAfter ? TrayState.On : TrayState.Paused;
+    }
+
+    public static void RunStatusSelfTest()
+    {
+        var timeout = TimeSpan.FromSeconds(45);
+        if (ResolveState(TimeSpan.Zero, null, timeout) != TrayState.Starting ||
+            ResolveState(TimeSpan.FromSeconds(46), null, timeout) != TrayState.Paused ||
+            ResolveState(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(10), timeout) != TrayState.On ||
+            ResolveState(TimeSpan.FromSeconds(70), TimeSpan.FromSeconds(10), timeout) != TrayState.Paused)
+            throw new InvalidOperationException("The Windows tray status state check failed.");
+    }
+
+    public static void RunHeartbeatIpcSelfTest()
+    {
+        var readyName = Environment.GetEnvironmentVariable("FAMILY_ACTIVITY_READY_EVENT");
+        var heartbeatName = Environment.GetEnvironmentVariable("FAMILY_ACTIVITY_HEARTBEAT_EVENT");
+        if (string.IsNullOrWhiteSpace(readyName) || string.IsNullOrWhiteSpace(heartbeatName))
+            throw new InvalidOperationException("The Windows tray heartbeat self-test is missing its event names.");
+        using var heartbeat = new EventWaitHandle(false, EventResetMode.AutoReset, heartbeatName);
+        using var ready = EventWaitHandle.OpenExisting(readyName);
+        ready.Set();
+        if (!heartbeat.WaitOne(10000))
+            throw new InvalidOperationException("The Windows tray heartbeat self-test timed out.");
+    }
+
+    [STAThread]
+    public static void Run()
+    {
+        if (!int.TryParse(Environment.GetEnvironmentVariable("FAMILY_ACTIVITY_PARENT_PID"), out int parentId)) return;
+        Process parent;
+        try { parent = Process.GetProcessById(parentId); }
+        catch (ArgumentException) { return; }
+
+        var heartbeatName = Environment.GetEnvironmentVariable("FAMILY_ACTIVITY_HEARTBEAT_EVENT");
+        if (string.IsNullOrWhiteSpace(heartbeatName)) return;
+        EventWaitHandle heartbeat;
+        try { heartbeat = new EventWaitHandle(false, EventResetMode.AutoReset, heartbeatName); }
+        catch { return; }
+        using var heartbeatSignal = heartbeat;
+
+        Application.EnableVisualStyles();
+        using var menu = new ContextMenuStrip();
+        var statusItem = new ToolStripMenuItem("Monitoring is starting")
+        {
+            Enabled = false,
+            AccessibleName = "Monitoring status",
+            AccessibleDescription = "Waiting for the first completed encrypted sample."
+        };
+        menu.Items.Add(statusItem);
+        menu.Items.Add("What this app records…", null, (_, _) => ShowDisclosure());
+        var core = Environment.GetEnvironmentVariable("FAMILY_ACTIVITY_SHARE_PYTHON");
+        var database = Environment.GetEnvironmentVariable("FAMILY_ACTIVITY_SHARE_DATABASE");
+        if (!string.IsNullOrWhiteSpace(core) && !string.IsNullOrWhiteSpace(database))
+        {
+            menu.Items.Add(new ToolStripSeparator());
+            menu.Items.Add("Share an encrypted report…", null, (_, _) => ShareReport(core, database));
+        }
+        using var icon = new NotifyIcon { Icon = SystemIcons.Information, Text = "Family Activity: Starting", ContextMenuStrip = menu, Visible = true };
+        var uptime = Stopwatch.StartNew();
+        TimeSpan? lastHeartbeat = null;
+        var sampleInterval = 15.0;
+        if (!double.TryParse(Environment.GetEnvironmentVariable("FAMILY_ACTIVITY_SAMPLE_INTERVAL"), NumberStyles.Float,
+                             CultureInfo.InvariantCulture, out sampleInterval) || !double.IsFinite(sampleInterval) || sampleInterval <= 0)
+            sampleInterval = 15.0;
+        var staleAfter = TimeSpan.FromSeconds(Math.Max(45, sampleInterval * 3 + 5));
+        using var timer = new System.Windows.Forms.Timer { Interval = 2000 };
+        timer.Tick += (_, _) =>
+        {
+            if (parent.HasExited)
+            {
+                try { activeShareForm?.Close(); } catch { }
+                try { if (activeShare is { HasExited: false } && !activeShare.WaitForExit(2000)) activeShare.Kill(true); } catch { }
+                Application.ExitThread();
+                return;
+            }
+            if (heartbeatSignal.WaitOne(0)) lastHeartbeat = uptime.Elapsed;
+            var elapsed = uptime.Elapsed;
+            var state = ResolveState(elapsed, lastHeartbeat, staleAfter);
+            statusItem.Text = state switch
+            {
+                TrayState.Starting => "Monitoring is starting",
+                TrayState.On => "Monitoring is on",
+                _ => "Monitoring is paused",
+            };
+            statusItem.AccessibleDescription = state switch
+            {
+                TrayState.Starting => "Waiting for the first completed encrypted sample.",
+                TrayState.On => "A recent encrypted sample was saved. This does not establish that the child was actively using the computer.",
+                _ => "No recent completed sample was received. The reason is unknown; ask a parent if this status is unexpected.",
+            };
+            icon.Text = state switch
+            {
+                TrayState.Starting => "Family Activity: Starting",
+                TrayState.On => "Family Activity: Monitoring on",
+                _ => "Family Activity: Monitoring paused",
+            };
+        };
+        timer.Start();
+        var readyName = Environment.GetEnvironmentVariable("FAMILY_ACTIVITY_READY_EVENT");
+        if (string.IsNullOrWhiteSpace(readyName)) return;
+        try
+        {
+            using var ready = EventWaitHandle.OpenExisting(readyName);
+            ready.Set();
+        }
+        catch (WaitHandleCannotBeOpenedException) { return; }
+        catch (UnauthorizedAccessException) { return; }
+        Application.Run();
+        icon.Visible = false;
+        parent.Dispose();
+    }
+
+    private static void ShowDisclosure()
+    {
+        if (!int.TryParse(Environment.GetEnvironmentVariable("FAMILY_ACTIVITY_RETENTION_DAYS"), out int retentionDays) || retentionDays <= 0) retentionDays = 30;
+        if (!double.TryParse(Environment.GetEnvironmentVariable("FAMILY_ACTIVITY_SAMPLE_INTERVAL"), NumberStyles.Float,
+                             CultureInfo.InvariantCulture, out double interval) || interval <= 0) interval = 15;
+        var message = $"While this visible indicator is running, Family Activity samples the foreground app name about every {interval:0.#} seconds, records total network bytes by interface, and records a pseudonymous hint for the default router when one is available. The raw router address is not saved, and the hint does not prove where the computer is. It stores only whether Windows reports IPv4/IPv6 DNS resolver settings or Internet Settings proxy configuration. It does not record resolver addresses, proxy addresses, window titles, website addresses, screenshots, keystrokes, audio, camera, or messages. VPN status is unknown. " +
+                      $"Reports are locked on this computer and can be opened on your parent's computer. Detailed records are kept for up to {retentionDays} days; pruning happens while the agent is running. Uninstall keeps the encrypted local report unless your parent chooses to delete it. Ask your parent or guardian about the report and these settings.";
+        MessageBox.Show(message, "What Family Activity records", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+
+    private static void ShareReport(string core, string database)
+    {
+        try
+        {
+            var host = SelectLocalIPv4();
+            var codePath = Path.Combine(Path.GetTempPath(), "family-report-code-" + Guid.NewGuid().ToString("N") + ".txt");
+            var cancelPath = Path.Combine(Path.GetTempPath(), "family-report-cancel-" + Guid.NewGuid().ToString("N") + ".txt");
+            var start = new ProcessStartInfo(core) { UseShellExecute = false, CreateNoWindow = true, WorkingDirectory = Path.GetDirectoryName(core)! };
+            foreach (var arg in new[] { "share", "--db", database, "--host", host, "--lifetime", "300", "--code-file", codePath, "--cancel-file", cancelPath }) start.ArgumentList.Add(arg);
+            var share = Process.Start(start) ?? throw new InvalidOperationException("The encrypted report share could not start.");
+            activeShare = share;
+            using var form = new ShareForm(share, codePath, cancelPath);
+            activeShareForm = form;
+            try { form.ShowDialog(); }
+            finally
+            {
+                activeShareForm = null; activeShare = null;
+                try { File.WriteAllText(cancelPath, "stop"); } catch { }
+                try { if (!share.HasExited && !share.WaitForExit(2000)) share.Kill(true); } catch { }
+                try { share.Dispose(); File.Delete(codePath); File.Delete(cancelPath); } catch { }
+            }
+        }
+        catch (Exception error)
+        {
+            MessageBox.Show(error.Message, "Could not share the encrypted report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+    }
+
+    private static string SelectLocalIPv4()
+    {
+        using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+        socket.Connect(IPAddress.Parse("192.0.2.1"), 80);
+        var address = ((IPEndPoint)socket.LocalEndPoint!).Address;
+        if (IPAddress.IsLoopback(address) || address.Equals(IPAddress.Any)) throw new InvalidOperationException("No local network address is available. Connect both computers to the same local network and try again.");
+        return address.ToString();
+    }
+
+    private sealed class ShareForm : Form
+    {
+        private readonly Process process;
+        private readonly string codePath;
+        private readonly string cancelPath;
+        private readonly TextBox code = new() { ReadOnly = true, Width = 430, Multiline = true, Height = 82, ScrollBars = ScrollBars.Vertical };
+        private readonly Label detail = new() { AutoSize = true, Text = "Starting a temporary encrypted share…" };
+        private readonly Button copy = new() { Text = "Copy digits", Enabled = false, AutoSize = true };
+        private readonly Button closeShare = new() { Text = "Stop sharing", AutoSize = true };
+        private readonly System.Windows.Forms.Timer timer = new() { Interval = 300 };
+        private readonly DateTime expires = DateTime.UtcNow.AddMinutes(5);
+        private bool ready;
+
+        public ShareForm(Process runningShare, string file, string cancelFile)
+        {
+            process = runningShare; codePath = file; cancelPath = cancelFile;
+            Text = "Share an encrypted report"; StartPosition = FormStartPosition.CenterParent;
+            FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false; MinimizeBox = false;
+            ClientSize = new Size(500, 270); Font = new Font("Segoe UI", 9.5f);
+            var stack = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, WrapContents = false, Padding = new Padding(20) };
+            Controls.Add(stack);
+            stack.Controls.Add(new Label { Text = "Show these two digits to your parent", Font = new Font(Font, FontStyle.Bold), AutoSize = true });
+            stack.Controls.Add(new Label { Text = "Your parent will enter them in the dashboard to receive an encrypted report. They are available for about five minutes. Keep both computers on the same Wi-Fi.", Width = 450, Height = 52 });
+            stack.Controls.Add(code); stack.Controls.Add(detail);
+            var buttons = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.LeftToRight, Margin = new Padding(0, 8, 0, 0) };
+            copy.Click += (_, _) => { if (code.Text.Length > 0) Clipboard.SetText(code.Text); detail.Text = "Digits copied. Your parent can enter them in the dashboard."; };
+            closeShare.Click += (_, _) => { if (!process.HasExited) try { File.WriteAllText(cancelPath, "stop"); } catch { } Close(); };
+            buttons.Controls.Add(copy); buttons.Controls.Add(closeShare); stack.Controls.Add(buttons);
+            timer.Tick += Poll; timer.Start(); FormClosed += (_, _) => { timer.Stop(); try { if (!process.HasExited) File.WriteAllText(cancelPath, "stop"); } catch { } };
+        }
+
+        private void Poll(object? sender, EventArgs e)
+        {
+            if (!ready && File.Exists(codePath))
+            {
+                try { code.Text = File.ReadAllText(codePath); ready = code.Text.Length > 0; copy.Enabled = ready; detail.Text = "Show these digits to your parent within about five minutes."; }
+                catch (IOException) { }
+            }
+            if (!process.HasExited && ready)
+            {
+                var seconds = Math.Max(0, (int)(expires - DateTime.UtcNow).TotalSeconds);
+                if (seconds == 0) detail.Text = "The code expired. Close this window to end the share.";
+                else detail.Text = $"Available for {seconds / 60}:{seconds % 60:00}.";
+            }
+            else if (process.HasExited)
+            {
+                timer.Stop(); closeShare.Text = "Close"; copy.Enabled = false;
+                detail.Text = ready ? "The transfer finished or expired. Close this window." : "The temporary share stopped before a code was ready.";
+            }
+        }
+    }
+}

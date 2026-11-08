@@ -1,0 +1,74 @@
+name: Build and test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install project
+        run: python -m pip install -e .
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+
+  windows-package-check:
+    name: Build Windows preview (no artifact published)
+    runs-on: windows-latest
+    timeout-minutes: 15
+    needs: tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Install build dependencies
+        run: python -m pip install -e ".[build]"
+      - name: Build and smoke-check Windows package
+        shell: pwsh
+        run: |
+          $preview = Join-Path $env:RUNNER_TEMP 'FamilyActivityPreview'
+          .\scripts\build-windows-preview.ps1 -OutputDirectory $preview
+          if (Test-Path $preview) { Remove-Item $preview -Recurse -Force }
+          if (Test-Path "$preview.zip") { Remove-Item "$preview.zip" -Force }
+
+  macos-package-check:
+    name: Build macOS preview (no artifact published)
+    runs-on: macos-latest
+    needs: tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install build dependencies
+        run: python -m pip install -e ".[build]"
+      - name: Validate disposable per-user LaunchAgent lifecycle
+        run: python scripts/validate-macos-install-flow.py
+      - name: Build and smoke-check macOS app
+        shell: bash
+        run: |
+          python_executable="$(python -c 'import sys; print(sys.executable)')"
+          output_directory="${RUNNER_TEMP}/FamilyActivityPreview"
+          ./scripts/build-macos-preview.sh "$python_executable" "$output_directory"
+          rm -rf -- "$output_directory"

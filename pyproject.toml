@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "family-activity-prototype"
+version = "0.1.0"
+description = "Experimental, local-first family activity prototype"
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+dependencies = ["PyNaCl>=1.6.2,<2", "cryptography>=46,<52", "psutil>=7.2,<8; sys_platform == 'win32'", "tzdata>=2025.1; sys_platform == 'win32'"]
+
+[project.optional-dependencies]
+build = ["PyInstaller>=6.0,<7"]
+
+[tool.setuptools.packages.find]
+include = ["family_activity*"]
+
+[tool.setuptools.package-data]
+family_activity = ["parent_assets/*.html", "parent_assets/*.css", "parent_assets/*.js"]

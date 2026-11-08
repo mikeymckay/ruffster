@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <meta content="Answers about Family Activity's data collection, encryption, network measurements, and preview status." name="description"/>
+  <meta content="#f5f4ee" name="theme-color"/>
+  <title>
+   FAQ — Family Activity
+  </title>
+  <link href="favicon.svg" rel="icon" type="image/svg+xml"/>
+ <link href="assets/site.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <a class="skip" href="#main">
+   Skip to content
+  </a>
+  <header class="topbar">
+   <div class="wrap topbar-in">
+    <a class="brand" href="index.html">
+     <span aria-hidden="true" class="brand-mark">
+      <svg fill="none" viewBox="0 0 24 24">
+       <path d="M5 13.2c1.7-3.1 4-4.7 7-4.7s5.3 1.6 7 4.7M8.1 16.1c1-1.6 2.3-2.4 3.9-2.4s2.9.8 3.9 2.4M12 19h.01" stroke="currentColor" stroke-linecap="round" stroke-width="2.2">
+       </path>
+      </svg>
+     </span>
+     <span>
+      Family Activity
+      <small>
+       technology, together
+      </small>
+     </span>
+    </a>
+    <nav aria-label="Main navigation" class="nav">
+     <a href="index.html">
+      Overview
+     </a>
+     <a href="install.html">
+      Getting started
+     </a>
+     <a aria-current="page" href="faq.html">
+      FAQ
+     </a>
+     <a class="nav-cta" href="install.html#status">
+      Preview status
+     </a>
+    </nav>
+   </div>
+  </header>
+  <main id="main">
+   <section class="page-hero">
+    <div class="wrap">
+     <div class="eyebrow">
+      Questions, answered plainly
+     </div>
+     <h1>
+      Know what is collected—and what it cannot show.
+     </h1>
+     <p>
+      Family Activity is meant to make technology use easier to discuss. These answers describe the current prototype and its limits, not a promise that a final product is ready.
+     </p>
+    </div>
+   </section>
+   <div class="wrap prose">
+    <section class="faq-item">
+     <h2>
+      Is Family Activity ready to install on my child's computer?
+     </h2>
+     <p>
+      No. The Mac bundle is unsigned, the Windows package has not been run on Windows, and the experience has not been validated with families. See the
+      <a href="install.html">
+       getting-started guide
+      </a>.
+     </p>
+    </section>
+    <section class="faq-item">
+     <h2>
+      What does it collect?
+     </h2>
+     <p>
+      The experimental encrypted agent samples the foreground application name and total byte counts reported by network interfaces. The Mac setup and experimental Windows preview also create a device-only random key for a pseudonymous hint when the default router changes; the raw router address is not saved, and the hint does not establish location. It records monitoring sessions and gaps that can be observed. An optional, experimental Chromium extension can send active website domains; a visible popup explains this and lets the child pause website observations. It does not inspect private-window domains or send complete URLs, page titles, or page contents. When the child returns to a regular window after private browsing, a domain-free marker may be sent to prevent website-time estimates from spanning that interval. The extension stores a pause setting and a temporary continuity-reset flag, but no domain history. If a report has no domains, it cannot tell whether the extension was paused, disconnected, or did not observe a website. DNS and proxy settings are reduced to simple indicators. Exact behavior varies by operating system and remains under validation.
+     </p>
+    </section>
+    <section class="faq-item">
+     <h2>
+      What does it never collect?
+     </h2>
+     <p>
+      The product does not capture screenshots, keystrokes, audio, camera data, message contents, or full website URLs. It is designed for transparency, not hidden surveillance or automatic blocking.
+     </p>
+    </section>
+    <section class="faq-item">
+     <h2>
+      Do I need a browser add-on, and whose computer is it for?
+     </h2>
+     <p>
+      No add-on is needed for the main app or the parent's dashboard. The experimental add-on would go on the child's computer, inside each supported browser you choose to cover. It reports domain names because the computer's network totals cannot reveal which websites were visited. The child can pause or remove it, or use a browser without it, so website details can have gaps and are never a complete record. A gap does not explain what happened and is not evidence of avoidance or misconduct. The add-on is not integrated into Mac setup or available as a supported family install yet, and is not intended for the parent's computer.
+     </p>
+    </section>
+    <section class="faq-item">
+     <h2>
+      Can it tell how much data a particular website used?
+     </h2>
+     <p>
+      No. The report adds recorded counter changes separately for each network interface, but interfaces can overlap and missed intervals may leave traffic uncounted. Labels such as “en0” are computer-generated connection IDs, not website names; a VPN and its Wi-Fi connection may count the same traffic. A domain sample and a byte counter are separate observations; the prototype must not combine them into claims such as “YouTube used 2.4 GB.”
+     </p>
+    </section>
+    <section class="faq-item">
+     <h2>
+      What do the school-hours and network-label estimates mean?
+     </h2>
+     <p>
+      School-hours traffic is estimated by apportioning each measured interface-counter interval according to how much of it overlaps the schedule you chose. Separate Home-, School-, and Other-labeled network estimates use the most recently observed router label that you set. A School label is not the same as the schedule-based school-hours view, and neither proves where the computer was. Network-label estimates skip sample intervals with a recorded change; traffic estimates omit intervals ending at or crossing an observed router change. Labels can be wrong or unavailable. Views may overlap, and interface counters can overlap too, so do not add them together as a device-wide total.
+     </p>
+    </section>
+    <section class="faq-item">
+     <h2>
+      Does a VPN or DNS indicator prove that filtering is working?
+     </h2>
+     <p>
+      No. The indicators are incomplete. The Windows preview checks IPv4/IPv6 resolver settings and the signed-in account's Internet Settings proxy settings, but not separate WinHTTP proxy settings; Windows VPN status is unknown. macOS checks a different set of system-reported settings. A filter configured only on a home router normally applies only while the computer uses that router; by itself it does not follow to school Wi-Fi or a mobile hotspot. A device profile or filtering app may work on other networks if that setup supports them and remains allowed and active. VPNs, browser secure DNS, and school-managed settings can change which service handles DNS. Check the provider's own status or supported test separately on each network, and ask the school before changing a school-managed computer. This app cannot verify that filtering works. <a href="https://help.nextdns.io/t/m1hmv0k/which-setup-type-to-use" target="_blank" rel="noopener noreferrer">NextDNS describes device and router setup options</a> as one example; review any provider's privacy and retention terms before choosing a service.
+     </p>
+    </section>
+    <section class="faq-item">
+     <h2>
+      Is my child's information uploaded to a cloud service?
+     </h2>
+     <p>
+      The prototype has no required cloud account. The handoff works the same way in either direction: the computer sending something shows two digits, and the receiving computer enters them. Both must be on the same Wi-Fi. The digits only find the nearby computer; they are not a password. The app creates a protected connection and sends only the parent's public key or an already-encrypted report. Local discovery may be blocked by a network or firewall, and the transfer has not received an independent security review.
+     </p>
+    </section>
+    <section class="faq-item">
+     <h2>
+      Who holds the encryption key?
+     </h2>
+     <p>
+      New setups use a six-digit parent access PIN that the child should not know. It helps keep reports private from the child. If someone copies the recovery file, they can try PIN guesses, so don't treat this short PIN as protection from a determined attacker. The child's computer can lock reports for you, but it cannot open them. Save the encrypted recovery copy before setup. On a new parent install, choose “Restore parent access,” select the encrypted .vault file, and enter the same PIN. Older recovery copies can still be restored with their original phrase. Losing both the recovery copy and PIN means reports cannot be opened. There is no PIN recovery service.
+     </p>
+    </section>
+    <section class="faq-item">
+     <h2>
+      Can it explain a monitoring gap or detect tampering?
+     </h2>
+     <p>
+      No. A gap shows that observations were missed; it does not identify whether the cause was sleep, a crash, a permission change, an uninstall, or something else. A person with administrator access can change or disable software on their computer. This prototype is not tamper-proof.
+     </p>
+    </section>
+    <section class="faq-item">
+     <h2>
+      Does the school need to set anything up?
+     </h2>
+     <p>
+      No school installation or administration is intended. Families choose a school-hours schedule themselves. That schedule creates a time-based report and does not prove that the computer was at school.
+     </p>
+    </section>
+    <section class="faq-item">
+     <h2>
+      Which computers are priorities?
+     </h2>
+     <p>
+      macOS comes first, then Windows. Linux is used as a development and test host only; there are no plans for students to use the Linux version in the current scope.
+     </p>
+    </section>
+    <section class="faq-item">
+     <h2>
+      What about plaintext files from an earlier prototype?
+     </h2>
+     <p>
+      New agent runs require the parent's public key and write encrypted events. An older developer database may still contain plaintext; the app does not automatically change or delete it. Developers can use the documented <code>encrypt-legacy</code> command to create an encrypted copy of the supported prototype schema with a chosen retention period. The command leaves the original file untouched. Verify the encrypted copy before deciding how to remove the original; secure erasure from storage and backups is not guaranteed.
+     </p>
+    </section>
+    <section class="faq-item">
+     <h2>
+      How long are reports kept, and can they be deleted?
+     </h2>
+     <p>
+      The prototype has separate retention controls for the child computer and parent copy. It offers local report deletion, but exported backups and filesystem snapshots are outside those controls. Secure erasure from storage media is not guaranteed. A release needs reviewed retention, deletion, export, update, and recovery behavior on each supported platform.
+     </p>
+    </section>
+    <section class="faq-item">
+     <h2>
+      Is the prototype legally compliant in Europe?
+     </h2>
+     <p>
+      No claim of legal compliance is made. Children's privacy, transparency, consent, and data-minimization obligations depend on the people and context involved. Qualified legal and privacy review is still needed.
+     </p>
+    </section>
+    <div class="notice">
+     <strong>
+      Still have a question?
+     </strong>
+     Start with the
+     <a href="install.html">
+      current preview and installation status
+     </a>
+     . The app is not ready for family monitoring.
+    </div>
+   </div>
+  </main>
+  <footer class="footer">
+   <div class="wrap footer-grid">
+    <div>
+     <a class="brand" href="index.html" style="color:#fff">
+      <span aria-hidden="true" class="brand-mark">
+       <svg fill="none" viewBox="0 0 24 24">
+        <path d="M5 13.2c1.7-3.1 4-4.7 7-4.7s5.3 1.6 7 4.7M8.1 16.1c1-1.6 2.3-2.4 3.9-2.4s2.9.8 3.9 2.4M12 19h.01" stroke="currentColor" stroke-linecap="round" stroke-width="2.2">
+        </path>
+       </svg>
+      </span>
+      <span>
+       Family Activity
+       <small>
+        technology, together
+       </small>
+      </span>
+     </a>
+     <p>
+      macOS first · Windows next · Linux for development/testing only
+     </p>
+    </div>
+    <div class="footer-links">
+     <a href="index.html">
+      Overview
+     </a>
+     <a href="install.html">
+      Getting started
+     </a>
+    </div>
+   </div>
+  </footer>
+ </body>
+</html>

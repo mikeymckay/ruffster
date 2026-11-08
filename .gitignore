@@ -1,0 +1,29 @@
+__pycache__/
+*.py[cod]
+# Local developer configuration, exports, and platform metadata.
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+.coverage
+.pytest_cache/
+.mypy_cache/
+dist/
+# Local activity databases and cryptographic material must never enter source control.
+*.sqlite*
+*.db
+*.key
+*.vault
+*.pem
+*.p12
+*.pfx
+
+.venv/
+build/
+*.egg-info/
+artifacts/
+native/windows/bin/
+native/windows/obj/
+native/windows/**/bin/
+native/windows/**/obj/

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <meta content="A transparent, local-first way for families to understand computer use together." name="description"/>
+  <meta content="#f5f4ee" name="theme-color"/>
+  <title>
+   Family Activity — understand together
+  </title>
+  <link href="favicon.svg" rel="icon" type="image/svg+xml"/>
+ <link href="assets/site.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <a class="skip" href="#main">
+   Skip to content
+  </a>
+  <header class="topbar">
+   <div class="wrap topbar-in">
+    <a class="brand" href="index.html">
+     <span aria-hidden="true" class="brand-mark">
+      <svg fill="none" viewBox="0 0 24 24">
+       <path d="M5 13.2c1.7-3.1 4-4.7 7-4.7s5.3 1.6 7 4.7M8.1 16.1c1-1.6 2.3-2.4 3.9-2.4s2.9.8 3.9 2.4M12 19h.01" stroke="currentColor" stroke-linecap="round" stroke-width="2.2">
+       </path>
+      </svg>
+     </span>
+     <span>
+      Family Activity
+      <small>
+       technology, together
+      </small>
+     </span>
+    </a>
+    <nav aria-label="Main navigation" class="nav">
+     <a aria-current="page" href="index.html">
+      Overview
+     </a>
+     <a href="install.html">
+      Getting started
+     </a>
+     <a href="faq.html">
+      FAQ
+     </a>
+     <a class="nav-cta" href="install.html#status">
+      Project status
+     </a>
+    </nav>
+   </div>
+  </header>
+  <main id="main">
+   <section class="hero">
+    <div class="wrap hero-grid">
+     <div>
+      <div class="eyebrow">
+       A family-first activity summary
+      </div>
+      <h1>
+       Make computer use easier to talk about.
+      </h1>
+      <p class="hero-copy">
+       Family Activity is an early, open-source prototype for parents and children to review computer use together—with visible monitoring, local reports, and clear limits on what the data can tell you.
+      </p>
+      <div class="actions">
+       <a class="button" href="install.html">
+        See the getting-started guide
+        <span aria-hidden="true">
+         ↗
+        </span>
+       </a>
+       <a class="button secondary" href="faq.html">
+        Explore the FAQ
+       </a>
+      </div>
+      <p class="hero-note">
+       <strong>
+        Development preview only.
+       </strong>
+       It is not ready for family deployment. Current student-facing priorities are macOS first, then Windows; Linux is a development and test host only.
+      </p>
+     </div>
+     <figure>
+      <a class="screen-frame" href="assets/parent-dashboard.png">
+       <div class="screen-top">
+        <i>
+        </i>
+        <i>
+        </i>
+        <i>
+        </i>
+        <span>
+         Parent dashboard · example data
+        </span>
+       </div>
+       <img alt="Prototype parent dashboard showing synthetic activity estimates, network observations, and explicit uncertainty notes" class="screen-image" src="assets/parent-dashboard.png"/>
+      </a>
+      <figcaption class="shot-caption">
+       A prototype report with invented data.
+       <a href="assets/parent-dashboard.png">
+        View full screenshot
+       </a>
+       .
+      </figcaption>
+     </figure>
+    </div>
+   </section>
+   <section class="trust-row">
+   <div class="wrap trust-grid">
+     <div class="trust-item">
+      <b>
+       Visible by design
+      </b>
+      <span>
+       A clear status indicator and plain-language explanation are product requirements; real-device visibility tests remain open.
+      </span>
+     </div>
+     <div class="trust-item">
+      <b>
+       Local first
+      </b>
+      <span>
+       The guided encrypted modes keep detailed reports local. (The default developer CLI stores plaintext.)
+      </span>
+     </div>
+     <div class="trust-item">
+      <b>
+       Conversation, not control
+      </b>
+      <span>
+       No blocking, behavior scores, or claims about intent.
+      </span>
+     </div>
+    </div>
+   </section>
+   <section class="section">
+    <div class="wrap">
+     <div class="section-head">
+      <div>
+       <div class="eyebrow">
+        A clearer picture, with honest limits
+       </div>
+       <h2>
+        Observations need context.
+       </h2>
+      </div>
+      <p class="section-intro">
+       The goal is to help a family ask better questions. A measurement is only useful when its limits are visible too.
+      </p>
+     </div>
+     <div class="measure-grid">
+      <article class="measure good">
+       <h3>
+        What the prototype can measure
+       </h3>
+       <ul>
+        <li>
+         Which application was in the foreground at sample times.
+        </li>
+        <li>
+         Total network bytes reported by the computer’s interfaces.
+        </li>
+        <li>
+         Monitoring sessions and gaps between observations.
+        </li>
+        <li>
+         Website domains only when the optional browser extension is used.
+        </li>
+       </ul>
+      </article>
+      <article class="measure unknown">
+       <h3>
+        What it cannot conclude
+       </h3>
+       <ul>
+        <li>
+         Whether a child was actively using an app between samples.
+        </li>
+        <li>
+         Which website or app caused interface-level network traffic.
+        </li>
+        <li>
+         Why monitoring stopped or a network changed.
+        </li>
+        <li>
+         Whether a filter is working, or whether activity was appropriate.
+        </li>
+       </ul>
+      </article>
+     </div>
+    </div>
+   </section>
+   <section class="section alt">
+    <div class="wrap">
+     <div class="section-head">
+      <div>
+       <div class="eyebrow">
+        How the family flow is designed
+       </div>
+       <h2>
+        Three steps. No school setup.
+       </h2>
+      </div>
+      <p class="section-intro">
+       A parent prepares the key, the child sees the setup and indicator, and the parent reviews an encrypted report locally.
+      </p>
+     </div>
+     <div class="grid-3">
+      <article class="feature">
+       <div class="num">
+        01
+       </div>
+       <h3>
+        Set up together
+       </h3>
+       <p>
+        Explain the monitoring before installation. Choose a short retention period and make sure the visible status indicator is present.
+       </p>
+       <a class="more" href="install.html">
+        Preview setup guide →
+       </a>
+      </article>
+      <article class="feature">
+       <div class="num">
+        02
+       </div>
+       <h3>
+        Keep details protected
+       </h3>
+       <p>
+        The child computer encrypts observations to a public key. The parent keeps the matching private key and six-digit PIN; no cloud account is required.
+       </p>
+      </article>
+      <article class="feature">
+       <div class="num">
+        03
+       </div>
+       <h3>
+        Review what is known
+       </h3>
+       <p>
+        See estimates, network totals, and missing intervals with uncertainty stated. Use the report as a starting point for a conversation.
+       </p>
+       <a class="more" href="faq.html">
+        Read the privacy FAQ →
+       </a>
+      </article>
+     </div>
+    </div>
+   </section>
+   <section class="section">
+    <div class="wrap detail-grid">
+     <div class="detail-copy">
+      <div class="eyebrow">
+       Designed for transparency
+      </div>
+      <h2>
+       See the experience before the data.
+      </h2>
+      <p>
+       The parent setup screen now asks the parent to save an encrypted key backup before preparing the child computer. The screen shown here is a prototype—not a usability-tested release.
+      </p>
+      <p>
+       Detailed screenshots use synthetic records only. No personal or family activity appears in the examples.
+      </p>
+      <a href="assets/parent-setup.png">
+       Open the full parent PIN-setup screenshot →
+      </a>
+     </div>
+     <figure class="photo-card">
+      <a href="assets/parent-setup.png">
+       <img alt="Prototype dashboard showing the first-run parent PIN setup before pairing the child's computer" loading="lazy" src="assets/parent-setup.png"/>
+      </a>
+      <figcaption class="photo-caption">
+       First run · synthetic empty state · open full image
+      </figcaption>
+     </figure>
+    </div>
+   </section>
+   <section class="section alt">
+    <div class="wrap">
+     <div class="callout">
+      <div>
+       <div class="eyebrow" style="color:var(--lime)">
+        Still in development
+       </div>
+       <h2>
+        Not ready for family monitoring.
+       </h2>
+       <p>
+        The Mac preview is unsigned. Windows has not been tested on a Windows computer. Usability, accessibility, security, permissions, and recovery still need work.
+       </p>
+      </div>
+      <a class="button" href="install.html#status">
+       See progress and open issues ↗
+      </a>
+     </div>
+    </div>
+   </section>
+  </main>
+  <footer class="footer">
+   <div class="wrap footer-grid">
+    <div>
+     <a class="brand" href="index.html" style="color:#fff">
+      <span aria-hidden="true" class="brand-mark">
+       <svg fill="none" viewBox="0 0 24 24">
+        <path d="M5 13.2c1.7-3.1 4-4.7 7-4.7s5.3 1.6 7 4.7M8.1 16.1c1-1.6 2.3-2.4 3.9-2.4s2.9.8 3.9 2.4M12 19h.01" stroke="currentColor" stroke-linecap="round" stroke-width="2.2">
+        </path>
+       </svg>
+      </span>
+      <span>
+       Family Activity
+       <small>
+        technology, together
+       </small>
+      </span>
+     </a>
+     <p>
+      Built around openness, data minimization, and conversations that leave room for context.
+     </p>
+     <p>
+      This prototype does not establish legal compliance or prevent a capable device owner from altering monitoring.
+     </p>
+    </div>
+    <div class="footer-links">
+     <a href="install.html">
+      Getting started
+     </a>
+     <a href="faq.html">
+      FAQ
+     </a>
+     <a href="install.html#development">
+      Developer setup
+     </a>
+     <a href="install.html#status">
+      Project status
+     </a>
+    </div>
+   </div>
+   <div class="wrap repo-line">
+    Open source · macOS first, Windows next · Linux for development/testing only
+   </div>
+  </footer>
+ </body>
+</html>

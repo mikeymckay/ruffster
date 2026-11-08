@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <meta content="Current preview status, developer setup, and the planned family installation journey for Family Activity." name="description"/>
+  <meta content="#f5f4ee" name="theme-color"/>
+  <title>
+   Getting started — Family Activity
+  </title>
+  <link href="favicon.svg" rel="icon" type="image/svg+xml"/>
+ <link href="assets/site.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <a class="skip" href="#main">
+   Skip to content
+  </a>
+  <header class="topbar">
+   <div class="wrap topbar-in">
+    <a class="brand" href="index.html">
+     <span aria-hidden="true" class="brand-mark">
+      <svg fill="none" viewBox="0 0 24 24">
+       <path d="M5 13.2c1.7-3.1 4-4.7 7-4.7s5.3 1.6 7 4.7M8.1 16.1c1-1.6 2.3-2.4 3.9-2.4s2.9.8 3.9 2.4M12 19h.01" stroke="currentColor" stroke-linecap="round" stroke-width="2.2">
+       </path>
+      </svg>
+     </span>
+     <span>
+      Family Activity
+      <small>
+       technology, together
+      </small>
+     </span>
+    </a>
+    <nav aria-label="Main navigation" class="nav">
+     <a href="index.html">
+      Overview
+     </a>
+     <a aria-current="page" href="install.html">
+      Getting started
+     </a>
+     <a href="faq.html">
+      FAQ
+     </a>
+     <a class="nav-cta" href="install.html#status">
+      Preview status
+     </a>
+    </nav>
+   </div>
+  </header>
+  <main id="main">
+   <section class="page-hero">
+    <div class="wrap">
+     <div class="eyebrow">
+      Getting started
+     </div>
+     <h1>
+      A clear path for families—and contributors.
+     </h1>
+     <p>
+      The family installation is still being built. This guide separates what families should expect from developer testing instructions, so an experimental preview is not mistaken for a supported release.
+     </p>
+    </div>
+   </section>
+   <div class="wrap prose">
+    <div class="notice" id="status">
+     <strong>
+      There is no supported family installer yet.
+     </strong>
+     The current Mac app is unsigned, the Windows setup has not run on a Windows computer, and the parent and child experiences have not been tested with families. Do not install this prototype for ongoing monitoring of a child.
+    </div>
+    <h2>
+     For parents
+    </h2>
+    <p>
+     Wait for a supported release. There is no public download, signing and notarization are unfinished, Windows behavior is unverified, and independent security, privacy, accessibility, and usability reviews remain open.
+    </p>
+    <p>
+     The intended flow is designed to be straightforward:
+    </p>
+    <ol class="steps">
+     <li>
+      <strong>
+       Start on the parent's computer.
+      </strong>
+      Choose a six-digit parent access PIN that your child does not know. Save the encrypted recovery copy somewhere you control before setting up the child's computer. The child's computer can lock reports for you, but it cannot open them.
+     </li>
+     <li>
+      <strong>
+       Set up the child's computer together.
+      </strong>
+      Read what is recorded together, choose how long to keep detailed records, and verify the visible status indicator. For setup, the parent computer shows two digits and the child computer enters them. When returning a report, the child computer shows two digits and the parent computer enters them. Both devices need the same Wi-Fi and local network discovery must be allowed.
+     </li>
+     <li>
+      <strong>
+       Review an encrypted report.
+      </strong>
+      Return it to the parent computer, open it locally, and discuss observations and uncertainty together.
+     </li>
+    </ol>
+    <p>
+     The school does not need to install or operate the app. The first supported student platforms are planned to be macOS, then Windows. Linux is not a student-facing target.
+    </p>
+    <h2>
+     Current preview status
+    </h2>
+    <h3>
+     macOS
+    </h3>
+    <p>
+     An unsigned Apple-silicon development bundle can be built from source. It includes a local parent dashboard, experimental encrypted collection, and a disclosed setup flow. On the test Mac, a temporary synthetic-only test verified encrypted app samples, a recorded coverage gap, restart of the real agent after forced termination, and clean stop. It collected no real app or network data and removed its temporary service and files. The menu-bar display and VoiceOver behavior, native setup dialogs, physical sleep/wake, signing, notarization, and family usability remain unverified. The preview is for development only.
+    </p>
+    <h3>
+     Windows
+    </h3>
+    <p>
+     A Windows x64 setup and tray companion, parent dashboard launcher, and collection adapters are in development. The companion has been cross-compiled, but no Windows computer has run the package. Do not use it for family monitoring.
+    </p>
+    <h2 id="development">
+     For contributors
+    </h2>
+    <p>
+     Use a recent Python 3 and a virtual environment. Linux is supported as a convenient development/test host; tests there do not prove macOS or Windows behavior.
+    </p>
+    <pre><code>python3 -m venv .venv
+.venv/bin/python -m pip install -e .
+.venv/bin/python -m unittest discover -s tests -v
+node --check family_activity/parent_assets/app.js</code></pre>
+    <p>
+     For a Mac bundle, use a Mac with PyInstaller and the project dependencies installed:
+    </p>
+    <pre><code>./scripts/build-macos-preview.sh \
+  "$(pwd)/.venv/bin/python" \
+  "/absolute/path/to/output-directory"</code></pre>
+    <p>
+     For the Windows preview, build on Windows x64 with Python, PyInstaller, and the .NET 10 LTS SDK. From the repository root, run
+     <code>
+      python -m pip install -e ".[build]"
+     </code>
+     and then
+     <code>
+      ./scripts/build-windows-preview.ps1 -OutputDirectory ./dist/FamilyActivityPreview
+     </code>
+     in PowerShell. Linux cross-compilation checks the .NET GUI source only; it cannot run the Windows package or tray.
+    </p>
+    <h2>
+     When family releases are ready
+    </h2>
+    <p>
+     A release download will appear only after the supported operating-system flows are tested, the packages are signed, and clear installation, update, removal, data export, key recovery, and deletion instructions are in place. Until then, the project status page in the source repository describes the open validation work.
+    </p>
+    <div class="notice">
+     <strong>
+      Never treat missing data as evidence.
+     </strong>
+     A sleep, crash, network change, permission issue, removal, or other event can create a gap. The prototype cannot establish its cause or resist an administrator who changes the computer.
+    </div>
+    <p>
+     Questions about what the prototype records?
+     <a href="faq.html">
+      Read the FAQ
+     </a>
+     .
+    </p>
+   </div>
+  </main>
+  <footer class="footer">
+   <div class="wrap footer-grid">
+    <div>
+     <a class="brand" href="index.html" style="color:#fff">
+      <span aria-hidden="true" class="brand-mark">
+       <svg fill="none" viewBox="0 0 24 24">
+        <path d="M5 13.2c1.7-3.1 4-4.7 7-4.7s5.3 1.6 7 4.7M8.1 16.1c1-1.6 2.3-2.4 3.9-2.4s2.9.8 3.9 2.4M12 19h.01" stroke="currentColor" stroke-linecap="round" stroke-width="2.2">
+        </path>
+       </svg>
+      </span>
+      <span>
+       Family Activity
+       <small>
+        technology, together
+       </small>
+      </span>
+     </a>
+     <p>
+      macOS first · Windows next · Linux for development/testing only
+     </p>
+    </div>
+    <div class="footer-links">
+     <a href="index.html">
+      Overview
+     </a>
+     <a href="faq.html">
+      FAQ
+     </a>
+    </div>
+   </div>
+  </footer>
+ </body>
+</html>
