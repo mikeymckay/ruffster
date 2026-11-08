@@ -8,7 +8,7 @@ This produces a **signed preview candidate**, not a family release. It does not 
 
 Unsigned builds are less convenient and macOS may block them. Ruffster does not remove quarantine, disable Gatekeeper, or provide a Terminal bypass. A parent or tester decides whether to use Apple's per-app override after reviewing the source and Apple's warning. The override does not mean Apple checked or approved the app.
 
-The release workflow runs on an Apple-silicon GitHub Actions runner when a `mac-preview-*` tag is pushed. It runs the Mac test suite, builds and smoke-checks the app, makes a drag-to-Applications disk image, and publishes a GitHub **prerelease** with:
+The release workflow runs on the standard `macos-latest` Apple-silicon GitHub Actions runner when a `mac-preview-*` tag is pushed. It runs the Mac test suite, builds and smoke-checks the app, makes a drag-to-Applications disk image, and publishes a GitHub **prerelease** with:
 
 - a warning inside the disk image that says it is unsigned and not for ongoing family monitoring;
 - the exact source commit in the release workflow and inside the disk image;
