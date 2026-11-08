@@ -25,10 +25,10 @@ The public entry points are:
 1. Keep the product story, screenshots, platform priorities, and readiness caveat current in `README.md`.
 2. Refine the home page, parent installation journey, and FAQ as a unified site with accessible desktop and mobile layouts.
 3. Run `tests.test_docs_site` to check Pages entry points, screenshot assets, local links, fragments, and visible release caveats. Run `npm ci && npm run check:pages-a11y`, then review a real-browser render at desktop and phone widths before launch.
-4. Keep `.github/workflows/pages.yml` limited to pushes to `main` that change `docs/`, plus manual runs. Once Pages is enabled for GitHub Actions, the workflow publishes the static `docs/` directory and reports the live URL. Verify all three pages and screenshot links at that repository-subpath URL.
+4. Keep `.github/workflows/pages.yml` limited to pushes to `main` that change the site or its accessibility check, plus manual runs. The workflow runs the accessibility check before publishing `docs/`, independently of app builds. Verify all three pages and screenshot links at that repository-subpath URL.
 5. Update screenshots and install/FAQ copy with every user-facing release; keep a prominent status and avoid implying unsupported platform behavior.
 
-The Ruffster repository is public and `main` has been pushed. Pages is not yet enabled: the first deployment attempt confirmed that the repository's Pages source setting must be configured first. Once it is enabled, a successful `Build and test` run on `main` triggers deployment automatically; the Pages workflow also supports a manual run on `main`.
+The Ruffster repository is public and `main` has been pushed. Pages is not yet enabled: the first deployment attempt confirmed that the repository's Pages source setting must be configured first. Once it is enabled, a site change on `main` triggers deployment after the accessibility scan passes; the Pages workflow also supports a manual run on `main`.
 
 1. Open the repository **Settings → Pages**.
 2. Under **Build and deployment**, choose **GitHub Actions** as the source.
