@@ -129,6 +129,9 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('wcag21aa', script)
         self.assertIn('horizontal overflow', script)
         self.assertIn('await waitForPageReady(send, page)', script)
+        self.assertIn('GITHUB_STEP_SUMMARY', script)
+        self.assertIn('chromeVersion', script)
+        self.assertIn('Axe violations | Horizontal overflow', script)
         self.assertIn("'.webp': 'image/webp'", script)
 
     def test_github_pages_guide_matches_published_repository_state(self):

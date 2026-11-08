@@ -1,6 +1,6 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { createServer } from 'node:http';
-import { access, mkdtemp, readFile, rm } from 'node:fs/promises';
+import { access, appendFile, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -22,6 +22,11 @@ const mimeTypes = {
   '.svg': 'image/svg+xml',
   '.webp': 'image/webp',
 };
+
+async function writeStepSummary(lines) {
+  const summaryPath = process.env.GITHUB_STEP_SUMMARY;
+  if (summaryPath) await appendFile(summaryPath, `${lines.join('\n')}\n`, 'utf8');
+}
 
 function chromeCandidates() {
   if (process.env.CHROME_BIN) return [process.env.CHROME_BIN];
@@ -177,6 +182,7 @@ async function waitForPageReady(send, page) {
 
 async function main() {
   const chrome = await findChrome();
+  const chromeVersion = spawnSync(chrome, ['--version'], { encoding: 'utf8' }).stdout?.trim() || 'unknown';
   const profile = await mkdtemp(path.join(tmpdir(), 'family-pages-axe-'));
   const server = createStaticServer();
   let browser;
@@ -242,6 +248,31 @@ async function main() {
       console.error(JSON.stringify(failures, null, 2));
       process.exitCode = 1;
     }
+    const summary = [
+      '## Ruffster Pages accessibility scan',
+      `Runtime: Node ${process.version}; ${chromeVersion}`,
+      '',
+      '| Page | Viewport | Axe violations | Horizontal overflow |',
+      '| --- | --- | ---: | --- |',
+      ...pages.flatMap((page) => viewports.map((viewport) => {
+        const failure = failures.find((entry) => entry.page === page && entry.viewport === viewport.name);
+        const count = failure?.violations.length ?? 0;
+        return `| ${page} | ${viewport.name} | ${count} | ${failure?.overflow ? 'Yes' : 'No'} |`;
+      })),
+    ];
+    if (failures.length) {
+      summary.push('', '### Findings');
+      for (const failure of failures) {
+        for (const violation of failure.violations) {
+          const targets = violation.nodes.map((node) => node.target.join(' ')).join(', ');
+          summary.push(`- **${failure.page} / ${failure.viewport}**: \`${violation.id}\` (${violation.impact}) — ${violation.help}; targets: ${targets}`);
+        }
+        if (failure.overflow) {
+          summary.push(`- **${failure.page} / ${failure.viewport}**: document width ${failure.documentWidth}px exceeds viewport ${failure.viewportWidth}px.`);
+        }
+      }
+    }
+    await writeStepSummary(summary);
   } finally {
     socket?.close();
     if (browser && browser.exitCode === null) {
@@ -257,7 +288,17 @@ async function main() {
   }
 }
 
-main().catch((error) => {
+main().catch(async (error) => {
   console.error(error);
+  try {
+    await writeStepSummary([
+      '## Ruffster Pages accessibility scan failed before completion',
+      `Runtime: Node ${process.version}`,
+      '',
+      `Error: ${error?.stack || error}`,
+    ]);
+  } catch (summaryError) {
+    console.error('Could not write the GitHub Actions step summary:', summaryError);
+  }
   process.exitCode = 1;
 });
