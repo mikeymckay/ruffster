@@ -132,6 +132,8 @@ class MacInstallTests(unittest.TestCase):
         self.assertIn('def _service_present(domain, label):', validator)
         self.assertIn("_launchctl('bootout', f'{domain}/{label}')", validator)
         self.assertIn('folder.rename(preserved)', validator)
+        self.assertIn('AssociatedBundleIdentifiers', validator)
+        self.assertIn('synthetic host app bundle', validator)
 
     def test_refuses_modified_definition_and_failed_stop(self):
         result=self.perform(); plist=Path(result['plist']); original=plist.read_bytes(); plist.write_bytes(original+b' ')

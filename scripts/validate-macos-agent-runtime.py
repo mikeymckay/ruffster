@@ -79,6 +79,13 @@ def _validate_launchd(root, folder, foreground, status):
     home = folder / 'launchd-home'
     home.mkdir(mode=0o700)
     public_path = folder / 'launchd-parent.pub'
+    bundle_contents = folder / 'Synthetic Family Activity.app' / 'Contents'
+    runtime = bundle_contents / 'Resources' / 'runtime'
+    runtime.mkdir(parents=True)
+    shutil.copytree(root / 'family_activity', runtime / 'family_activity',
+                    ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+    (bundle_contents / 'Info.plist').write_bytes(plistlib.dumps(
+        {'CFBundleIdentifier': 'org.familyactivity.validation.synthetic'}))
     private_key = PrivateKey.generate()
     public_path.write_bytes(public_key_file.encode(private_key.public_key))
     runner = lambda arguments: subprocess.run(arguments, capture_output=True, text=True, timeout=20)
@@ -86,13 +93,17 @@ def _validate_launchd(root, folder, foreground, status):
     plist_path = home / 'Library' / 'LaunchAgents' / f'{label}.plist'
     try:
         installed_paths = macos_install.install(
-            public_path, sys.executable, root, foreground, status, home, uid,
+            public_path, sys.executable, runtime, foreground, status, home, uid,
             label=label, runner=runner, retention_days=30,
             collect_network=False, collect_network_settings=False)
         installed = True
         database = Path(installed_paths['data_directory']) / 'activity.sqlite3'
         plist_path = Path(installed_paths['plist'])
-        arguments = plistlib.loads(plist_path.read_bytes())['ProgramArguments']
+        installed_definition = plistlib.loads(plist_path.read_bytes())
+        arguments = installed_definition['ProgramArguments']
+        if installed_definition.get('AssociatedBundleIdentifiers') != [
+                'org.familyactivity.validation.synthetic']:
+            raise RuntimeError('launch agent did not identify its synthetic host app bundle')
         if '--experimental-network' in arguments or '--experimental-network-settings' in arguments:
             raise RuntimeError('synthetic-only installer enabled network observations')
         first = _wait_for_samples(database, private_key, 2, 45)
