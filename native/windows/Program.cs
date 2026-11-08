@@ -120,8 +120,8 @@ internal static class TrayCompanion
             statusItem.AccessibleDescription = state switch
             {
                 TrayState.Starting => "Waiting for the first completed encrypted sample.",
-                TrayState.On => "A recent encrypted sample was saved. This does not establish that the child was actively using the computer.",
-                _ => "No recent completed sample was received. The reason is unknown; ask a parent if this status is unexpected.",
+                TrayState.On => "Ruffster recently saved a sample. This confirms the monitor is running, not whether someone is using the computer.",
+                _ => "No recent sample was saved. Some time may be missing from the report; let your parent know.",
             };
             icon.Text = state switch
             {
@@ -150,9 +150,9 @@ internal static class TrayCompanion
         if (!int.TryParse(Environment.GetEnvironmentVariable("FAMILY_ACTIVITY_RETENTION_DAYS"), out int retentionDays) || retentionDays <= 0) retentionDays = 30;
         if (!double.TryParse(Environment.GetEnvironmentVariable("FAMILY_ACTIVITY_SAMPLE_INTERVAL"), NumberStyles.Float,
                              CultureInfo.InvariantCulture, out double interval) || interval <= 0) interval = 15;
-        var message = $"While this visible indicator is running, Ruffster samples the foreground app name about every {interval:0.#} seconds, records total network bytes by interface, and records a pseudonymous hint for the default router when one is available. The raw router address is not saved, and the hint does not prove where the computer is. It stores only whether Windows reports IPv4/IPv6 DNS resolver settings or Internet Settings proxy configuration. It does not record resolver addresses, proxy addresses, window titles, website addresses, screenshots, keystrokes, audio, camera, or messages. VPN status is unknown. " +
-                      $"Reports are locked on this computer and can be opened on your parent's computer. Detailed records are kept for up to {retentionDays} days; pruning happens while the agent is running. Uninstall keeps the encrypted local report unless your parent chooses to delete it. Ask your parent or guardian about the report and these settings.";
-        MessageBox.Show(message, "What Ruffster records", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        var message = $"Ruffster helps your family understand computer use. While this visible icon is running, Ruffster samples the foreground app name about every {interval:0.#} seconds and records total network bytes by interface, a private hint for the default router when available, and whether Windows reports DNS or proxy settings. The router, DNS, and proxy addresses are not saved; the router hint does not show where the computer is. VPN status is unknown. Ruffster doesn't record window titles, website addresses, screenshots, typing, messages, sound, or camera. " +
+                      $"Reports are locked on this computer and can be opened on your parent's computer. Detailed records are kept for up to {retentionDays} days. Removing Ruffster keeps the report unless your parent chooses to delete it. If the icon says monitoring is paused, some time may be missing from the report; let your parent know.";
+        MessageBox.Show(message, "About Ruffster", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     private static void ShareReport(string core, string database)

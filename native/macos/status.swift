@@ -51,8 +51,8 @@ private enum MonitoringState: Equatable {
     var accessibilityHelp: String {
         switch self {
         case .starting: return "Waiting for the first completed encrypted sample."
-        case .active: return "A recent encrypted sample was saved. This does not show whether the computer is actively being used."
-        case .paused: return "No recent sample was received. Tell your parent; the reason is unknown."
+        case .active: return "Ruffster recently saved a sample. This confirms the monitor is running, not whether someone is using the computer."
+        case .paused: return "No recent sample was saved. Some time may be missing from the report; let your parent know."
         }
     }
 }
@@ -79,7 +79,7 @@ final class StatusController: NSObject, NSApplicationDelegate {
         heading.isEnabled = false
         menu.addItem(heading)
         self.heading = heading
-        let details = NSMenuItem(title: "About this monitoring…", action: #selector(showDetails), keyEquivalent: "")
+        let details = NSMenuItem(title: "What Ruffster records…", action: #selector(showDetails), keyEquivalent: "")
         details.target = self
         menu.addItem(details)
         if sharePython != nil && shareDatabase != nil {
@@ -165,11 +165,11 @@ final class StatusController: NSObject, NSApplicationDelegate {
 
     @objc private func showDetails() {
         let alert = NSAlert()
-        alert.messageText = "Ruffster experimental monitoring"
+        alert.messageText = "About Ruffster"
         let processNetwork = ProcessInfo.processInfo.environment["FAMILY_ACTIVITY_PROCESS_NETWORK"] == "1"
-            ? " Optional process-associated sent and received byte totals are enabled. Some traffic may appear under helper services; websites are not identified."
-            : " Optional process-associated network totals are off."
-        alert.informativeText = "This preview can record the name and identifier of the app in front, network interface traffic totals, a pseudonymous hint when the default router changes, and basic DNS, proxy, and system VPN indicators.\(processNetwork) Website domains are not part of this Mac setup; the experimental browser add-on is separate and is not connected here. The router hint is not a location; the raw router address is not saved. Reports are locked on this Mac and can be opened on the parent's computer. It does not record screenshots, keystrokes, camera, microphone, messages, or full website URLs. The menu bar indicator changes when the last sample is overdue. If it says monitoring is paused or disappears, tell your parent; reports may show an unobserved gap. Ask your parent or guardian about this test."
+            ? " Optional app and service network totals are on. Some traffic may appear under helper apps; websites aren't identified."
+            : " Optional app and service network totals are off."
+        alert.informativeText = "Ruffster helps your family understand computer use. While you're signed in, it records the name and identifier of the app in front, total network bytes by interface, a private hint when the default router changes, and basic DNS, proxy, and system VPN indicators.\(processNetwork) Website domains are not part of this Mac setup; a separate experimental browser add-on is not connected to this report. The router hint does not show where the computer is, and the router address itself is not saved. Reports are locked on this Mac and can be opened on your parent's computer. Ruffster doesn't record screenshots, typing, messages, microphone, camera, or full website addresses. The menu-bar paw shows when recent samples have been saved. If it says monitoring is paused or disappears, some time may be missing from the report; let your parent know."
         alert.addButton(withTitle: "OK")
         NSApplication.shared.activate(ignoringOtherApps: true)
         alert.runModal()

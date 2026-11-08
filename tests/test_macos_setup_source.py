@@ -41,8 +41,13 @@ class MacSetupSourceTests(unittest.TestCase):
         source = (Path(__file__).parents[1] / 'native' / 'macos' / 'status.swift').read_text()
         details = source[source.index('private func showDetails'):source.index('// Choose a local IPv4 address')]
 
+        self.assertIn('alert.messageText = "About Ruffster"', details)
+        self.assertIn('Ruffster helps your family understand computer use', details)
+        self.assertIn('some time may be missing from the report; let your parent know', details)
+        self.assertNotIn('experimental monitoring', details)
+        self.assertNotIn('this test', details)
         self.assertIn('Website domains are not part of this Mac setup', details)
-        self.assertIn('the experimental browser add-on is separate and is not connected here', details)
+        self.assertIn('a separate experimental browser add-on is not connected to this report', details)
         self.assertNotIn('active website domains when the optional browser extension is enabled', details)
 
     def test_install_dialog_explains_retention_is_a_maximum_with_day_rounding(self):
@@ -91,7 +96,7 @@ class MacSetupSourceTests(unittest.TestCase):
         setup = (root / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')
         status = (root / 'native' / 'macos' / 'status.swift').read_text(encoding='utf-8')
         self.assertIn("Reports are locked on this Mac and can be opened on the parent's computer", setup)
-        self.assertIn("Reports are locked on this Mac and can be opened on the parent's computer", status)
+        self.assertIn("Reports are locked on this Mac and can be opened on your parent's computer", status)
         self.assertNotIn("Activity is encrypted to the parent's key", setup)
         self.assertNotIn('Reports are encrypted to a key held by the parent', status)
 

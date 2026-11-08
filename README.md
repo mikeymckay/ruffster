@@ -8,7 +8,7 @@ Ruffster helps parents and children understand computer use together, especially
 
 **Mac family development preview:** ready for families who want to try Ruffster together. Monitoring stays visible, and activity reports are encrypted for the parent. We’re improving setup and accessibility as families start using it. Windows builds and synthetic checks run in GitHub Actions; the family setup still needs a Windows-computer review.
 
-[Get the Apple-silicon Mac preview](https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.2) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
+[Get the Apple-silicon Mac preview](https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.3) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
 
 [Project website](https://mikeymckay.github.io/ruffster/) · [Install guide](https://mikeymckay.github.io/ruffster/install.html) · [Progress page](https://mikeymckay.github.io/ruffster/progress.html) · [FAQ](https://mikeymckay.github.io/ruffster/faq.html) · [Privacy and children's rights](PRIVACY-AND-CHILDREN.md) · [Implementation plan](PLAN.md)
 
