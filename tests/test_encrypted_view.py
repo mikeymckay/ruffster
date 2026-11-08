@@ -11,6 +11,31 @@ from family_activity.encrypted_agent_store import EncryptedAgentStore
 from family_activity.encrypted_view import open_projection
 
 class EncryptedViewTests(unittest.TestCase):
+    def test_process_network_event_reconstruction_requires_opt_in_status(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = PrivateKey.generate(); path = Path(tmp) / 'process-traffic.sqlite3'
+            writer = EncryptedAgentStore(path, parent.public_key, 30)
+            writer.event('start')
+            writer.event('process_network_status', state='enabled')
+            writer.event('process_network', process='Safari', received_bytes=5000, sent_bytes=700)
+            writer.event('process_network_status', state='unavailable')
+            writer.event('stop'); writer.close()
+            db, incomplete = open_projection(path, parent)
+            self.assertFalse(incomplete)
+            self.assertEqual(db.execute('SELECT process_name,received_bytes,sent_bytes FROM process_network_samples').fetchall(),
+                             [('Safari', 5000, 700)])
+            self.assertEqual(db.execute('SELECT state FROM process_network_status ORDER BY id').fetchall(),
+                             [('enabled',), ('unavailable',)])
+            db.close()
+
+            invalid = Path(tmp) / 'unannounced-process-traffic.sqlite3'
+            writer = EncryptedAgentStore(invalid, parent.public_key, 30)
+            writer.event('start')
+            writer.event('process_network', process='Safari', received_bytes=1, sent_bytes=0)
+            writer.close()
+            with self.assertRaises(ValueError):
+                open_projection(invalid, parent)
+
     def test_encrypted_gap_event_reconstructs_unobserved_interval(self):
         with tempfile.TemporaryDirectory() as tmp:
             parent=PrivateKey.generate(); path=Path(tmp)/'encrypted.db'

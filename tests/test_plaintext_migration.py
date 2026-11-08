@@ -122,6 +122,19 @@ class PlaintextMigrationTests(unittest.TestCase):
         self.assertTrue(self.source.exists())
         self.assertFalse(self.output.exists())
 
+    def test_refuses_to_drop_process_network_projection_rows(self):
+        db = store.connect(self.source)
+        try:
+            sid = store.start(db, stamp(datetime.now(timezone.utc).replace(microsecond=0)))
+            with db:
+                db.execute('INSERT INTO process_network_samples(session_id,sampled_at,process_name,received_bytes,sent_bytes) VALUES (?,?,?,?,?)',
+                           (sid, stamp(datetime.now(timezone.utc)), 'Example', 10, 20))
+        finally:
+            db.close()
+        with self.assertRaisesRegex(ValueError, 'cannot preserve'):
+            encrypt_legacy_database(self.source, self.public, self.output)
+        self.assertFalse(self.output.exists())
+
     def test_rejects_source_symlink_and_same_path_output(self):
         link = self.root / 'legacy-link.sqlite3'
         link.symlink_to(self.source)

@@ -527,10 +527,17 @@ def _report(path, private_key, labels_path, schedule_path):
             'FROM network_intervals WHERE to_at >= ? AND to_at <= ? ORDER BY to_at',
             ((now - timedelta(days=9)).isoformat(), now.isoformat())).fetchall()
         traffic_intervals = [row[1:] for row in traffic_interval_rows]
+        process_samples = db.execute(
+            'SELECT sampled_at, process_name, received_bytes, sent_bytes FROM process_network_samples '
+            'WHERE sampled_at >= ? AND sampled_at <= ? ORDER BY sampled_at',
+            ((now - timedelta(days=8)).isoformat(), now.isoformat())).fetchall()
+        process_network_status = db.execute(
+            'SELECT state, sampled_at FROM process_network_status ORDER BY sampled_at DESC, id DESC LIMIT 1').fetchone()
         timestamps = [db.execute('SELECT MAX(value) FROM (SELECT started_at AS value FROM sessions UNION ALL SELECT heartbeat_at FROM sessions UNION ALL SELECT stopped_at FROM sessions)').fetchone()[0]]
         for query in (
             'SELECT MAX(sampled_at) FROM foreground_samples',
             'SELECT MAX(sampled_at) FROM website_samples',
+            'SELECT MAX(sampled_at) FROM process_network_samples',
             'SELECT MAX(to_at) FROM network_intervals',
             'SELECT MAX(sampled_at) FROM network_settings',
             'SELECT MAX(sampled_at) FROM network_changes',
@@ -577,6 +584,9 @@ def _report(path, private_key, labels_path, schedule_path):
                   'traffic_usage': reports.traffic_usage(traffic_intervals, now, calendar_timezone),
                   'traffic_contexts': reports.contextual_traffic_usage(
                       traffic_interval_rows, changes, labels, schedule, now),
+                  'process_traffic': {'status': process_network_status[0] if process_network_status else None,
+                                      'status_at': process_network_status[1] if process_network_status else None,
+                                      **reports.process_traffic(process_samples, now, calendar_timezone)},
                   'networks': networks,
                   'network_settings': network_settings, 'contexts': contexts,
                   'recorded_through': recorded_through, 'generated_at': now.isoformat(),

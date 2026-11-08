@@ -62,6 +62,7 @@ def _project(source, private_key):
         if source.execute('SELECT fingerprint FROM key_commitment').fetchall() != [(fingerprint,)]:
             raise ValueError('incorrect parent key or invalid database')
         sessions = {}
+        process_network_states = {}
         incomplete = False
         for ciphertext, in source.execute('SELECT ciphertext FROM encrypted_events ORDER BY id'):
             event = encrypted_store.open_event(private_key, ciphertext)
@@ -72,8 +73,9 @@ def _project(source, private_key):
                 if session in sessions:
                     raise ValueError('duplicate session start')
                 sessions[session] = store.start(memory, at)
+                process_network_states[session] = None
                 continue
-            if typ not in {'heartbeat', 'stop', 'foreground', 'network', 'network_identity', 'website', 'tick', 'network_settings', 'gap'}:
+            if typ not in {'heartbeat', 'stop', 'foreground', 'network', 'network_identity', 'website', 'tick', 'network_settings', 'gap', 'process_network', 'process_network_status'}:
                 raise ValueError('unsupported encrypted event')
             if session not in sessions:
                 # Retention may remove a start before newer records expire.
@@ -108,6 +110,26 @@ def _project(source, private_key):
                     raise ValueError('invalid network settings observation')
                 memory.execute('INSERT INTO network_settings(session_id, sampled_at, dns_observed, proxy_indicator, vpn_indicator) VALUES (?, ?, ?, ?, ?)',
                                (sid, at, *(event[name] for name in fields)))
+            elif typ == 'process_network_status':
+                state = event.get('state')
+                if (state not in {'enabled', 'disabled', 'unavailable', 'unsupported'}
+                        or process_network_states.get(session) in {'disabled', 'unavailable', 'unsupported'}):
+                    raise ValueError('invalid process network status')
+                process_network_states[session] = state
+                memory.execute('INSERT INTO process_network_status(session_id, sampled_at, state) VALUES (?, ?, ?)',
+                               (sid, at, state))
+            elif typ == 'process_network':
+                process = event.get('process')
+                received, sent = event.get('received_bytes'), event.get('sent_bytes')
+                if (process_network_states.get(session) != 'enabled'
+                        or not isinstance(process, str) or not process or len(process) > 128
+                        or any(ord(char) < 32 for char in process)
+                        or not all(isinstance(value, int) and not isinstance(value, bool)
+                                   and 0 <= value <= 2**63 - 1 for value in (received, sent))
+                        or (received == 0 and sent == 0)):
+                    raise ValueError('invalid process network observation')
+                memory.execute('INSERT INTO process_network_samples(session_id, sampled_at, process_name, received_bytes, sent_bytes) VALUES (?, ?, ?, ?, ?)',
+                               (sid, at, process, received, sent))
             elif typ == 'gap':
                 start, end = event.get('from_at'), event.get('to_at')
                 if not _valid_time(start) or not _valid_time(end) or datetime.fromisoformat(end) <= datetime.fromisoformat(start):

@@ -162,7 +162,10 @@ final class StatusController: NSObject, NSApplicationDelegate {
     @objc private func showDetails() {
         let alert = NSAlert()
         alert.messageText = "Family Activity experimental monitoring"
-        alert.informativeText = "This preview can record the name and identifier of the app in front, network interface traffic totals, a pseudonymous hint when the default router changes, and basic DNS, proxy, and system VPN indicators. Website domains are not part of this Mac setup; the experimental browser add-on is separate and is not connected here. The router hint is not a location; the raw router address is not saved. Reports are locked on this Mac and can be opened on the parent's computer. It does not record screenshots, keystrokes, camera, microphone, messages, or full website URLs. The menu bar indicator changes when the last sample is overdue. If it says monitoring is paused or disappears, tell your parent; reports may show an unobserved gap. Ask your parent or guardian about this test."
+        let processNetwork = ProcessInfo.processInfo.environment["FAMILY_ACTIVITY_PROCESS_NETWORK"] == "1"
+            ? " Optional process-associated sent and received byte totals are enabled. Some traffic may appear under helper services; websites are not identified."
+            : " Optional process-associated network totals are off."
+        alert.informativeText = "This preview can record the name and identifier of the app in front, network interface traffic totals, a pseudonymous hint when the default router changes, and basic DNS, proxy, and system VPN indicators.\(processNetwork) Website domains are not part of this Mac setup; the experimental browser add-on is separate and is not connected here. The router hint is not a location; the raw router address is not saved. Reports are locked on this Mac and can be opened on the parent's computer. It does not record screenshots, keystrokes, camera, microphone, messages, or full website URLs. The menu bar indicator changes when the last sample is overdue. If it says monitoring is paused or disappears, tell your parent; reports may show an unobserved gap. Ask your parent or guardian about this test."
         alert.addButton(withTitle: "OK")
         NSApplication.shared.activate(ignoringOtherApps: true)
         alert.runModal()

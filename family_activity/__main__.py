@@ -158,7 +158,7 @@ def status_heartbeat(process):
         raise RuntimeError("Status indicator stopped; ending experimental monitoring.") from None
 
 
-def agent(path, interval, foreground_helper=None, status_helper=None, retention_days=30, monitor_network=False, public_key_path=None, windows_foreground=False, network_key_path=None, browser_socket=None, inspect_network_settings=False):
+def agent(path, interval, foreground_helper=None, status_helper=None, retention_days=30, monitor_network=False, public_key_path=None, windows_foreground=False, network_key_path=None, browser_socket=None, inspect_network_settings=False, experimental_process_network=False):
     interval = network.validate_sampling_interval(interval)
     if not public_key_path:
         raise SystemExit("A parent public key is required; plaintext activity collection is disabled.")
@@ -170,10 +170,11 @@ def agent(path, interval, foreground_helper=None, status_helper=None, retention_
     except BlockingIOError:
         raise SystemExit("An agent is already running for this database")
     status = start_status(status_helper, path if public_key_path else None,
-                          retention_days=retention_days, interval=interval) if foreground_helper or monitor_network or windows_foreground or browser_socket or inspect_network_settings else None
+                          retention_days=retention_days, interval=interval) if foreground_helper or monitor_network or windows_foreground or browser_socket or inspect_network_settings or experimental_process_network else None
     sealed = None
     network_key = None
     receiver = None
+    process_network_sampler = None
     try:
         session_started_at = store.now()
         session_started_monotonic = time.monotonic()
@@ -187,10 +188,18 @@ def agent(path, interval, foreground_helper=None, status_helper=None, retention_
         from .encrypted_agent_store import EncryptedAgentStore
         public_key = PublicKey(Path(public_key_path).read_bytes())
         sealed = EncryptedAgentStore(path, public_key, retention_days)
+        if experimental_process_network:
+            from .process_network import MacProcessNetworkSampler
+            process_network_sampler = MacProcessNetworkSampler()
         sealed.prune()
         sealed.event("start", at=session_started_at)
+        process_network_state = ('enabled' if process_network_sampler else
+                                 'disabled' if sys.platform == 'darwin' else 'unsupported')
+        sealed.event('process_network_status', state=process_network_state)
         sid = sealed.session_id
     except BaseException:
+        if process_network_sampler:
+            process_network_sampler.close()
         if receiver:
             receiver.close()
         if sealed:
@@ -221,6 +230,10 @@ def agent(path, interval, foreground_helper=None, status_helper=None, retention_
             if receiver:
                 for domain in receiver.drain():
                     sealed.event("website", domain=domain)
+            if process_network_sampler and process_network_sampler.failure:
+                sealed.event('process_network_status', state='unavailable')
+                process_network_sampler.close()
+                process_network_sampler = None
             if time.monotonic() < next_sample:
                 continue
             next_sample = time.monotonic() + interval
@@ -245,6 +258,10 @@ def agent(path, interval, foreground_helper=None, status_helper=None, retention_
                     tick["intervals"] = observations[:16]
                     extra_network = observations[16:]
             sealed.event("tick", at=observed_at, **tick)
+            if process_network_sampler:
+                for observation in process_network_sampler.drain():
+                    sealed.event('process_network', process=observation.process,
+                                 received_bytes=observation.received, sent_bytes=observation.sent)
             for offset in range(0, len(extra_network), 16):
                 sealed.event("network", intervals=extra_network[offset:offset + 16])
             if network_key and time.monotonic() >= next_identity_check:
@@ -277,6 +294,8 @@ def agent(path, interval, foreground_helper=None, status_helper=None, retention_
         finally:
             if receiver:
                 receiver.close()
+            if process_network_sampler:
+                process_network_sampler.close()
             stop_status(status)
             lock.close()
 
@@ -393,6 +412,7 @@ def main():
     install_mac.add_argument("--foreground-helper", required=True)
     install_mac.add_argument("--status-helper", required=True)
     install_mac.add_argument("--retention-days", type=int, choices=(7,30,90,180,365), default=30)
+    install_mac.add_argument("--process-network", action="store_true", help="Optionally collect experimental per-process byte totals on macOS")
     install_mac.add_argument("--disclosed", action="store_true", required=True, help="Confirm that monitoring has been explained to the child")
     mac_uninstall = sub.add_parser("mac-uninstall", help="Stop and remove the Mac agent; retain encrypted data by default")
     mac_uninstall.add_argument("--delete-data", action="store_true", help="Also delete the local encrypted database and parent public key")
@@ -421,6 +441,7 @@ def main():
     a.add_argument("--interval", type=sampling_interval_argument, default=15)
     a.add_argument("--retention-days", type=int, default=30, help="Delete records older than this many days (default: 30).")
     a.add_argument("--experimental-network-settings", action="store_true", help="Observe minimized DNS and proxy indicators on macOS or Windows; VPN detection is incomplete.")
+    a.add_argument("--experimental-process-network", action="store_true", help="Opt in to macOS nettop per-process byte deltas; this does not identify websites.")
     a.add_argument("--experimental-browser-socket", help="Opt in to domain-only browser observations via a private Unix socket (encrypted mode only).")
     a.add_argument("--experimental-network-key", help="Opt in to a pseudonymous default-router hint with a 32-byte device key; encrypted macOS or Windows mode only.")
     a.add_argument("--experimental-public-key", help="Path to a 32-byte parent public key; use a new database. The private key must stay on the parent device.")
@@ -474,6 +495,7 @@ def main():
                 result = macos_install.install(args.public_key, sys.executable, args.source_directory,
                                               args.foreground_helper, args.status_helper, Path.home(), os.getuid(),
                                               retention_days=args.retention_days,
+                                              collect_process_network=args.process_network,
                                               frozen=getattr(sys, 'frozen', False))
             except (OSError, ValueError, RuntimeError, sqlite3.Error) as error:
                 parser.error(str(error))
@@ -529,6 +551,8 @@ def main():
         from .parent_app import run
         run(args.data_dir, args.port, not args.no_browser, args.url_file, args.stop_file)
     elif args.command == "agent":
+        if args.experimental_process_network and sys.platform != 'darwin':
+            parser.error("Per-process network sampling is available only on macOS")
         if not args.experimental_public_key:
             parser.error("a parent public key is required; plaintext activity collection is disabled")
         if args.interval <= 0:
@@ -549,7 +573,7 @@ def main():
             parser.error("app or network sampling requires --experimental-status-helper")
         if args.experimental_foreground_helper or args.experimental_network or args.experimental_windows_foreground or args.experimental_browser_socket:
             print("Experimental sampling enabled; use only for disclosed testing.", flush=True)
-        agent(args.db, args.interval, args.experimental_foreground_helper, args.experimental_status_helper, args.retention_days, args.experimental_network, args.experimental_public_key, args.experimental_windows_foreground, args.experimental_network_key, args.experimental_browser_socket, args.experimental_network_settings)
+        agent(args.db, args.interval, args.experimental_foreground_helper, args.experimental_status_helper, args.retention_days, args.experimental_network, args.experimental_public_key, args.experimental_windows_foreground, args.experimental_network_key, args.experimental_browser_socket, args.experimental_network_settings, args.experimental_process_network)
     elif args.command == "encrypt-legacy":
         from .plaintext_migration import encrypt_legacy_database
         try:

@@ -42,6 +42,17 @@ class MacLaunchdTests(unittest.TestCase):
         self.assertIn('--experimental-network-key', args)
         self.assertEqual(args[args.index('--experimental-network-key') + 1], '/tmp/network.key')
 
+    def test_process_network_is_explicit_and_disabled_by_default(self):
+        plain = plistlib.loads(agent_plist('org.example.plain', '/usr/bin/python3', '/opt/family',
+                                           '/tmp/db', '/tmp/key', '/tmp/fg', '/tmp/status'))
+        self.assertNotIn('--experimental-process-network', plain['ProgramArguments'])
+        self.assertNotIn('EnvironmentVariables', plain)
+        enabled = plistlib.loads(agent_plist('org.example.process', '/usr/bin/python3', '/opt/family',
+                                             '/tmp/db', '/tmp/key', '/tmp/fg', '/tmp/status',
+                                             collect_process_network=True))
+        self.assertIn('--experimental-process-network', enabled['ProgramArguments'])
+        self.assertEqual(enabled['EnvironmentVariables'], {'FAMILY_ACTIVITY_PROCESS_NETWORK': '1'})
+
     def test_synthetic_validation_can_disable_network_observations(self):
         args = plistlib.loads(agent_plist(
             'org.example.synthetic', '/usr/bin/python3', '/opt/family', '/tmp/db', '/tmp/key',

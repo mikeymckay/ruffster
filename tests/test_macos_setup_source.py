@@ -32,7 +32,7 @@ class MacSetupSourceTests(unittest.TestCase):
         self.assertIn('This version is not ready for everyday family use', welcome)
         self.assertIn('What this preview records', welcome)
         self.assertIn('What it never records', welcome)
-        self.assertIn('Network bytes are not attributed to apps or websites', welcome)
+        self.assertIn('Network-interface bytes are not attributed to apps or websites', welcome)
         self.assertIn('Open parent dashboard', welcome)
         self.assertIn('Set up this Mac together…', welcome)
         self.assertIn('More options…', welcome)
@@ -49,6 +49,15 @@ class MacSetupSourceTests(unittest.TestCase):
         source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')
         self.assertIn('Choose the maximum time to keep detailed records', source)
         self.assertIn('calendar-day rounding may remove them up to a day before that limit', source)
+
+    def test_process_traffic_is_off_by_default_and_disclosed(self):
+        source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')
+        status = (Path(__file__).parents[1] / 'native' / 'macos' / 'status.swift').read_text(encoding='utf-8')
+        self.assertIn('processNetwork.state = .off', source)
+        self.assertIn('Include network totals by app or service (experimental)', source)
+        self.assertIn('helper service', source)
+        self.assertIn('does not identify websites', source)
+        self.assertIn('FAMILY_ACTIVITY_PROCESS_NETWORK', status)
 
     def test_scrollable_disclosure_uses_explicit_cgfloat_height(self):
         source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')

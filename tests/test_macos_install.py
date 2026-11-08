@@ -100,6 +100,13 @@ class MacInstallTests(unittest.TestCase):
         args=plistlib.loads(Path(result['plist']).read_bytes())['ProgramArguments']
         self.assertEqual(args[args.index('--retention-days')+1],'7')
 
+    def test_process_network_install_is_opt_in(self):
+        result = install(self.key, self.exe, self.source, self.exe, self.exe, self.home, 123,
+                         runner=self.launch, collect_process_network=True)
+        definition = plistlib.loads(Path(result['plist']).read_bytes())
+        self.assertIn('--experimental-process-network', definition['ProgramArguments'])
+        self.assertEqual(definition['EnvironmentVariables']['FAMILY_ACTIVITY_PROCESS_NETWORK'], '1')
+
     def test_packaged_launch_agent_is_associated_with_its_host_app(self):
         bundle_contents = self.root / 'Family Activity.app' / 'Contents'
         runtime = bundle_contents / 'Resources' / 'runtime'

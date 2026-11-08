@@ -98,6 +98,37 @@ def traffic_usage(intervals, as_of, calendar_timezone=None):
             for period, per_interface in totals.items()}
 
 
+def process_traffic(samples, as_of, calendar_timezone=None):
+    """Sum sampled process-associated byte deltas by local day and week."""
+    if as_of.tzinfo is None:
+        raise ValueError('as_of must be timezone-aware')
+    end = as_of.astimezone(timezone.utc)
+    today = end.astimezone(calendar_timezone).date() if calendar_timezone else end.astimezone().date()
+    totals = {'today': defaultdict(lambda: [0, 0]), 'week': defaultdict(lambda: [0, 0])}
+    for sampled_at, process, received, sent in samples:
+        try:
+            timestamp = datetime.fromisoformat(sampled_at)
+            if (timestamp.utcoffset() is None or not isinstance(process, str) or not process or
+                    type(received) is not int or type(sent) is not int or received < 0 or sent < 0):
+                continue
+            timestamp = timestamp.astimezone(timezone.utc)
+        except (TypeError, ValueError):
+            continue
+        if timestamp > end:
+            continue
+        local_date = timestamp.astimezone(calendar_timezone).date() if calendar_timezone else timestamp.astimezone().date()
+        days_ago = (today - local_date).days
+        if days_ago == 0:
+            totals['today'][process][0] += received
+            totals['today'][process][1] += sent
+        if 0 <= days_ago < 7:
+            totals['week'][process][0] += received
+            totals['week'][process][1] += sent
+    return {period: sorted(((name, values[0], values[1]) for name, values in per_process.items()),
+                           key=lambda row: (-(row[1] + row[2]), row[0]))[:50]
+            for period, per_process in totals.items()}
+
+
 def contextual_traffic_usage(intervals, network_changes, labels, schedule, as_of):
     """Estimate weekly interface bytes in scheduled hours and labeled networks.
 

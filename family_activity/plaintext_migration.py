@@ -24,6 +24,13 @@ SCHEMA = {
     'network_changes': {'id', 'session_id', 'sampled_at', 'identifier'},
     'gaps': {'id', 'session_id', 'from_at', 'to_at'},
 }
+OPTIONAL_EMPTY_SCHEMA = {
+    # Added to the modern local projection after the original plaintext schema.
+    # The agent writes these only to encrypted storage; permit empty projection
+    # tables from newer stores while refusing to silently discard any rows.
+    'process_network_samples': {'id', 'session_id', 'sampled_at', 'process_name', 'received_bytes', 'sent_bytes'},
+    'process_network_status': {'id', 'session_id', 'sampled_at', 'state'},
+}
 MAX_COUNTER = 2**63 - 1
 
 
@@ -158,15 +165,19 @@ def encrypt_legacy_database(source_path, public_key_path, output_path, retention
         if source.execute('PRAGMA integrity_check').fetchone() != ('ok',):
             raise ValueError('plaintext source database failed its integrity check')
         tables = {row[0] for row in source.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-        if tables != set(SCHEMA):
+        if not set(SCHEMA).issubset(tables) or not tables.issubset(set(SCHEMA) | set(OPTIONAL_EMPTY_SCHEMA)):
             raise ValueError('source is not a supported plaintext activity database')
         extra_objects = source.execute("SELECT 1 FROM sqlite_master WHERE type IN ('view','trigger') LIMIT 1").fetchone()
         if extra_objects is not None:
             raise ValueError('source activity database schema is unsupported')
-        for name, expected in SCHEMA.items():
+        for name, expected in {**SCHEMA, **OPTIONAL_EMPTY_SCHEMA}.items():
+            if name not in tables:
+                continue
             columns = {row[1] for row in source.execute(f'PRAGMA table_info("{name}")')}
             if columns != expected:
                 raise ValueError('source activity database schema is unsupported')
+            if name in OPTIONAL_EMPTY_SCHEMA and source.execute(f'SELECT 1 FROM "{name}" LIMIT 1').fetchone() is not None:
+                raise ValueError('source contains newer process network records that this migration cannot preserve')
         if source.execute('PRAGMA foreign_key_check').fetchone() is not None:
             raise ValueError('plaintext source contains broken session references')
         gap_rows = source.execute('SELECT count(*) FROM gaps').fetchone()[0]

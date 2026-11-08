@@ -3,10 +3,28 @@ import os
 import time
 from datetime import datetime, timedelta, timezone
 from family_activity.reports import (_system_local_midnight_utc, agent_runtime,
-                                     contextual_traffic_usage, estimates, traffic_usage)
+                                     contextual_traffic_usage, estimates, process_traffic, traffic_usage)
 from zoneinfo import ZoneInfo
 
 class ReportsTests(unittest.TestCase):
+    def test_process_traffic_sums_measured_deltas_by_local_day_and_week(self):
+        zone = ZoneInfo('Europe/Vienna')
+        as_of = datetime(2026, 11, 8, 12, tzinfo=zone)
+        samples = [
+            ('2026-11-08T08:00:00+01:00', 'Safari', 1000, 200),
+            ('2026-11-03T08:00:00+01:00', 'Safari', 300, 50),
+            ('2026-11-08T08:00:00+01:00', 'softwareupdated', 100, 20),
+            ('2026-11-01T08:00:00+01:00', 'Safari', 900, 900),
+            ('2026-11-08T13:00:00+01:00', 'Safari', 500, 500),
+            ('invalid', 'Safari', 500, 500),
+        ]
+        result = process_traffic(samples, as_of, zone)
+        self.assertEqual(result['today'], [('Safari', 1000, 200), ('softwareupdated', 100, 20)])
+        self.assertEqual(result['week'], [('Safari', 1300, 250), ('softwareupdated', 100, 20)])
+
+    def test_process_traffic_requires_aware_report_time(self):
+        with self.assertRaises(ValueError):
+            process_traffic([], datetime(2026, 11, 8))
     def test_traffic_usage_sums_each_interface_for_local_day_and_seven_days(self):
         zone = ZoneInfo('Europe/Vienna')
         as_of = datetime(2026, 11, 8, 12, tzinfo=zone)

@@ -279,6 +279,21 @@ async function render() {
   list('traffic-week-summary', data.traffic_usage.week, formatTrafficTotal,
        'No traffic intervals are available for these seven days. This does not show that traffic was zero.');
   list('traffic', data.traffic, ([at,iface,received,sent]) => `${formatUtcTimestamp(at)} · ${iface}: ${formatBytes(received)} received, ${formatBytes(sent)} sent`, 'No interface measurements were recorded in this report.');
+  const processTraffic = data.process_traffic || {status: null, today: [], week: []};
+  $('process-traffic-status').textContent = processTraffic.status === 'enabled'
+    ? 'This optional Mac source was enabled. It records process-associated byte deltas, not website traffic. Some connections may belong to helper services.'
+    : processTraffic.status === 'unavailable'
+      ? 'The optional process measurement stopped reporting. Missing values do not mean zero traffic.'
+      : processTraffic.status === 'disabled'
+        ? 'Process-associated network totals were turned off during the latest monitoring session.'
+        : processTraffic.status === 'unsupported'
+          ? 'Process-associated network totals are currently available only on macOS.'
+          : 'Process-associated network totals were not included in this report. They may not have been enabled on the child’s Mac.';
+  const formatProcessTraffic = ([process,received,sent]) => `${process}: ${formatBytes(received)} received · ${formatBytes(sent)} sent`;
+  list('process-traffic-today', processTraffic.today, formatProcessTraffic,
+       'No process byte changes were available for today. This does not show that traffic was zero.');
+  list('process-traffic-week', processTraffic.week, formatProcessTraffic,
+       'No process byte changes were available for these seven days. This does not show that traffic was zero.');
   const networks = $('networks'); networks.replaceChildren();
   if (!data.networks.length) networks.textContent = 'No identified routers in this report.';
   for (const network of data.networks) {

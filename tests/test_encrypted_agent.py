@@ -1,10 +1,14 @@
 import os
+from contextlib import redirect_stdout
 import hashlib
 import sqlite3
 import subprocess
 import sys
 import tempfile
 import time
+import signal
+import io
+import threading
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -13,6 +17,47 @@ from family_activity import encrypted_store, store
 from family_activity.encrypted_agent_store import EncryptedAgentStore
 
 class EncryptedAgentTests(unittest.TestCase):
+    def test_opted_in_process_network_samples_are_encrypted_and_labeled(self):
+        from unittest.mock import patch
+        from family_activity.__main__ import agent
+        from family_activity.process_network import ProcessBytes
+
+        class SyntheticSampler:
+            def __init__(self): self.pending = True; self.failure = None; self.closed = False
+            def drain(self):
+                if self.pending:
+                    self.pending = False
+                    return (ProcessBytes('SyntheticBrowser', 4096, 512),)
+                return ()
+            def close(self): self.closed = True
+
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = PrivateKey.generate()
+            public = Path(tmp) / 'parent.pub'; public.write_bytes(bytes(parent.public_key))
+            database = Path(tmp) / 'activity.sqlite3'
+            sampler = SyntheticSampler()
+            previous = signal.getsignal(signal.SIGTERM)
+            stop = threading.Timer(.2, lambda: os.kill(os.getpid(), signal.SIGTERM))
+            try:
+                with patch('family_activity.__main__.start_status', return_value=None), \
+                     patch('family_activity.process_network.MacProcessNetworkSampler', return_value=sampler), \
+                     redirect_stdout(io.StringIO()):
+                    stop.start()
+                    agent(database, .1, public_key_path=public, experimental_process_network=True)
+            finally:
+                stop.cancel()
+                signal.signal(signal.SIGTERM, previous)
+            connection = sqlite3.connect(database)
+            events = [encrypted_store.open_event(parent, row[0])
+                      for row in connection.execute('SELECT ciphertext FROM encrypted_events ORDER BY id')]
+            connection.close()
+            self.assertEqual([event['state'] for event in events if event['type'] == 'process_network_status'], ['enabled'])
+            sample = next(event for event in events if event['type'] == 'process_network')
+            self.assertEqual((sample['process'], sample['received_bytes'], sample['sent_bytes']),
+                             ('SyntheticBrowser', 4096, 512))
+            self.assertNotIn(b'SyntheticBrowser', database.read_bytes())
+            self.assertTrue(sampler.closed)
+
     def test_key_commitment_and_plaintext_database_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp)/'db'

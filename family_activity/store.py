@@ -47,6 +47,15 @@ def initialize(db):
           received_bytes INTEGER NOT NULL, sent_bytes INTEGER NOT NULL,
           FOREIGN KEY(session_id) REFERENCES sessions(id)
         );
+        CREATE TABLE IF NOT EXISTS process_network_samples (
+          id INTEGER PRIMARY KEY, session_id INTEGER NOT NULL, sampled_at TEXT NOT NULL,
+          process_name TEXT NOT NULL, received_bytes INTEGER NOT NULL, sent_bytes INTEGER NOT NULL,
+          FOREIGN KEY(session_id) REFERENCES sessions(id)
+        );
+        CREATE TABLE IF NOT EXISTS process_network_status (
+          id INTEGER PRIMARY KEY, session_id INTEGER NOT NULL, sampled_at TEXT NOT NULL,
+          state TEXT NOT NULL, FOREIGN KEY(session_id) REFERENCES sessions(id)
+        );
         CREATE TABLE IF NOT EXISTS website_samples (
           id INTEGER PRIMARY KEY, session_id INTEGER NOT NULL, sampled_at TEXT NOT NULL,
           domain TEXT, FOREIGN KEY(session_id) REFERENCES sessions(id)
@@ -125,12 +134,16 @@ def prune(db, retention_days, reference=None):
     with db:
         db.execute("DELETE FROM foreground_samples WHERE julianday(sampled_at) < julianday(?)", (cutoff,))
         db.execute("DELETE FROM network_intervals WHERE julianday(to_at) < julianday(?)", (cutoff,))
+        db.execute("DELETE FROM process_network_samples WHERE julianday(sampled_at) < julianday(?)", (cutoff,))
+        db.execute("DELETE FROM process_network_status WHERE julianday(sampled_at) < julianday(?)", (cutoff,))
         db.execute("DELETE FROM gaps WHERE julianday(to_at) < julianday(?)", (cutoff,))
         db.execute("""DELETE FROM sessions WHERE stopped_at IS NOT NULL
                       AND julianday(stopped_at) < julianday(?)
                       AND NOT EXISTS (SELECT 1 FROM gaps WHERE gaps.session_id = sessions.id)
                       AND NOT EXISTS (SELECT 1 FROM foreground_samples WHERE foreground_samples.session_id = sessions.id)
-                      AND NOT EXISTS (SELECT 1 FROM network_intervals WHERE network_intervals.session_id = sessions.id)""", (cutoff,))
+                      AND NOT EXISTS (SELECT 1 FROM network_intervals WHERE network_intervals.session_id = sessions.id)
+                      AND NOT EXISTS (SELECT 1 FROM process_network_samples WHERE process_network_samples.session_id = sessions.id)
+                      AND NOT EXISTS (SELECT 1 FROM process_network_status WHERE process_network_status.session_id = sessions.id)""", (cutoff,))
 
 
 def record_network(db, sid, intervals):

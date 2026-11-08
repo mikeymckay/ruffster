@@ -19,7 +19,7 @@ The prototype's collection and reporting paths include:
 - Optional website-domain observations from an experimental Chromium extension installed in a supported browser on the child's computer. It does not collect full URLs, page titles, page content, or private-window domains. It can be paused, removed, disabled, or bypassed by using another browser; missing observations do not explain why.
 - Parent-selected schedules and family labels used to produce estimates. These are context supplied by the parent, not proof of where the child or computer was.
 
-The product excludes screenshots, keystrokes, audio, camera, message contents, and automatic blocking. Network totals are not attributed to specific apps or websites. See [README.md](README.md), [FAQ](docs/faq.html), and [ENCRYPTION.md](ENCRYPTION.md) for current implementation detail and limitations.
+The product excludes screenshots, keystrokes, audio, camera, message contents, and automatic blocking. Interface byte totals are not attributed to apps or websites. The Mac setup offers a separate opt-in experimental process-byte summary; it may assign traffic to a helper service, miss short-lived connections, and cannot identify websites. See [README.md](README.md), [FAQ](docs/faq.html), and [ENCRYPTION.md](ENCRYPTION.md) for current implementation detail and limitations.
 
 ## Engineering requirements
 

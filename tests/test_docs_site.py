@@ -374,4 +374,5 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('<b>239</b><span>Mac tests passed · 2 Node.js and 4 PowerShell checks skipped (245 run)</span>', status)
         self.assertIn('Device connection decision', status)
         self.assertIn('cloud rendezvous service', status)
+        self.assertIn('process traffic', status)
         self.assertIn('Two-digit report pairing over home Wi-Fi', status)

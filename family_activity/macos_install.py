@@ -51,7 +51,7 @@ def _has_symlink_component(path, home):
     return False
 
 
-def install(public_key, python, source, foreground, status, home, uid, *, label=DEFAULT_LABEL, runner=_run, frozen=False, retention_days=30, collect_network=True, collect_network_settings=True):
+def install(public_key, python, source, foreground, status, home, uid, *, label=DEFAULT_LABEL, runner=_run, frozen=False, retention_days=30, collect_network=True, collect_network_settings=True, collect_process_network=False):
     """Install a launch agent only after the caller has obtained disclosure.
 
     Does not overwrite an existing agent, key, or report. Previously retained
@@ -69,6 +69,7 @@ def install(public_key, python, source, foreground, status, home, uid, *, label=
         str(foreground), str(status), frozen=frozen, retention_days=retention_days,
         network_key=str(network_key_path), collect_network=collect_network,
         collect_network_settings=collect_network_settings,
+        collect_process_network=collect_process_network,
         associated_bundle_id=macos_launchd.bundle_identifier_for_path(source))
     for path in (python, foreground, status):
         if not Path(path).is_file() or not os.access(path, os.X_OK): raise ValueError('required executable is unavailable')

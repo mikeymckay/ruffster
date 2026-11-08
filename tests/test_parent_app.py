@@ -252,6 +252,9 @@ class ParentAppTests(unittest.TestCase):
             (sample-timedelta(seconds=15)).isoformat(), sample.isoformat(), 'en0', 1024, 256]])
         writer.event('website', domain='youtube.com', at=(sample-timedelta(seconds=15)).isoformat())
         writer.event('website', domain='youtube.com', at=sample.isoformat())
+        writer.event('process_network_status', state='enabled', at=sample.isoformat())
+        writer.event('process_network', process='SyntheticBrowser', received_bytes=2400000000,
+                     sent_bytes=123456, at=sample.isoformat())
         writer.event('stop'); writer.close()
         import sqlite3
         extra = sqlite3.connect(path)
@@ -275,6 +278,8 @@ class ParentAppTests(unittest.TestCase):
         self.assertIsNotNone(report_data['generated_at'])
         self.assertEqual(report_data['traffic_usage']['today'], [['en0', 1024, 256]])
         self.assertEqual(report_data['traffic_usage']['week'], [['en0', 1024, 256]])
+        self.assertEqual(report_data['process_traffic']['status'], 'enabled')
+        self.assertEqual(report_data['process_traffic']['today'], [['SyntheticBrowser', 2400000000, 123456]])
         self.assertTrue(report_data['traffic_contexts']['schedule_configured'])
         self.assertIn('school', report_data['traffic_contexts'])
         self.assertIn('home', report_data['traffic_contexts'])
@@ -297,6 +302,7 @@ class ParentAppTests(unittest.TestCase):
         self.assertEqual(self.request('POST', '/api/import', b'invalid bytes and not a database')[0], 400)
         self.assertEqual(self.request('GET', '/api/report')[0], 200)
         self.assertNotIn(b'SYNTHETIC_PARENT_APP', self.server.data.read_bytes())
+        self.assertNotIn(b'SyntheticBrowser', self.server.data.read_bytes())
         self.assertNotIn(b'UNRELATED_PLAINTEXT_MARKER', self.server.data.read_bytes())
         self.assertEqual(self.request('POST', '/api/lock', {})[0], 200)
         self.assertEqual(self.request('GET', '/api/report')[0], 403)

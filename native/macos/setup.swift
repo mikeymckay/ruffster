@@ -83,7 +83,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         readiness.contentViewMargins = NSSize(width: 12, height: 10)
         readiness.contentView = paragraph("This version is not ready for everyday family use. It cannot detect tampering, and its readings have important limits.")
 
-        let collected = paragraph("Foreground app names and identifiers; total network-interface bytes; reduced DNS, proxy, and system VPN indicators; and a pseudonymous hint when the default router changes. Network bytes are not attributed to apps or websites.")
+        let collected = paragraph("Foreground app names and identifiers; total network-interface bytes; reduced DNS, proxy, and system VPN indicators; and a pseudonymous hint when the default router changes. Network-interface bytes are not attributed to apps or websites. Setup also offers an optional experimental process-byte summary.")
         let excluded = paragraph("No screenshots, keystrokes, message contents, microphone, camera, or full website URLs. The optional browser experiment is not included in this Mac setup.")
         let disclosure = paragraph("A visible menu-bar indicator shows monitoring status. Activity records are encrypted to a key held by the parent. Router hints do not identify a location, and unknown or missing observations do not explain why they occurred.")
 
@@ -472,9 +472,9 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         disclosureText.textContainer?.containerSize = NSSize(width: 430, height: CGFloat.greatestFiniteMagnitude)
         disclosureText.textContainerInset = NSSize(width: 6, height: 6)
         disclosureText.string = """
-        While this account is signed in, Family Activity samples foreground app names, network-interface traffic totals, a pseudonymous hint when the default router changes, and basic DNS, proxy, and VPN settings. Network bytes are not attributed to apps or websites. The router hint is not a location, and the raw router address is not saved.
+        While this account is signed in, Family Activity samples foreground app names, network-interface traffic totals, a pseudonymous hint when the default router changes, and basic DNS, proxy, and VPN settings. Network-interface totals are not attributed to apps or websites. You can separately opt into experimental process-level totals below; these may list helper services, miss brief connections, and do not identify websites. The router hint is not a location, and the raw router address is not saved.
 
-        It does not record screenshots, keystrokes, message contents, microphone, camera, or full website addresses. Website domains are not included in this Mac setup.
+        It does not record screenshots, keystrokes, message contents, microphone, camera, or full website addresses. Website domains are not included in this Mac setup. If selected below, experimental network totals are grouped by the process that owns a connection. Some traffic may appear under a helper service, brief connections may be missed, and this does not identify websites.
 
         The menu-bar status icon must stay visible to the child. Reports are locked on this Mac and can be opened on the parent's computer. Keep this app in its current location; moving it may stop monitoring.
 
@@ -502,7 +502,11 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         acknowledgement.setAccessibilityHelp("Read the collection details and discuss them with the child before enabling setup.")
         acknowledgement.cell?.wraps = true
         acknowledgement.cell?.usesSingleLineMode = false
-        let accessory = NSStackView(views: [disclosureScroll, retentionRow, acknowledgement])
+        let processNetwork = NSButton(checkboxWithTitle: "Include network totals by app or service (experimental)", target: nil, action: nil)
+        processNetwork.setAccessibilityLabel("Include experimental network totals by app or service")
+        processNetwork.setAccessibilityHelp("Records process-associated sent and received bytes. Helper services may be listed separately, brief connections may be missed, and it does not identify websites.")
+        processNetwork.state = .off
+        let accessory = NSStackView(views: [disclosureScroll, processNetwork, retentionRow, acknowledgement])
         accessory.orientation = .vertical
         accessory.alignment = .leading
         accessory.spacing = 10
@@ -522,9 +526,10 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         installConfirmationButton = nil
         guard response == .alertFirstButtonReturn, acknowledgement.state == .on else { return }
         let retentionDays = retention.selectedItem?.representedObject as? Int ?? 30
-        let arguments = ["-m", "family_activity", "mac-install", "--public-key", key.path,
+        var arguments = ["-m", "family_activity", "mac-install", "--public-key", key.path,
                          "--source-directory", runtime.source, "--foreground-helper", runtime.foreground,
                          "--status-helper", runtime.status, "--retention-days", String(retentionDays), "--disclosed"]
+        if processNetwork.state == .on { arguments.append("--process-network") }
         cleanupWhenComplete = temporaryDirectory != nil
         runWithProgress(arguments, title: "Setting up this Mac…",
                         detail: "Registering monitoring for this account. Keep Family Activity open.") { [weak self] succeeded, detail in
