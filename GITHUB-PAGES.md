@@ -28,7 +28,7 @@ The public entry points are:
 4. Keep `.github/workflows/pages.yml` limited to pushes to `main` that change `docs/`, plus manual runs. Once Pages is enabled for GitHub Actions, the workflow publishes the static `docs/` directory and reports the live URL. Verify all three pages and screenshot links at that repository-subpath URL.
 5. Update screenshots and install/FAQ copy with every user-facing release; keep a prominent status and avoid implying unsupported platform behavior.
 
-The Ruffster Git remote is configured, but it currently has no published branch and Pages is not yet enabled. Before the first push, review the author name and email in local Git commits; GitHub exposes that metadata with published commits. If desired, set Git to use the private noreply address shown in GitHub settings, then decide whether existing local-only commits should be rewritten to use it. After the reviewed `main` branch is pushed:
+The Ruffster Git remote is configured and `main` has been pushed, but Pages is not yet enabled. The first deploy attempt confirmed that the source setting is required. Before the first push, review the author name and email in local Git commits; GitHub exposes that metadata with published commits. If desired, set Git to use the private noreply address shown in GitHub settings, then decide whether existing local-only commits should be rewritten to use it. After the reviewed `main` branch is pushed:
 
 1. Open the repository **Settings → Pages**.
 2. Under **Build and deployment**, choose **GitHub Actions** as the source.
