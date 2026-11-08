@@ -129,10 +129,11 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('wcag21aa', script)
         self.assertIn('horizontal overflow', script)
 
-    def test_github_pages_guide_warns_about_public_commit_author_metadata(self):
+    def test_github_pages_guide_matches_published_repository_state(self):
         guide = (ROOT / 'GITHUB-PAGES.md').read_text(encoding='utf-8')
-        self.assertIn('review the author name and email in local Git commits', guide)
-        self.assertIn('private noreply address', guide)
+        self.assertIn('repository is public and `main` has been pushed', guide)
+        self.assertIn('must be configured first', guide)
+        self.assertIn('choose **GitHub Actions** as the source', guide)
 
     def test_local_reports_and_key_material_are_ignored_by_source_control(self):
         ignored = (ROOT / '.gitignore').read_text(encoding='utf-8').splitlines()

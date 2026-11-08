@@ -28,11 +28,11 @@ The public entry points are:
 4. Keep `.github/workflows/pages.yml` limited to pushes to `main` that change `docs/`, plus manual runs. Once Pages is enabled for GitHub Actions, the workflow publishes the static `docs/` directory and reports the live URL. Verify all three pages and screenshot links at that repository-subpath URL.
 5. Update screenshots and install/FAQ copy with every user-facing release; keep a prominent status and avoid implying unsupported platform behavior.
 
-The Ruffster Git remote is configured and `main` has been pushed, but Pages is not yet enabled. The first deploy attempt confirmed that the source setting is required. Before the first push, review the author name and email in local Git commits; GitHub exposes that metadata with published commits. If desired, set Git to use the private noreply address shown in GitHub settings, then decide whether existing local-only commits should be rewritten to use it. After the reviewed `main` branch is pushed:
+The Ruffster repository is public and `main` has been pushed. Pages is not yet enabled: the first deployment attempt confirmed that the repository's Pages source setting must be configured first. Once it is enabled, a successful `Build and test` run on `main` triggers deployment automatically; the Pages workflow also supports a manual run on `main`.
 
 1. Open the repository **Settings → Pages**.
 2. Under **Build and deployment**, choose **GitHub Actions** as the source.
-3. Run the **Deploy Ruffster Pages** workflow, or push a change under `docs/` to `main`.
+3. If needed, run the **Deploy Ruffster Pages** workflow from the Actions tab on `main`.
 4. Open the URL shown by GitHub Pages and verify the home page, getting-started page, FAQ, screenshots, mobile layout, and links from the deployed project subpath.
 
 The site has no runtime package dependencies or build step; `package.json` contains only local accessibility-check tooling. `.nojekyll` asks Pages to publish the directory as static files. Automated checks cannot judge visual quality or complete accessibility; a real browser review, keyboard navigation, and screen-reader behavior are still required before publication. If the hosting setup changes, keep the same no-build output and verify base-path-relative links again.
