@@ -739,3 +739,8 @@ The agent now validates its sampling interval both when parsing the CLI option a
 The Windows preview now checks current-user and all-user built-in VPN profiles with `Get-VpnConnection` and stores only connected, disconnected, or unknown. Profile names and error text are not emitted. Query failures remain unknown; third-party VPN implementations are outside this check. The PowerShell script was run with PowerShell Core against mocked connected, disconnected, and query-error results, and focused adapter tests passed. Native Windows behavior, permissions, and the dashboard wording still need validation on a Windows computer. This indicator does not show whether filtering works.
 
 Focused network settings and PowerShell Core probe checks passed. Full Linux suite: 228 tests passed with no skips. `node --check family_activity/parent_assets/app.js` passed, and all 24 documentation-site tests passed.
+
+
+## 2026-11-08 — Clarify the optional browser add-on
+
+Updated the public home page and FAQ to say the add-on runs in supported browsers on the child’s computer, is not installed on the parent’s computer, provides domain names because interface traffic totals cannot name websites, and is not currently part of a supported family setup. The dedicated copy regression and all 24 documentation-site tests pass. No browser add-on behavior or installation was tested by this wording change.
