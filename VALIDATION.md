@@ -828,3 +828,7 @@ Updated `scripts/validate-macos-agent-runtime.py` to make its disposable synthet
 ## 2026-11-08 — Improve guidance when local report transfer fails
 
 The two-digit discovery error and parent dashboard now mention checking the digits and Wi-Fi, and direct Mac users to System Settings > Privacy & Security > Local Network. This follows the permission explanation already added to the app bundle, parent guide, and FAQ. Added regression checks for discovery and the parent API error. Full Linux suite: 240 tests, 4 skipped (PowerShell unavailable). Full macOS suite on the test Mac: 240 tests, 6 skipped (2 Node.js and 4 PowerShell unavailable). The focused docs suite passes all 24 tests.
+
+## 2026-11-08 — Build the current Mac preview with transfer help
+
+Built the current source again on the test Mac after adding actionable local-network permission guidance to failed two-digit discovery and report-transfer messages. The unsigned Apple-silicon bundle passed Swift helper compilation, status self-check, frozen setup and agent/share command checks, loopback dashboard startup, and unauthenticated API rejection. The built Info.plist contains the local-network usage message, and its runtime resolves `org.familyactivity.preview` for LaunchAgent attribution. No agent was installed. Output: `/tmp/family-activity-preview-current/Family Activity Preview.app`.
