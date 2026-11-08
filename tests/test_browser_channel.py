@@ -100,7 +100,7 @@ assert.equal(domainFromTab({focused:true}, {url:'file:///private'}), null);
         self.assertIn('the parent report cannot tell whether sharing was paused, disconnected, or simply had nothing to report', popup)
         self.assertIn('Private-window domains are excluded', popup)
         self.assertIn('for example, wikipedia.org', popup)
-        self.assertIn('remembers your pause choice and when it could not observe the browser', popup)
+        self.assertIn('remembers your pause choice and that sharing was interrupted', popup)
         self.assertNotIn('temporary reset flag', popup)
         self.assertNotIn('domain-free marker', popup)
         self.assertIn('This switch affects website sharing only', popup)
