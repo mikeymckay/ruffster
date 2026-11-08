@@ -429,7 +429,9 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('exec /bin/sleep 60', lifecycle_check)
         self.assertIn('validate-macos-install-flow.py', guide)
         self.assertIn('zero valid identities', status)
-        self.assertIn('<b>279</b><span>Linux tests run · 274 passed · 5 platform/tool checks skipped', status)
+        self.assertIn('<b>280</b><span>Mac tests run · 272 passed · 8 platform/dependency checks skipped', status)
+        self.assertIn('Latest real-machine checkpoint · macOS 26.6 on Apple silicon', status)
+        self.assertIn('same-location update action', status)
         self.assertIn('Parent reports can merge several computers', status)
         self.assertIn('remove one computer from the current parent copy', status)
         self.assertIn('Device connection decision', status)
@@ -439,7 +441,6 @@ class DocumentationSiteTests(unittest.TestCase):
 
     def test_project_status_page_reports_latest_ci_and_release_gates(self):
         status = (ROOT / 'PROJECT-STATUS.html').read_text(encoding='utf-8')
-        self.assertIn('two of three platform test jobs are complete', status)
+        self.assertIn('The latest GitHub Actions run is still in progress', status)
         self.assertIn('periodic stack traces', status)
-        self.assertIn('Pages accessibility check passed', status)
-        self.assertIn('Pages is not configured at repository level', status)
+        self.assertIn('repository setting to publish with Actions', status)
