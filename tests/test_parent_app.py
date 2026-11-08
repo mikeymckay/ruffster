@@ -87,6 +87,8 @@ class ParentAppTests(unittest.TestCase):
         self.assertIn(b'add more computers later and review each one separately', page)
         self.assertIn(b'id="report-device"', page)
         self.assertIn(b'id="device-label-form"', page)
+        self.assertIn(b'id="delete-computer"', page)
+        self.assertIn(b'backups you made earlier', page)
         self.assertIn(b'New observations are added to the report already saved here.', page)
         self.assertIn(b'exact copies of the same records are ignored', page)
         self.assertIn(b'I already set up parent access', page)
@@ -110,6 +112,7 @@ class ParentAppTests(unittest.TestCase):
         self.assertIn(b"$('child-setup').hidden = !(status.unlocked && status.backup_confirmed)", script)
         self.assertIn(b"$('backup-required').hidden = !(status.unlocked && !status.backup_confirmed)", script)
         self.assertIn(b"post('/api/public-key-share', {})", script)
+        self.assertIn(b"post('/api/delete-device'", script)
         self.assertIn(b"/api/confirm-key-backup", script)
         self.assertIn(b"$('report-transfer').hidden = !status.unlocked", script)
         self.assertIn(b"status.has_report", script)
@@ -534,6 +537,38 @@ class ParentAppTests(unittest.TestCase):
         self.assertEqual(next(device['label'] for device in named['devices']
                               if device['device_id'] == device_id), "Annika's MacBook")
         self.assertNotIn(b"Annika's MacBook", self.server.data.read_bytes())
+        previously_exported = self.request('GET', '/api/report-backup')[2]
+
+        before_invalid_delete = self.server.data.read_bytes()
+        self.assertEqual(self.request('POST', '/api/delete-device',
+                                      {'device_id': 'not-a-device'})[0], 400)
+        self.assertEqual(self.server.data.read_bytes(), before_invalid_delete)
+        result = json.loads(self.request('POST', '/api/delete-device',
+                                         {'device_id': device_id})[2])
+        self.assertTrue(result['deleted'])
+        self.assertGreater(result['events_removed'], 0)
+        remaining = json.loads(self.request('GET', '/api/report')[2])
+        self.assertEqual({entry['device_id'] for entry in remaining['devices']},
+                         {snapshots[1][0]})
+        self.assertEqual({entry[0] for entry in remaining['apps']['today']},
+                         {snapshots[1][1]})
+        old_backup, _ = encrypted_view.open_projection_bytes(previously_exported,
+                                                              self.server.private_key)
+        try:
+            self.assertEqual({row[0] for row in old_backup.execute(
+                'SELECT DISTINCT device_id FROM sessions')},
+                {snapshots[0][0], snapshots[1][0]})
+            self.assertEqual(old_backup.execute('SELECT label FROM device_labels WHERE device_id=?',
+                                                (device_id,)).fetchone(), ("Annika's MacBook",))
+        finally:
+            old_backup.close()
+        self.assertTrue((Path(self.tmp.name) / 'child-one.db').exists())
+        projection, _ = encrypted_view.open_projection(self.server.data, self.server.private_key)
+        try:
+            self.assertEqual(projection.execute('SELECT device_id FROM device_labels').fetchall(), [])
+        finally:
+            projection.close()
+        self.assertTrue(self.server.vault.exists())
 
     def test_import_normalizes_legacy_expiry_before_marking_records_current(self):
         import sqlite3

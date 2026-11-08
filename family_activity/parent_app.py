@@ -376,6 +376,18 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:
                 self._json({'error': 'The report path is not a regular local file.'}, 400)
             return
+        if self.path == '/api/delete-device':
+            if self.server.private_key is None:
+                self._json({'error': 'Unlock the parent key first.'}, 403); return
+            try:
+                body = json.loads(self._body())
+                removed = _remove_device_records(
+                    self.server.data, self.server.private_key, self.server.retention_days,
+                    body.get('device_id'))
+                self._json({'deleted': True, 'events_removed': removed})
+            except Exception:
+                self._json({'error': 'That computer could not be removed from this parent report.'}, 400)
+            return
         if self.path == '/api/schedule':
             if self.server.private_key is None:
                 self._json({'error': 'Unlock the parent key first.'}, 403); return
@@ -595,6 +607,67 @@ def _prune_report_file(path, private_key, retention_days):
             target.close()
         if temp_path and os.path.exists(temp_path):
             os.unlink(temp_path)
+
+
+def _remove_device_records(path, private_key, retention_days, device_id):
+    """Atomically remove one computer and its parent-authenticated name event."""
+    parent_settings.validate_retention_days(retention_days)
+    source_path = Path(path).expanduser()
+    if source_path.is_symlink() or not source_path.is_file():
+        raise ValueError('parent report is not a regular file')
+    _prune_report_file(source_path, private_key, retention_days)
+    projection, _ = encrypted_view.open_projection(source_path, private_key)
+    try:
+        known_devices = {row[0] for row in projection.execute('SELECT DISTINCT device_id FROM sessions')}
+    finally:
+        projection.close()
+    if not isinstance(device_id, str) or device_id not in known_devices:
+        raise ValueError('computer is not in this report')
+
+    source = sqlite3.connect(source_path.resolve().as_uri() + '?mode=ro', uri=True, timeout=5)
+    temp_path = None
+    identity_sidecar = None
+    target = None
+    removed = 0
+    try:
+        descriptor, temporary = tempfile.mkstemp(prefix='.remove-computer-', dir=source_path.parent)
+        os.close(descriptor)
+        temp_path = temporary
+        identity_sidecar = Path(temp_path + '.device-id')
+        target = EncryptedAgentStore(temp_path, private_key.public_key, retention_days)
+        with target.db:
+            for expires, ciphertext in source.execute(
+                    'SELECT expires_on, ciphertext FROM encrypted_events ORDER BY id'):
+                if (not isinstance(expires, str) or date.fromisoformat(expires).isoformat() != expires
+                        or not isinstance(ciphertext, bytes) or len(ciphertext) not in CIPHERTEXT_SIZES):
+                    raise ValueError('invalid encrypted record')
+                event = encrypted_store.open_event(private_key, ciphertext)
+                if event.get('type') == 'device_label':
+                    remove = event.get('target_device_id') == device_id
+                else:
+                    remove = encrypted_view._device_id(event) == device_id
+                if remove:
+                    removed += 1
+                    continue
+                target.db.execute(
+                    'INSERT INTO encrypted_events(expires_on,ciphertext) VALUES (?,?)',
+                    (expires, ciphertext))
+        target.close()
+        target = None
+        source.close()
+        source = None
+        os.replace(temp_path, source_path)
+        temp_path = None
+        return removed
+    finally:
+        if source is not None:
+            source.close()
+        if target is not None:
+            target.close()
+        if temp_path and os.path.exists(temp_path):
+            os.unlink(temp_path)
+        if identity_sidecar:
+            identity_sidecar.unlink(missing_ok=True)
 
 
 def _report(path, private_key, labels_path, schedule_path, selected_device=None):

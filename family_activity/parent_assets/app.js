@@ -230,6 +230,7 @@ async function render() {
   picker.value = selectedDeviceId;
   const selected = (data.devices || []).find(device => device.device_id === selectedDeviceId);
   $('device-label-form').hidden = !selected;
+  $('delete-computer').hidden = !selected;
   $('device-label').value = selected ? selected.label : '';
   $('device-last-seen').textContent = selected
     ? `Most recent recorded session: ${formatUtcTimestamp(selected.last_seen)}. The report updates when you bring back another encrypted snapshot.`
@@ -347,6 +348,18 @@ $('device-label-form').addEventListener('submit', async event => {
     await post('/api/device-label', {device_id:selectedDeviceId, label:$('device-label').value});
     show('Computer name saved encrypted on this device.');
     await render();
+  } catch (error) { show(error.message); }
+});
+$('delete-computer').addEventListener('click', async () => {
+  const selected = selectedDeviceId && document.querySelector('#report-device option:checked');
+  if (!selectedDeviceId || !selected) return;
+  if (!window.confirm(`Remove “${selected.textContent}” and its observations from this parent report? Earlier exported backups and data on the child computer will remain.`)) return;
+  try {
+    await post('/api/delete-device', {device_id:selectedDeviceId});
+    selectedDeviceId = '';
+    reportDeviceInitialized = false;
+    show('This computer was removed from the parent report. Earlier backups and the child computer’s copy remain.');
+    await refresh();
   } catch (error) { show(error.message); }
 });
 $('schedule-form').addEventListener('submit', async e => {

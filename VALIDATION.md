@@ -1,5 +1,11 @@
 # Real-machine validation
 
+## 2026-11-08: Remove one computer from a multi-computer parent report
+
+The parent dashboard can now delete one selected computer's encrypted observations and its parent-authenticated display name from the local combined report. It rebuilds into a temporary encrypted database and atomically replaces the current report only after validation. Other computers' events and labels stay; the child database, earlier report exports, and the parent key are unchanged. Regression coverage verifies failed unknown-device deletion leaves the report byte-for-byte unchanged, selected-device removal keeps another computer's activity, and a previously exported backup still decrypts with both computers and the original name.
+
+The complete Linux suite ran 278 tests (273 passed, 5 tool-dependent checks skipped). The Pages accessibility scan found zero Axe violations across desktop and mobile entry points; the synthetic parent report screenshot was regenerated and visually reviewed. SSH to Annika's Mac timed out, so these latest Python/UI changes have not been run on macOS. No Windows computer is available for this check. GitHub Actions Pages run [42520236457](https://github.com/mikeymckay/ruffster/actions/runs/42520236457) failed at Configure Pages because the repository has no Pages site configured; the public project URL remains unavailable.
+
 ## 2026-11-08: Merge parent report imports without losing retained observations
 
 Report receipt now validates both the incoming snapshot and any saved parent report, merges unique encrypted records, ignores exact ciphertext repeats, applies the parent's retention window, normalizes legacy one-day expiry metadata, and writes the result through an atomic temporary database. The merge uses a temporary SQLite hash table rather than retaining one hash object per event in Python memory, and rejects a merged file beyond the 256 MiB limit without replacing the existing report. The dashboard, README, and FAQ explain the merge behavior. They also state that the preview does not identify the source computer, so one parent report must be used with one monitored computer until device profiles exist. New regressions prove out-of-order imports retain newer data, repeated imports do not duplicate events, and legacy expiry metadata is corrected during migration.

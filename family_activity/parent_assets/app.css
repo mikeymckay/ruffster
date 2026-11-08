@@ -15,3 +15,4 @@ details{margin-top:1.25rem;padding-top:1rem;border-top:1px solid #d6e4da}summary
 .mascot{float:right;width:104px;height:104px;object-fit:contain;margin:-.5rem 0 .5rem 1rem}@media(max-width:480px){.mascot{width:76px;height:76px}}
 
 .device-picker{margin:1rem 0 1.5rem;padding:1rem 1.2rem;background:#edf5ef;border:1px solid #c7d8cc;border-left:5px solid #236348;border-radius:10px}.device-picker>label:first-child{margin-top:0}.device-picker select{width:min(100%,32rem);min-height:2.75rem;font:inherit}.device-picker input{width:min(100%,32rem);font:inherit}.device-picker form{display:flex;align-items:end;gap:.75rem;flex-wrap:wrap}.device-picker form label{flex:1 1 16rem}.device-picker form input{margin:.3rem 0 0}.device-picker form button{flex:0 0 auto}
+.device-picker .danger{margin-top:.75rem;background:#fff0e8;color:#762f1e;border:1px solid #c87455}
