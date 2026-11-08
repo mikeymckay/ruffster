@@ -887,3 +887,8 @@ Ran the frozen macOS agent directly (no LaunchAgent installation) with interface
 ## 2026-11-08 — Sanitize unpublished history before GitHub setup
 
 The tracked docs and validation history used a real test-computer label, SSH alias, tailnet address, and home-network subnet. Before any remote was configured, replaced those with generic test-device wording and a generic private-network fixture in the current files and all 37 local commits. Added a contributor rule to keep real device/account names, home paths, public or tailnet addresses, and family-network subnets out of tracked records. Verified the current history has no remaining instances of those identifiers. Linux and Mac suites pass 259 tests each (four PowerShell skips on Linux; six platform/dependency skips on Mac). No Git remote is configured, and nothing was published.
+
+
+## 2026-11-08 — Add IPv6 fallback for Windows network labels
+
+The Windows router-hint lookup previously queried only IPv4 default routes, leaving IPv6-only networks unidentified. It now tries IPv4, then IPv6, sorts candidate routes within each family by route plus interface metric, and returns only the keyed pseudonymous gateway hint. Added a PowerShell mock for an IPv6-only route and static coverage for the IPv6 command path. Linux and Mac suites pass 260 tests each (five PowerShell checks skipped on both; two additional Node.js checks skipped on Mac). The new IPv6-only PowerShell mock therefore did not execute on these hosts. No native Windows computer or Windows runtime was available; Windows behavior remains subject to the native CI/package and device checks.

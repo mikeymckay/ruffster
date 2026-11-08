@@ -9,29 +9,32 @@ from .network_identity import identifier
 
 
 _DEFAULT_ROUTE_SCRIPT = r"""
-$interfaceMetrics = @{}
-Get-NetIPInterface -AddressFamily IPv4 -ErrorAction SilentlyContinue |
-    ForEach-Object {
-        $interfaceMetrics[[int]$_.InterfaceIndex] = [int]$_.InterfaceMetric
-    }
-
-$routes = Get-NetRoute -AddressFamily IPv4 -DestinationPrefix '0.0.0.0/0' -ErrorAction SilentlyContinue |
-    Where-Object { $_.NextHop -ne '0.0.0.0' } |
-    Sort-Object {
-        $metric = 0
-        if ($interfaceMetrics.ContainsKey([int]$_.InterfaceIndex)) {
-            $metric = $interfaceMetrics[[int]$_.InterfaceIndex]
+foreach ($family in @('IPv4', 'IPv6')) {
+    $interfaceMetrics = @{}
+    Get-NetIPInterface -AddressFamily $family -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            $interfaceMetrics[[int]$_.InterfaceIndex] = [int]$_.InterfaceMetric
         }
-        [int]$_.RouteMetric + $metric
-    }
 
-foreach ($route in $routes) {
-    $neighbor = Get-NetNeighbor -AddressFamily IPv4 -InterfaceIndex $route.InterfaceIndex -IPAddress $route.NextHop -ErrorAction SilentlyContinue |
-        Where-Object { $_.State -in @('Reachable', 'Stale', 'Delay', 'Probe', 'Permanent') } |
-        Select-Object -First 1
-    if ($neighbor -and $neighbor.LinkLayerAddress -match '^([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}$') {
-        Write-Output $neighbor.LinkLayerAddress
-        exit 0
+    $routes = Get-NetRoute -AddressFamily $family -ErrorAction SilentlyContinue |
+        Where-Object { $_.DestinationPrefix -eq '0.0.0.0/0' -or $_.DestinationPrefix -eq '::/0' } |
+        Where-Object { $_.NextHop -and $_.NextHop -notin @('0.0.0.0', '::') } |
+        Sort-Object {
+            $metric = 0
+            if ($interfaceMetrics.ContainsKey([int]$_.InterfaceIndex)) {
+                $metric = $interfaceMetrics[[int]$_.InterfaceIndex]
+            }
+            [int]$_.RouteMetric + $metric
+        }
+
+    foreach ($route in $routes) {
+        $neighbor = Get-NetNeighbor -AddressFamily $family -InterfaceIndex $route.InterfaceIndex -IPAddress $route.NextHop -ErrorAction SilentlyContinue |
+            Where-Object { $_.State -in @('Reachable', 'Stale', 'Delay', 'Probe', 'Permanent') } |
+            Select-Object -First 1
+        if ($neighbor -and $neighbor.LinkLayerAddress -match '^([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}$') {
+            Write-Output $neighbor.LinkLayerAddress
+            exit 0
+        }
     }
 }
 exit 0
@@ -56,9 +59,9 @@ def network_identifier(secret):
     """Return a device-keyed default-router hint without retaining the MAC/IP.
 
     Windows PowerShell asks the IP routing and neighbor tables for the active
-    IPv4 default gateway's link-layer address. Only a pseudonymous HMAC leaves
-    this function; unavailable routes, VPN tunnels, or restricted cmdlets are
-    reported as unknown.
+    IPv4, then IPv6, default gateway's link-layer address. Only a pseudonymous
+    HMAC leaves this function; unavailable routes, VPN tunnels, or restricted
+    cmdlets are reported as unknown.
     """
     if sys.platform != 'win32':
         return None

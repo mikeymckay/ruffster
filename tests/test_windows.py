@@ -79,15 +79,17 @@ function Get-NetIPInterface {
 function Get-NetRoute {
     [CmdletBinding()]
     param([string]$AddressFamily, [string]$DestinationPrefix)
-    [pscustomobject]@{ InterfaceIndex = 12; RouteMetric = 1; NextHop = '192.0.2.1' }
-    [pscustomobject]@{ InterfaceIndex = 13; RouteMetric = 50; NextHop = '198.51.100.1' }
+    if ($AddressFamily -eq 'IPv4') {
+        [pscustomobject]@{ InterfaceIndex = 12; RouteMetric = 1; DestinationPrefix = '0.0.0.0/0'; NextHop = '192.0.2.1' }
+        [pscustomobject]@{ InterfaceIndex = 13; RouteMetric = 50; DestinationPrefix = '0.0.0.0/0'; NextHop = '198.51.100.1' }
+    }
 }
 function Get-NetNeighbor {
     [CmdletBinding()]
     param([string]$AddressFamily, [uint32]$InterfaceIndex, [string]$IPAddress)
-    if ($IPAddress -eq '192.0.2.1') {
+    if ($AddressFamily -eq 'IPv4' -and $IPAddress -eq '192.0.2.1') {
         [pscustomobject]@{ State = 'Reachable'; LinkLayerAddress = '00-11-22-33-44-55' }
-    } elseif ($IPAddress -eq '198.51.100.1') {
+    } elseif ($AddressFamily -eq 'IPv4' -and $IPAddress -eq '198.51.100.1') {
         [pscustomobject]@{ State = 'Stale'; LinkLayerAddress = '00-22-33-44-55-66' }
     }
 }
@@ -105,6 +107,50 @@ function Get-NetNeighbor {
                                     env=env, capture_output=True, text=True, timeout=15, check=False)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout.strip(), '00-22-33-44-55-66')
+
+    @unittest.skipUnless(_powershell_executable(), 'requires PowerShell')
+    def test_default_route_script_finds_gateway_on_ipv6_only_network(self):
+        import os
+        import subprocess
+        import tempfile
+        from pathlib import Path
+        powershell = _powershell_executable()
+        harness = r"""
+function Get-NetIPInterface {
+    [CmdletBinding()]
+    param([string]$AddressFamily)
+    if ($AddressFamily -eq 'IPv6') {
+        [pscustomobject]@{ InterfaceIndex = 7; InterfaceMetric = 20 }
+    }
+}
+function Get-NetRoute {
+    [CmdletBinding()]
+    param([string]$AddressFamily)
+    if ($AddressFamily -eq 'IPv6') {
+        [pscustomobject]@{ InterfaceIndex = 7; RouteMetric = 10; DestinationPrefix = '::/0'; NextHop = 'fe80::1%7' }
+    }
+}
+function Get-NetNeighbor {
+    [CmdletBinding()]
+    param([string]$AddressFamily, [uint32]$InterfaceIndex, [string]$IPAddress)
+    if ($AddressFamily -eq 'IPv6' -and $IPAddress -eq 'fe80::1%7') {
+        [pscustomobject]@{ State = 'Stale'; LinkLayerAddress = '00-33-44-55-66-77' }
+    }
+}
+& ([scriptblock]::Create([IO.File]::ReadAllText($env:FAMILY_ACTIVITY_PS_SCRIPT)))
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            script_path = Path(tmp) / 'router-hint.ps1'
+            harness_path = Path(tmp) / 'test-ipv6-router-hint.ps1'
+            script_path.write_text(windows._DEFAULT_ROUTE_SCRIPT, encoding='utf-8')
+            harness_path.write_text(harness, encoding='utf-8')
+            env = os.environ.copy()
+            env['FAMILY_ACTIVITY_PS_SCRIPT'] = str(script_path)
+            result = subprocess.run([powershell, '-NoLogo', '-NoProfile', '-NonInteractive',
+                                     '-ExecutionPolicy', 'Bypass', '-File', str(harness_path)],
+                                    env=env, capture_output=True, text=True, timeout=15, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), '00-33-44-55-66-77')
 
     def test_windows_router_mac_is_pseudonymized_and_invalid_neighbors_are_unknown(self):
         import subprocess
@@ -125,6 +171,8 @@ function Get-NetNeighbor {
         self.assertEqual(run.call_args.kwargs['timeout'], 5)
         self.assertIn('Get-NetIPInterface', windows._DEFAULT_ROUTE_SCRIPT)
         self.assertIn('RouteMetric + $metric', windows._DEFAULT_ROUTE_SCRIPT)
+        self.assertIn("@('IPv4', 'IPv6')", windows._DEFAULT_ROUTE_SCRIPT)
+        self.assertIn("$_.DestinationPrefix -eq '::/0'", windows._DEFAULT_ROUTE_SCRIPT)
 
         with patch.object(windows.sys, 'platform', 'win32'), \
              patch.object(windows.subprocess, 'run', side_effect=subprocess.TimeoutExpired('powershell.exe', 5)):
