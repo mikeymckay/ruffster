@@ -178,7 +178,9 @@ def discover_code(pin, *, timeout=2.0, target=None):
             except (UnicodeError, ValueError, TypeError, KeyError):
                 continue
     if not matches:
-        raise ValueError('No nearby computer matched that code. Check the code and make sure both computers are on the same Wi-Fi.')
+        raise ValueError(
+            'No nearby computer matched that code. Check the digits and Wi-Fi. '
+            'On a Mac, allow Family Activity under System Settings > Privacy & Security > Local Network.')
     if len(matches) > 1:
         raise ValueError('More than one nearby computer matched. Ask the sender to start a new share and try again.')
     return next(iter(matches.values()))

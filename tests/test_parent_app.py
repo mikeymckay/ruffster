@@ -384,6 +384,14 @@ class ParentAppTests(unittest.TestCase):
         finally:
             share.shutdown(); thread.join(timeout=5); share.server_close()
 
+    def test_report_pairing_error_points_mac_users_to_local_network_access(self):
+        from unittest.mock import patch
+        self.login(); self.create_parent_key('638204')
+        with patch('family_activity.local_share.discover_code', side_effect=ValueError('not found')):
+            status, _, content = self.request('POST', '/api/sync', {'code': '00'})
+        self.assertEqual(status, 400)
+        self.assertIn('System Settings > Privacy & Security > Local Network', json.loads(content)['error'])
+
     def test_parent_can_start_and_stop_one_time_public_key_pairing(self):
         from unittest.mock import patch
         from family_activity.local_share import decode_code, fetch_public_key

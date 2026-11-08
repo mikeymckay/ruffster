@@ -824,3 +824,7 @@ Added a plain-language usage description to the Mac app bundle and placed the ap
 ## 2026-11-08 — Validate the attributed LaunchAgent on the Mac
 
 Updated `scripts/validate-macos-agent-runtime.py` to make its disposable synthetic app bundle and confirm the real installer writes its bundle identifier into `AssociatedBundleIdentifiers`. The validator ran on the test Mac’s logged-in Mac: the LaunchAgent bootstrapped successfully with that property, stored only encrypted synthetic foreground records with network collection disabled, restarted after SIGKILL, recorded the restart gap, and uninstalled. It retained the encrypted report as configured; the harness removed the temporary app, home, and report. Follow-up checks found no validation LaunchAgent, validator process, status helper, or transfer listener. The 16 Mac installer tests pass on Linux; native prompt allow/deny remains untested because the validation uses SSH-exempt execution.
+
+## 2026-11-08 — Improve guidance when local report transfer fails
+
+The two-digit discovery error and parent dashboard now mention checking the digits and Wi-Fi, and direct Mac users to System Settings > Privacy & Security > Local Network. This follows the permission explanation already added to the app bundle, parent guide, and FAQ. Added regression checks for discovery and the parent API error. Full Linux suite: 240 tests, 4 skipped (PowerShell unavailable). Full macOS suite on the test Mac: 240 tests, 6 skipped (2 Node.js and 4 PowerShell unavailable). The focused docs suite passes all 24 tests.

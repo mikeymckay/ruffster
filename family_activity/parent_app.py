@@ -400,7 +400,7 @@ class Handler(BaseHTTPRequestHandler):
                 _install_report(self.server, data)
                 self._json({'ok': True})
             except Exception:
-                self._json({'error': 'Could not receive the report. Check the two digits and Wi-Fi connection, then try again.'}, 400)
+                self._json({'error': 'Could not receive the report. Check the two digits and Wi-Fi. On a Mac, allow Family Activity in System Settings > Privacy & Security > Local Network.'}, 400)
             return
         if self.path == '/api/import':
             if self.server.private_key is None:

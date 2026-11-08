@@ -115,7 +115,7 @@ class LocalShareTests(unittest.TestCase):
         resolved = discover_code(self.server.short_code, target='127.0.0.1')
         self.assertEqual(decode_code(resolved), decode_code(self.server.code))
         wrong = f'{(int(self.server.short_code) + 1) % 100:02d}'
-        with self.assertRaisesRegex(ValueError, 'No nearby computer matched'):
+        with self.assertRaisesRegex(ValueError, 'No nearby computer matched.*System Settings'):
             discover_code(wrong, timeout=0.3, target='127.0.0.1')
         with self.assertRaisesRegex(ValueError, 'two digits'):
             discover_code('8')
