@@ -192,7 +192,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('VoiceOver', guide)
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
         self.assertIn('explicit screen-reader labels and help', readme)
-        self.assertIn('actual VoiceOver behavior still need interactive review', readme)
+        self.assertIn('actual VoiceOver behavior also need review', readme)
 
     def test_home_page_discloses_limits_of_optional_mac_process_totals(self):
         home = (SITE / 'index.html').read_text(encoding='utf-8')
