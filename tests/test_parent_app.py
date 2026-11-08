@@ -1,7 +1,11 @@
 import http.client
+import html
 import json
 from contextlib import closing
 from pathlib import Path
+import re
+import shutil
+import subprocess
 import tempfile
 import threading
 import unittest
@@ -166,6 +170,20 @@ class ParentAppTests(unittest.TestCase):
             'Sec-Fetch-Site': 'cross-site'})[0], 403)
         self.assertEqual(self.request('GET', '/api/status', headers={
             'Sec-Fetch-Site': 'same-origin'})[0], 200)
+
+    @unittest.skipUnless(shutil.which('google-chrome'), 'requires Google Chrome')
+    def test_chrome_launcher_session_can_read_same_origin_parent_api(self):
+        with tempfile.TemporaryDirectory() as profile:
+            result = subprocess.run([
+                shutil.which('google-chrome'), '--headless=new', '--no-sandbox',
+                '--disable-gpu', '--disable-dev-shm-usage', '--no-first-run',
+                '--disable-background-networking', '--virtual-time-budget=3000',
+                f'--user-data-dir={profile}', '--dump-dom', self.server.url,
+            ], capture_output=True, text=True, timeout=20, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        message = re.search(r'<p id="message"[^>]*>(.*?)</p>', result.stdout, re.S)
+        self.assertIsNotNone(message, 'dashboard status message was not rendered')
+        self.assertEqual(html.unescape(message.group(1)).strip(), '')
 
     def test_parent_key_auto_locks_after_inactivity(self):
         import time
