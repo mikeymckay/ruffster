@@ -732,3 +732,10 @@ Rewrote the child's browser popup copy to remove the implementation term “temp
 ## 2026-11-08 — Reject invalid sampling intervals
 
 The agent now validates its sampling interval both when parsing the CLI option and at the agent function boundary. Zero, negative, NaN, infinity, and malformed values fail with an actionable “finite positive number” error before acquiring the agent lock, starting the status helper, or creating the activity database. Added unit checks for the validator and subprocess tests proving each invalid CLI value exits with an error and leaves no database. Focused network and agent tests passed; the complete Linux suite passed 224 tests with no skips. PowerShell Core 7.6.6 was present for the Windows script parsing and mocked route-selection checks included in that suite.
+
+
+## 2026-11-08: Minimized Windows built-in VPN profile indicator
+
+The Windows preview now checks current-user and all-user built-in VPN profiles with `Get-VpnConnection` and stores only connected, disconnected, or unknown. Profile names and error text are not emitted. Query failures remain unknown; third-party VPN implementations are outside this check. The PowerShell script was run with PowerShell Core against mocked connected, disconnected, and query-error results, and focused adapter tests passed. Native Windows behavior, permissions, and the dashboard wording still need validation on a Windows computer. This indicator does not show whether filtering works.
+
+Focused network settings and PowerShell Core probe checks passed. Full Linux suite: 228 tests passed with no skips. `node --check family_activity/parent_assets/app.js` passed, and all 24 documentation-site tests passed.

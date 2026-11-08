@@ -4,6 +4,8 @@ No resolver IPs, proxy addresses, VPN names, passwords, or URLs are returned.
 These observations do not verify filtering or enumerate every VPN/proxy.
 """
 import ipaddress
+import ntpath
+import os
 import re
 import subprocess
 
@@ -41,6 +43,49 @@ def parse_vpn(output):
     return True if re.search(r'^\s*\*?\s*\(Connected\)', output, re.M) else None
 
 
+def parse_windows_vpn(output):
+    """Accept only the minimized status token emitted by our PowerShell probe."""
+    if not isinstance(output, str):
+        return None
+    status = output.strip().lower()
+    if status == 'connected':
+        return True
+    if status == 'disconnected':
+        return False
+    return None
+
+
+_WINDOWS_VPN_SCRIPT = r"""
+$profiles = @()
+$queryFailed = $false
+try { $profiles += @(Get-VpnConnection -ErrorAction Stop) }
+catch { $queryFailed = $true }
+try { $profiles += @(Get-VpnConnection -AllUserConnection -ErrorAction Stop) }
+catch { $queryFailed = $true }
+if ($profiles | Where-Object { $_.ConnectionStatus -eq 'Connected' } | Select-Object -First 1) {
+    Write-Output 'connected'
+} elseif ($queryFailed) {
+    Write-Output 'unknown'
+} else {
+    Write-Output 'disconnected'
+}
+"""
+
+
+def observe_windows_vpn():
+    """Check built-in Windows VPN profile state without returning profile data."""
+    powershell = ntpath.join(os.environ.get('SystemRoot', r'C:\Windows'),
+                             'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe')
+    try:
+        result = subprocess.run(
+            [powershell, '-NoLogo', '-NoProfile', '-NonInteractive', '-Command', _WINDOWS_VPN_SCRIPT],
+            capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=5,
+            check=True, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return parse_windows_vpn(result.stdout)
+
+
 def observe_macos():
     def run(*args):
         try:
@@ -56,9 +101,8 @@ def observe_macos():
 def observe_windows():
     """Return privacy-minimized Windows registry observations.
 
-    Registry strings are examined in memory and never returned. VPN presence is
-    unknown: Windows exposes many VPN implementations and this adapter does not
-    attempt to enumerate them.
+    Registry strings are examined in memory and never returned. VPN status is
+    limited to built-in Windows VPN profiles; third-party VPNs are not covered.
     """
     try:
         import winreg
@@ -111,7 +155,7 @@ def observe_windows():
     except OSError:
         pass
     return {'dns_observed': dns_observed, 'proxy_indicator': proxy_indicator,
-            'vpn_indicator': None}
+            'vpn_indicator': observe_windows_vpn()}
 
 
 def _valid_ip(value):
