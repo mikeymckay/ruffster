@@ -867,3 +867,8 @@ The process traffic sampler starts the native status companion, but the direct a
 ## 2026-11-08 — Clarify process totals on the public overview
 
 The Pages home page now includes the optional experimental macOS process-byte summary alongside interface totals and says that process totals cannot identify websites; helper services may own connections and brief connections may be missed. Added a documentation regression check. Linux and Mac full suites each pass 258 tests (four PowerShell skips on Linux; six platform/dependency skips on Mac). The check was text and link coverage; no visual change was made to the layout, and no monitoring service ran.
+
+
+## 2026-11-08 — Repeat live macOS agent lifecycle validation
+
+Ran `scripts/validate-macos-agent-runtime.py` on the test Mac’s macOS 26.6 / Apple-silicon host using the real installer and LaunchAgent code with a temporary home directory, synthetic foreground helper, generated test key, and native status helper. The agent encrypted three fictional app samples, reconstructed a 9.0-second gap after process suspension, restarted under a new PID after SIGKILL, and recorded a 0.2-second restart gap. Graceful termination closed the session. Uninstall stopped the job and retained the encrypted report as designed; the harness then removed its temporary home, key, database, helper, and plist. It confirmed the disposable LaunchAgent was removed. This verifies logged-in user-session behavior and visible-helper readiness; it does not verify actual reboot/login without a session, UI appearance/VoiceOver, sleep/wake, or family usability.
