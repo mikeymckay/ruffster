@@ -10,6 +10,7 @@ import signal
 import io
 import threading
 import unittest
+from contextlib import closing
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from nacl.public import PrivateKey
@@ -29,7 +30,8 @@ class EncryptedAgentTests(unittest.TestCase):
             self.assertEqual(second.device_id, device_id)
             second.event('stop')
             second.close()
-            events = sqlite3.connect(path).execute('SELECT ciphertext FROM encrypted_events ORDER BY id').fetchall()
+            with closing(sqlite3.connect(path)) as database:
+                events = database.execute('SELECT ciphertext FROM encrypted_events ORDER BY id').fetchall()
             decrypted = [encrypted_store.open_event(parent, row[0]) for row in events]
             self.assertEqual({event['device_id'] for event in decrypted}, {device_id})
             self.assertNotIn(device_id.encode(), path.read_bytes())

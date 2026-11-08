@@ -488,6 +488,24 @@ class WindowsTaskTests(unittest.TestCase):
             with patch.object(windows_install.locking,'lock_file',return_value=None):
                 self.assertFalse(windows_install._agent_running(database))
 
+    def test_retained_event_count_closes_its_read_connection(self):
+        import sqlite3
+        import tempfile
+        from pathlib import Path
+        from family_activity import windows_install
+        with tempfile.TemporaryDirectory() as tmp:
+            database = Path(tmp) / 'activity.sqlite3'
+            connection = sqlite3.connect(database)
+            connection.execute('CREATE TABLE encrypted_events(expires_on TEXT)')
+            connection.close()
+            connect = sqlite3.connect
+            with patch('family_activity.windows_install.sqlite3.connect') as open_database:
+                opened = connect(database.resolve().as_uri() + '?mode=ro', uri=True, timeout=1)
+                open_database.return_value = opened
+                self.assertEqual(windows_install._retained_event_count(database), 0)
+            with self.assertRaises(sqlite3.ProgrammingError):
+                opened.execute('SELECT 1')
+
     def test_windows_readiness_requires_a_new_encrypted_event_and_live_agent(self):
         import tempfile
         from pathlib import Path

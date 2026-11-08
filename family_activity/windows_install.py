@@ -13,6 +13,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from contextlib import closing
 from datetime import datetime, timezone
 
 from . import locking, parent_settings, public_key_file, windows_task
@@ -56,7 +57,10 @@ def _retained_event_count(database):
     if not database.is_file():
         return 0
     uri = database.resolve().as_uri() + '?mode=ro'
-    with sqlite3.connect(uri, uri=True, timeout=1) as db:
+    # sqlite3's connection context manager commits/rolls back but does not
+    # close the connection. This runs repeatedly during readiness polling, so
+    # release the read handle before returning.
+    with closing(sqlite3.connect(uri, uri=True, timeout=1)) as db:
         return db.execute('SELECT COUNT(*) FROM encrypted_events WHERE expires_on > ?',
                           (datetime.now(timezone.utc).date().isoformat(),)).fetchone()[0]
 

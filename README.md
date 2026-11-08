@@ -6,7 +6,7 @@
 
 **This is not ready for family deployment.** The Mac package is unsigned. Windows has not been tested on a Windows computer. Setup, accessibility, security, key recovery, and family usability still need validation. There is no supported release download.
 
-[Website source (Pages-ready)](docs/index.html) · [Getting started](docs/install.html) · [FAQ](docs/faq.html) · [Privacy and children's rights](PRIVACY-AND-CHILDREN.md) · [Implementation plan](PLAN.md) · [Current status](PROJECT-STATUS.html)
+[Website source (Pages-ready)](docs/index.html) · [Getting started](docs/install.html) · [Progress page](docs/progress.html) · [FAQ](docs/faq.html) · [Privacy and children's rights](PRIVACY-AND-CHILDREN.md) · [Implementation plan](PLAN.md) · [Current status](PROJECT-STATUS.html)
 
 > **Platform priority:** macOS first, then Windows. Linux is a development and test host only; Linux is not a student-facing target in the current scope.
 
@@ -69,7 +69,7 @@ The engineering requirements and open European privacy and children's-rights que
 
 1. **Make macOS dependable first.** Validate setup and removal, visible status, sleep/wake, permissions, user changes, restart recovery, encrypted reports, and key recovery on real Macs. Finish a parent-friendly signed and notarized installer before family distribution.
 2. **Port the finished family flow to Windows.** Test installation, startup and recovery, visible tray status, network and app observations, encrypted report handoff, parent dashboard, updates, and removal on real Windows computers.
-3. **Make the public project experience excellent.** Keep this README useful to a parent arriving for the first time and to a contributor; publish a polished GitHub Pages home page, family installation guide, and plain-language FAQ. Include current synthetic screenshots, clear readiness status, accessible responsive layouts, and no download link until a supported release exists.
+3. **Make the public project experience excellent.** Keep this README useful to a parent arriving for the first time and to a contributor; publish a polished GitHub Pages home page, family installation guide, progress page, and plain-language FAQ. Include current synthetic screenshots, clear readiness status, accessible responsive layouts, and no download link until a supported release exists.
 4. **Validate with families and reviewers.** Observe nontechnical parents and children using the whole flow; complete accessibility, security, privacy, and European children's rights reviews.
 
 Linux remains a low-priority development and test host. It is not a student-facing platform target. The task list and release gates are in [PLAN.md](PLAN.md); the Pages design and launch checklist is in [GITHUB-PAGES.md](GITHUB-PAGES.md).
@@ -95,7 +95,7 @@ For local UI development, start the experimental parent app:
 
 It binds to loopback. The default CLI database and dashboard are developer tools, not a family installation path. Do not expose them to a network.
 
-GitHub Actions runs the test suite on Linux, macOS, and Windows, then builds the Mac and Windows previews on their native runners. The Mac job also exercises the harmless per-user LaunchAgent startup/restart/removal path with a sleep-only fixture. Generated previews are discarded; CI does not publish install downloads. The repository is published at [github.com/mikeymckay/ruffster](https://github.com/mikeymckay/ruffster). The GitHub Pages source still needs to be set to **GitHub Actions** in the repository's [Pages settings](https://github.com/mikeymckay/ruffster/settings/pages) before the public website can go live.
+GitHub Actions runs the test suite on Linux, macOS, and Windows, then builds the Mac and Windows previews on their native runners. The Mac job also exercises the harmless per-user LaunchAgent startup/restart/removal path with a sleep-only fixture. Generated previews are discarded; CI does not publish install downloads. The repository is published at [github.com/mikeymckay/ruffster](https://github.com/mikeymckay/ruffster). The [Pages source is now set to GitHub Actions](https://github.com/mikeymckay/ruffster/settings/pages); the first deployment is being triggered by the latest site update.
 
 The test runner prints each test and emits Python stack traces every five minutes if a job stalls; CI also places those traces in the job summary and stops a test job after 20 minutes.
 
@@ -119,7 +119,7 @@ Read [WINDOWS.md](WINDOWS.md) before working on the Windows preview. A Linux cro
 
 ## Project website
 
-The static website source in `docs/` contains the home page, getting-started guide, FAQ, and screenshots. It has no external runtime dependencies and is intended to publish from the repository's `/docs` folder with GitHub Pages. See [GITHUB-PAGES.md](GITHUB-PAGES.md). The website should not link to a family download until a supported signed release exists.
+The static website source in `docs/` contains the home page, getting-started guide, progress page, FAQ, and screenshots. It has no external runtime dependencies and publishes from the repository's `/docs` folder with GitHub Pages. See [GITHUB-PAGES.md](GITHUB-PAGES.md). The website should not link to a family download until a supported signed release exists.
 
 Refresh the synthetic parent setup and report screenshots with `.venv/bin/python scripts/capture-parent-demo-screenshots.py` (Chrome or Chromium required). The first-run image has no parent key; the report image uses a temporary key and fictional activity records. The tool starts no monitoring agent and replaces only the two PNG files in `docs/assets/`.
 

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width,initial-scale=1" name="viewport"/>
+  <meta content="Ruffster's current development progress, Mac and Windows validation, and the path to a supported Mac download." name="description"/>
+  <meta content="#f5f4ee" name="theme-color"/>
+  <title>Project progress — Ruffster</title>
+  <link href="favicon.svg" rel="icon" type="image/svg+xml"/>
+  <link href="assets/site.css" rel="stylesheet"/>
+ </head>
+ <body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+   <div class="wrap topbar-in">
+    <a class="brand" href="index.html">
+     <span aria-hidden="true" class="brand-mark"><svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="6.5" cy="7" rx="2.1" ry="2.7"/><ellipse cx="12" cy="5.3" rx="2.1" ry="2.7"/><ellipse cx="17.5" cy="7" rx="2.1" ry="2.7"/><ellipse cx="4.4" cy="12" rx="1.9" ry="2.4"/><path d="M12 10c-3.9 0-6.7 3.5-6.7 6.3 0 1.9 1.7 2.8 3.2 2.1l2.5-1.1a2.4 2.4 0 0 1 2 0l2.5 1.1c1.5.7 3.2-.2 3.2-2.1C18.7 13.5 15.9 10 12 10z"/></svg></span>
+     <span>Ruffster<small>a trusted family companion</small></span>
+    </a>
+    <nav aria-label="Main navigation" class="nav">
+     <a href="index.html">Overview</a>
+     <a href="install.html">Getting started</a>
+     <a href="faq.html">FAQ</a>
+     <a aria-current="page" class="nav-cta" href="progress.html">Progress</a>
+    </nav>
+   </div>
+  </header>
+  <main id="main">
+   <section class="page-hero">
+    <div class="wrap">
+     <div class="eyebrow">Project progress · updated 8 November 2026</div>
+     <h1>Mac testing is moving ahead. Family installation is still being prepared.</h1>
+     <p>The current prototype has been built and exercised on an Apple-silicon Mac with synthetic activity. This page tracks what works, what still needs real-world validation, and what must happen before parents can download Ruffster.</p>
+    </div>
+   </section>
+   <div class="wrap prose">
+    <div class="notice">
+     <strong>There is no supported Mac download yet.</strong>
+     The Mac app is unsigned. A Developer ID signing identity is not available on the build Mac, so Ruffster cannot yet provide the standard download and first-open experience parents expect. Windows also needs testing on a real Windows computer. Please do not use this preview for ongoing family monitoring.
+    </div>
+    <h2>What is working</h2>
+    <ol class="steps">
+     <li><strong>Visible Mac monitoring prototype.</strong> In a logged-in session, the Mac agent records synthetic foreground-app observations in parent-key-encrypted storage, shows a separate status companion, reconstructs an observable gap, and restarts after a forced stop through launchd.</li>
+     <li><strong>Parent dashboard and encrypted reports.</strong> Parents can unlock reports, set school hours and retention, receive encrypted reports, keep computers separate, and review clearly labeled estimates and measured counters.</li>
+     <li><strong>Mac build and automated checks.</strong> The unsigned preview app builds on Apple silicon and passes native packaging smoke checks. The latest full suites ran 281 tests on both Mac and Linux; the Mac run had 8 platform/dependency skips and the Linux run had 5. Tracemalloc-enabled Mac checks found and verified fixes for SQLite read-handle leaks.</li>
+     <li><strong>Windows prototype.</strong> A per-user setup, visible tray indicator, parent dashboard launcher, and update flow are implemented and built in CI. There is no real Windows computer validation yet.</li>
+    </ol>
+    <h2>What still stands between here and a Mac download</h2>
+    <ul>
+     <li>Make a Developer ID certificate and notarization setup available, then sign and notarize the Mac app.</li>
+     <li>Install the resulting download on a clean Mac and verify first open, setup, monitoring status, report transfer, update, recovery, and uninstall.</li>
+     <li>Review the native windows with keyboard and VoiceOver, and check the Mac local-network permission flow.</li>
+     <li>Validate the Windows installer, task startup, tray indicator, report transfer, update, and removal on an actual Windows computer.</li>
+     <li>Run the setup and weekly report flow with parents and children, then complete accessibility, privacy, and security reviews.</li>
+    </ul>
+    <p>Once the signed Mac package passes those checks, the <a href="install.html">Getting started page</a> will link to a download hosted in GitHub Releases. The page will keep the download unavailable until that release gate is met.</p>
+    <h2>Current automated test results</h2>
+    <p><strong>Mac:</strong> 281 tests ran; 273 passed and 8 platform/dependency checks skipped. The additional run with Python resource tracing reported zero SQLite <code>ResourceWarning</code>s.</p>
+    <p><strong>Linux development host:</strong> 281 tests ran; 276 passed and 5 platform/tool checks skipped. These tests do not prove Windows behavior.</p>
+    <p><strong>Website:</strong> the home page, getting-started guide, Progress page, and FAQ passed desktop and mobile accessibility scans with zero Axe violations. GitHub Pages has now been set to use Actions; the first deployment is being triggered with this update.</p>
+    <h2>What the prototype looks like</h2>
+    <p>These examples use synthetic parent and activity data. They are illustrations of the current prototype, not a finished or supported installer.</p>
+    <div class="detail-grid">
+     <figure class="photo-card"><a href="assets/parent-setup.png"><img src="assets/parent-setup.png" alt="Ruffster parent setup screen with a blank six-digit PIN form and recovery-copy instructions" loading="lazy"/></a><figcaption class="photo-caption">Parent access and recovery setup · synthetic example</figcaption></figure>
+     <figure class="photo-card"><a href="assets/parent-dashboard.png"><img src="assets/parent-dashboard.png" alt="Ruffster parent report with synthetic app and network observations, labeled estimates, and conversation prompts" loading="lazy"/></a><figcaption class="photo-caption">Parent report and discussion prompts · synthetic example</figcaption></figure>
+    </div>
+    <h2>Where to follow the work</h2>
+    <ul>
+     <li><a href="https://github.com/mikeymckay/ruffster">Ruffster source and release downloads on GitHub</a></li>
+     <li><a href="install.html">Getting started and current install availability</a></li>
+     <li><a href="faq.html">Privacy and product questions</a></li>
+     <li><a href="https://github.com/mikeymckay/ruffster/blob/main/PROJECT-STATUS.html">Detailed engineering status in the repository</a></li>
+    </ul>
+   </div>
+  </main>
+  <footer class="footer">
+   <div class="wrap footer-grid">
+    <div><a class="brand" href="index.html"><span aria-hidden="true" class="brand-mark"><svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="6.5" cy="7" rx="2.1" ry="2.7"/><ellipse cx="12" cy="5.3" rx="2.1" ry="2.7"/><ellipse cx="17.5" cy="7" rx="2.1" ry="2.7"/><ellipse cx="4.4" cy="12" rx="1.9" ry="2.4"/><path d="M12 10c-3.9 0-6.7 3.5-6.7 6.3 0 1.9 1.7 2.8 3.2 2.1l2.5-1.1a2.4 2.4 0 0 1 2 0l2.5 1.1c1.5.7 3.2-.2 3.2-2.1C18.7 13.5 15.9 10 12 10z"/></svg></span><span>Ruffster<small>your trusted family companion</small></span></a><p>macOS first · Windows next · Linux for development/testing only</p></div>
+    <div class="footer-links"><a href="index.html">Overview</a><a href="install.html">Getting started</a><a href="faq.html">FAQ</a></div>
+   </div>
+  </footer>
+ </body>
+</html>

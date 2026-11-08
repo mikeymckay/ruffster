@@ -28,7 +28,7 @@ class PageRefs(HTMLParser):
 
 class DocumentationSiteTests(unittest.TestCase):
     def test_github_pages_entry_points_and_assets_exist(self):
-        for page in ('index.html', 'install.html', 'faq.html', '404.html'):
+        for page in ('index.html', 'install.html', 'progress.html', 'faq.html', '404.html'):
             self.assertTrue((SITE / page).is_file(), page)
         self.assertTrue((SITE / '.nojekyll').is_file())
         self.assertTrue((SITE / 'assets/site.css').is_file())
@@ -133,7 +133,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('pages-accessibility', workflow)
         self.assertIn('npm ci', workflow)
         self.assertIn('npm run check:pages-a11y', workflow)
-        for page in ('index.html', 'install.html', 'faq.html'):
+        for page in ('index.html', 'install.html', 'progress.html', 'faq.html'):
             self.assertIn(f"'{page}'", script)
         self.assertIn('wcag21aa', script)
         self.assertIn('horizontal overflow', script)
@@ -145,9 +145,9 @@ class DocumentationSiteTests(unittest.TestCase):
 
     def test_github_pages_guide_matches_published_repository_state(self):
         guide = (ROOT / 'GITHUB-PAGES.md').read_text(encoding='utf-8')
-        self.assertIn('repository is public and `main` has been pushed', guide)
-        self.assertIn('must be configured first', guide)
-        self.assertIn('choose **GitHub Actions** as the source', guide)
+        self.assertIn('repository is public, and its Pages source is now configured to use GitHub Actions', guide)
+        self.assertIn('The first deployment after enabling Pages is being checked', guide)
+        self.assertIn('progress page', guide)
 
     def test_local_reports_and_key_material_are_ignored_by_source_control(self):
         ignored = (ROOT / '.gitignore').read_text(encoding='utf-8').splitlines()
@@ -162,7 +162,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('macOS first, then Windows', home)
         self.assertIn('Linux is not a student-facing target', guide)
         self.assertIn('There is no supported family installer yet', guide)
-        self.assertIn('temporary synthetic-only test verified encrypted app samples', guide)
+        self.assertIn('temporary synthetic-only check verified encrypted app samples', guide)
         self.assertIn('VoiceOver behavior', guide)
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
         self.assertIn('explicit screen-reader labels and help', readme)
@@ -429,7 +429,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('exec /bin/sleep 60', lifecycle_check)
         self.assertIn('validate-macos-install-flow.py', guide)
         self.assertIn('zero valid identities', status)
-        self.assertIn('<b>280</b><span>Mac tests run · 272 passed · 8 platform/dependency checks skipped', status)
+        self.assertIn('<b>281</b><span>Mac tests run · 273 passed · 8 platform/dependency checks skipped', status)
         self.assertIn('Latest real-machine checkpoint · macOS 26.6 on Apple silicon', status)
         self.assertIn('same-location update action', status)
         self.assertIn('Parent reports can merge several computers', status)
@@ -443,4 +443,4 @@ class DocumentationSiteTests(unittest.TestCase):
         status = (ROOT / 'PROJECT-STATUS.html').read_text(encoding='utf-8')
         self.assertIn('The latest GitHub Actions run is still in progress', status)
         self.assertIn('periodic stack traces', status)
-        self.assertIn('repository setting to publish with Actions', status)
+        self.assertIn('GitHub Pages is now set to use Actions', status)

@@ -1,6 +1,7 @@
 import sqlite3
 import tempfile
 import unittest
+from contextlib import closing
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 
@@ -31,21 +32,21 @@ class DeviceLabelTests(unittest.TestCase):
                 'target_device_id': 'b' * 32,
                 'label': 'Child forged name',
             })
-            with sqlite3.connect(path) as database:
+            with closing(sqlite3.connect(path)) as database, database:
                 authentic_ciphertext = database.execute(
                     'SELECT ciphertext FROM encrypted_events ORDER BY id DESC LIMIT 1').fetchone()[0]
             replayed = encrypted_store.open_event(key, authentic_ciphertext)
             replayed['label'] = 'Tampered parent name'
             tampered = encrypted_store.seal_event(key.public_key, replayed)
             expiry = (datetime.now(timezone.utc).date() + timedelta(days=30)).isoformat()
-            with sqlite3.connect(path) as database:
+            with closing(sqlite3.connect(path)) as database, database:
                 database.execute('INSERT INTO encrypted_events(expires_on,ciphertext) VALUES (?,?)',
                                  (expiry, forged))
                 database.execute('INSERT INTO encrypted_events(expires_on,ciphertext) VALUES (?,?)',
                                  (expiry, tampered))
             stored = path.read_bytes()
             self.assertNotIn(b"Annika's Mac", stored)
-            with sqlite3.connect(path) as database:
+            with closing(sqlite3.connect(path)) as database:
                 self.assertEqual({row[0] for row in database.execute(
                     "SELECT name FROM sqlite_master WHERE type='table'")},
                     {'key_commitment', 'encrypted_events'})

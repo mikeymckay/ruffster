@@ -9,7 +9,7 @@ import WebSocket from 'ws';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const site = path.join(root, 'docs');
-const pages = ['index.html', 'install.html', 'faq.html'];
+const pages = ['index.html', 'install.html', 'progress.html', 'faq.html'];
 const viewports = [
   { name: 'desktop', width: 1440, height: 1000, mobile: false },
   { name: 'mobile', width: 390, height: 844, mobile: true },
