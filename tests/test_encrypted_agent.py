@@ -116,7 +116,7 @@ class EncryptedAgentTests(unittest.TestCase):
             parent = PrivateKey.generate()
             public = folder / 'parent.pub'
             public.write_bytes(bytes(parent.public_key))
-            for value in ('0', '-0.1', 'nan', 'inf', '-inf'):
+            for value in ('0', '-0.1', 'nan', 'inf', '-inf', '3600.01', '1e308'):
                 with self.subTest(interval=value):
                     database = folder / f'{value.replace("-", "negative-")}.sqlite3'
                     result = subprocess.run(

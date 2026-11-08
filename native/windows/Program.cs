@@ -18,6 +18,12 @@ internal static class TrayCompanion
         return uptime - lastHeartbeat.Value <= staleAfter ? TrayState.On : TrayState.Paused;
     }
 
+    private static TimeSpan ResolveStaleAfter(double sampleInterval)
+    {
+        if (!double.IsFinite(sampleInterval) || sampleInterval <= 0 || sampleInterval > 3600) sampleInterval = 15;
+        return TimeSpan.FromSeconds(Math.Max(45, sampleInterval * 3 + 5));
+    }
+
     public static void RunStatusSelfTest()
     {
         var timeout = TimeSpan.FromSeconds(45);
@@ -26,6 +32,10 @@ internal static class TrayCompanion
             ResolveState(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(10), timeout) != TrayState.On ||
             ResolveState(TimeSpan.FromSeconds(70), TimeSpan.FromSeconds(10), timeout) != TrayState.Paused)
             throw new InvalidOperationException("The Windows tray status state check failed.");
+        if (ResolveStaleAfter(double.PositiveInfinity) != TimeSpan.FromSeconds(50) ||
+            ResolveStaleAfter(3600.01) != TimeSpan.FromSeconds(50) ||
+            ResolveStaleAfter(3600) != TimeSpan.FromSeconds(10805))
+            throw new InvalidOperationException("The Windows tray sampling-interval check failed.");
     }
 
     public static void RunHeartbeatIpcSelfTest()
@@ -78,9 +88,9 @@ internal static class TrayCompanion
         TimeSpan? lastHeartbeat = null;
         var sampleInterval = 15.0;
         if (!double.TryParse(Environment.GetEnvironmentVariable("FAMILY_ACTIVITY_SAMPLE_INTERVAL"), NumberStyles.Float,
-                             CultureInfo.InvariantCulture, out sampleInterval) || !double.IsFinite(sampleInterval) || sampleInterval <= 0)
+                             CultureInfo.InvariantCulture, out sampleInterval) || !double.IsFinite(sampleInterval) || sampleInterval <= 0 || sampleInterval > 3600)
             sampleInterval = 15.0;
-        var staleAfter = TimeSpan.FromSeconds(Math.Max(45, sampleInterval * 3 + 5));
+        var staleAfter = ResolveStaleAfter(sampleInterval);
         using var timer = new System.Windows.Forms.Timer { Interval = 2000 };
         timer.Tick += (_, _) =>
         {

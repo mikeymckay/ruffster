@@ -8,9 +8,20 @@ private enum MonitoringState: Equatable {
     case active
     case paused
 
+    static let defaultSampleInterval = 15.0
+    static let maximumSampleInterval = 3600.0
+
     static func from(lastHeartbeat: Date?, now: Date, sampleInterval: TimeInterval) -> MonitoringState {
         guard let lastHeartbeat else { return .starting }
-        return now.timeIntervalSince(lastHeartbeat) <= max(45, sampleInterval * 3 + 5) ? .active : .paused
+        let interval = sampleInterval.isFinite && sampleInterval > 0 && sampleInterval <= maximumSampleInterval
+            ? sampleInterval : defaultSampleInterval
+        return now.timeIntervalSince(lastHeartbeat) <= max(45, interval * 3 + 5) ? .active : .paused
+    }
+
+    static func sampleInterval(from value: String?) -> TimeInterval {
+        guard let value, let interval = Double(value), interval.isFinite,
+              interval > 0, interval <= maximumSampleInterval else { return defaultSampleInterval }
+        return interval
     }
 
     var menuText: String {
@@ -55,7 +66,7 @@ final class StatusController: NSObject, NSApplicationDelegate {
     private var heartbeatBuffer = Data()
     private var lastHeartbeat: Date?
     private let parent = getppid()
-    private let sampleInterval = TimeInterval(ProcessInfo.processInfo.environment["FAMILY_ACTIVITY_SAMPLE_INTERVAL"] ?? "15") ?? 15
+    private let sampleInterval = MonitoringState.sampleInterval(from: ProcessInfo.processInfo.environment["FAMILY_ACTIVITY_SAMPLE_INTERVAL"])
     private let sharePython = ProcessInfo.processInfo.environment["FAMILY_ACTIVITY_SHARE_PYTHON"]
     private let shareDatabase = ProcessInfo.processInfo.environment["FAMILY_ACTIVITY_SHARE_DATABASE"]
 
@@ -269,12 +280,18 @@ if CommandLine.arguments.contains("--self-test-state") {
     let starting = MonitoringState.from(lastHeartbeat: nil, now: now, sampleInterval: 1)
     let active = MonitoringState.from(lastHeartbeat: now.addingTimeInterval(-2), now: now, sampleInterval: 1)
     let paused = MonitoringState.from(lastHeartbeat: now.addingTimeInterval(-46), now: now, sampleInterval: 1)
+    let invalidInterval = MonitoringState.sampleInterval(from: "inf") == 15 &&
+        MonitoringState.sampleInterval(from: "nan") == 15 &&
+        MonitoringState.sampleInterval(from: "3600.01") == 15 &&
+        MonitoringState.sampleInterval(from: "300") == 300
+    let hugeIntervalHeartbeat = MonitoringState.from(lastHeartbeat: now.addingTimeInterval(-46), now: now, sampleInterval: .infinity)
     let visibleLabels = starting.buttonText == "Monitoring …" &&
         active.buttonText == "Monitoring On" && paused.buttonText == "Monitoring Paused"
     let accessibleLabels = starting.accessibilityLabel.contains("starting") &&
         active.accessibilityLabel.contains("on") && paused.accessibilityLabel.contains("paused") &&
         !starting.accessibilityHelp.isEmpty && !active.accessibilityHelp.isEmpty && !paused.accessibilityHelp.isEmpty
-    exit(starting == .starting && active == .active && paused == .paused && visibleLabels && accessibleLabels ? 0 : 1)
+    exit(starting == .starting && active == .active && paused == .paused && invalidInterval &&
+         hugeIntervalHeartbeat == .paused && visibleLabels && accessibleLabels ? 0 : 1)
 }
 
 let app = NSApplication.shared

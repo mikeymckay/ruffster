@@ -8,4 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="bootstrapper/**/*.cs;bundle-extractor/**/*.cs;bundle-extractor-tests/**/*.cs;setup/obj/**/*.cs;setup/bin/**/*.cs" />
+  </ItemGroup>
 </Project>

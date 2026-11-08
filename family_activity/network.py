@@ -3,15 +3,17 @@ from datetime import datetime
 import math
 from .macos import traffic_delta
 
+MAX_SAMPLE_INTERVAL_SECONDS = 3600.0
+
 
 def validate_sampling_interval(interval):
-    """Return a finite positive sample interval or reject unsafe loop timing."""
+    """Return a safe finite sample interval of no more than one hour."""
     try:
         interval = float(interval)
     except (TypeError, ValueError, OverflowError):
         raise ValueError('sampling interval must be a finite positive number') from None
-    if not math.isfinite(interval) or interval <= 0:
-        raise ValueError('sampling interval must be a finite positive number')
+    if not math.isfinite(interval) or interval <= 0 or interval > MAX_SAMPLE_INTERVAL_SECONDS:
+        raise ValueError('sampling interval must be a finite positive number no greater than 3600 seconds')
     return interval
 
 

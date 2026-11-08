@@ -3,6 +3,10 @@ import unittest
 
 
 class WindowsSetupDisclosureTests(unittest.TestCase):
+    def test_windows_companion_project_excludes_nested_project_sources(self):
+        project = (Path(__file__).parents[1] / 'native/windows/FamilyActivityStatus.csproj').read_text(encoding='utf-8')
+        self.assertIn('<Compile Remove="bootstrapper/**/*.cs;bundle-extractor/**/*.cs;bundle-extractor-tests/**/*.cs;setup/obj/**/*.cs;setup/bin/**/*.cs" />', project)
+
     def test_windows_preview_compresses_self_contained_companion(self):
         root = Path(__file__).parents[1]
         source = (root / 'scripts/build-windows-preview.ps1').read_text(encoding='utf-8')
@@ -59,6 +63,9 @@ class WindowsSetupDisclosureTests(unittest.TestCase):
         entry = (root / 'native/windows/SetupEntry.cs').read_text(encoding='utf-8')
         builder = (root / 'scripts/build-windows-preview.ps1').read_text(encoding='utf-8')
         self.assertIn('RunUiSelfTest()', source)
+        self.assertIn('ResolveStaleAfter(double.PositiveInfinity)', tray)
+        self.assertIn('sampleInterval > 3600', tray)
+        self.assertIn('ResolveStaleAfter(sampleInterval)', tray)
         self.assertIn('SelfTestProgramRemoval()', source)
         self.assertIn('ScheduleProgramRemoval(folder)', source)
         self.assertEqual(source.count('private static bool ScheduleProgramRemoval(string folder)'), 1)

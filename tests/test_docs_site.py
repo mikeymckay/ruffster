@@ -282,6 +282,9 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('setAccessibilityHelp', native_status)
         self.assertIn('A recent encrypted sample was saved', native_status)
         self.assertIn('the reason is unknown', native_status)
+        self.assertIn('maximumSampleInterval = 3600.0', native_status)
+        self.assertIn('MonitoringState.sampleInterval(from:', native_status)
+        self.assertIn('hugeIntervalHeartbeat == .paused', native_status)
         self.assertIn('helpers/status" --self-test-state', builder)
 
     def test_macos_package_runs_frozen_parent_dashboard_smoke_check(self):
@@ -338,5 +341,5 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('exec /bin/sleep 60', lifecycle_check)
         self.assertIn('validate-macos-install-flow.py', guide)
         self.assertIn('zero valid identities', status)
-        self.assertIn('<b>231</b><span>Linux development tests passing · no skips</span>', status)
+        self.assertIn('<b>232</b><span>Linux development tests passing · no skips</span>', status)
         self.assertIn('<b>165</b><span>Mac tests passed · 2 Node.js checks skipped (167 run)</span>', status)

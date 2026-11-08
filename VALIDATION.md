@@ -768,3 +768,8 @@ Moved archive path validation and extraction into a platform-neutral .NET librar
 ## 2026-11-08 — Require child disclosure confirmation on Mac
 
 Replaced the long final Mac install paragraph with a fixed-height scrollable collection/retention disclosure and added a parent acknowledgment checkbox that keeps “Install for this account” disabled until selected. Updated the dialog title and accessibility labels. Eight Mac setup source tests pass; this host does not have Swift/AppKit and SSH to the test Mac’s Mac timed out, so native compilation, layout, VoiceOver, and interaction remain unverified. The full Linux Python suite passed 231 tests with no skips.
+
+
+## 2026-11-08 — Bound monitoring intervals and repair Windows companion build
+
+Sampling intervals are now limited to finite values from greater than zero through one hour. The agent validator rejects oversized values before creating the activity database; Mac and Windows visible-status helpers normalize invalid or excessive values before calculating their stale-heartbeat threshold. The Windows companion project now excludes nested installer and extractor source trees, which had been pulled into its recursive compile glob and caused duplicate `Program` entry points and assembly attributes. Added source regression coverage. The Windows companion cross-published as a compressed self-contained win-x64 executable with .NET 10.0.403 and warnings treated as errors. Full Linux suite: 232 tests passed with no skips. Mac-native compilation remains unavailable on this Linux host, and the Mac SSH target is currently unreachable; Windows runtime and UI behavior remain unverified on Windows.

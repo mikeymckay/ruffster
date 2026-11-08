@@ -6,11 +6,12 @@ from family_activity import network, store
 from family_activity.network import NetworkSampler, coverage_gap, sampling_gap_limit
 
 class NetworkTests(unittest.TestCase):
-    def test_sampling_interval_must_be_finite_and_positive(self):
-        for value in (0, -1, float('nan'), float('inf'), float('-inf'), 'not-a-number'):
+    def test_sampling_interval_must_be_finite_positive_and_bounded(self):
+        for value in (0, -1, float('nan'), float('inf'), float('-inf'), 'not-a-number', 3600.01, 1e308):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'finite positive'):
                 network.validate_sampling_interval(value)
         self.assertEqual(network.validate_sampling_interval('0.5'), 0.5)
+        self.assertEqual(network.validate_sampling_interval(3600), 3600)
 
     def test_coverage_gap_detects_suspend_and_ignores_short_or_backwards_intervals(self):
         start = '2026-11-07T10:00:00+00:00'
