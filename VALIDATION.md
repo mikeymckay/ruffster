@@ -783,3 +783,8 @@ Rewrote the answer to lead with the parent-facing basics: no add-on is required,
 ## 2026-11-08 — Explain optional browser add-on consistently
 
 Updated the README, project home page, and family installation guide to say the main app works without a browser add-on, parents do not install one, and the optional experiment runs on the child's computer in selected browsers. The copy notes that it can be bypassed and missing website names cannot explain why. Added regression assertions for all three pages. All 24 documentation-site tests pass and `git diff --check` is clean. No screenshot or application behavior changed.
+
+
+## 2026-11-08 — Diagnose the native Mac status self-check
+
+SSH to the test Mac briefly succeeded. The latest `native/macos/status.swift` compiled successfully there with `swiftc`, but `/tmp/family-activity-status --self-test-state` exited 1 without identifying the failing assertion. The host then went offline before the result could be retrieved through a subsequent SSH session. Updated the self-check to print the names of failed state checks and added source regression coverage; all 24 documentation-site tests pass and `git diff --check` is clean. The diagnostic change still needs transfer, native compilation, and execution on the Mac. `pmset -g custom` showed AC `sleep 0`, and `caffeinate -s` was active, so the sleep setting itself was correct.

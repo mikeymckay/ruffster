@@ -290,8 +290,22 @@ if CommandLine.arguments.contains("--self-test-state") {
     let accessibleLabels = starting.accessibilityLabel.contains("starting") &&
         active.accessibilityLabel.contains("on") && paused.accessibilityLabel.contains("paused") &&
         !starting.accessibilityHelp.isEmpty && !active.accessibilityHelp.isEmpty && !paused.accessibilityHelp.isEmpty
-    exit(starting == .starting && active == .active && paused == .paused && invalidInterval &&
-         hugeIntervalHeartbeat == .paused && visibleLabels && accessibleLabels ? 0 : 1)
+    let checks: [(String, Bool)] = [
+        ("starting state", starting == .starting),
+        ("active state", active == .active),
+        ("paused state", paused == .paused),
+        ("bounded interval parsing", invalidInterval),
+        ("oversized interval becomes stale", hugeIntervalHeartbeat == .paused),
+        ("visible state labels", visibleLabels),
+        ("accessibility labels and help", accessibleLabels)
+    ]
+    let failures = checks.filter { !$0.1 }.map { $0.0 }
+    if failures.isEmpty {
+        exit(0)
+    } else {
+        fputs("Monitoring status self-check failed: \(failures.joined(separator: ", "))\n", stderr)
+        exit(1)
+    }
 }
 
 let app = NSApplication.shared

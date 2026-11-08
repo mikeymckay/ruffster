@@ -293,6 +293,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('maximumSampleInterval = 3600.0', native_status)
         self.assertIn('MonitoringState.sampleInterval(from:', native_status)
         self.assertIn('hugeIntervalHeartbeat == .paused', native_status)
+        self.assertIn('Monitoring status self-check failed:', native_status)
         self.assertIn('helpers/status" --self-test-state', builder)
 
     def test_macos_package_runs_frozen_parent_dashboard_smoke_check(self):
