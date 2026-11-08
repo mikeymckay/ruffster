@@ -1,11 +1,12 @@
 """Reconstruct an experimental encrypted event log in an in-memory database."""
 from datetime import datetime
 import hashlib
+import hmac
 import re
 from pathlib import Path
 import sqlite3
 from nacl.public import PrivateKey
-from . import browser_channel, encrypted_store, store
+from . import browser_channel, device_labels, encrypted_store, store
 
 
 def _valid_time(value):
@@ -66,6 +67,7 @@ def _project(source, private_key):
     try:
         memory.execute('PRAGMA temp_store=MEMORY')
         store.initialize(memory)
+        memory.execute('CREATE TABLE device_labels (device_id TEXT PRIMARY KEY, label TEXT NOT NULL, updated_at TEXT NOT NULL)')
         source.execute('BEGIN')
         fingerprint = hashlib.sha256(bytes(private_key.public_key)).hexdigest()
         if source.execute('SELECT fingerprint FROM key_commitment').fetchall() != [(fingerprint,)]:
@@ -76,6 +78,30 @@ def _project(source, private_key):
         for ciphertext, in source.execute('SELECT ciphertext FROM encrypted_events ORDER BY id'):
             event = encrypted_store.open_event(private_key, ciphertext)
             typ, session, at = event.get('type'), event.get('session'), event.get('at')
+            if typ == 'device_label':
+                authentication = event.get('parent_auth')
+                try:
+                    expected_authentication = device_labels.authentication_tag(private_key, event)
+                except (TypeError, ValueError, UnicodeError):
+                    continue
+                if (not isinstance(authentication, str) or
+                        not hmac.compare_digest(authentication, expected_authentication)):
+                    # Child machines can encrypt with the parent's public key,
+                    # but cannot authenticate a parent-chosen computer name.
+                    continue
+                target = event.get('target_device_id')
+                label = event.get('label')
+                if (not _valid_time(at) or not isinstance(target, str)
+                        or (target != 'legacy' and not re.fullmatch(r'[0-9a-f]{32}', target))
+                        or not isinstance(label, str) or not label.strip() or len(label) > 48
+                        or any(ord(char) < 32 or ord(char) == 127 for char in label)):
+                    raise ValueError('invalid encrypted computer label')
+                memory.execute(
+                    'INSERT INTO device_labels(device_id,label,updated_at) VALUES (?,?,?) '
+                    'ON CONFLICT(device_id) DO UPDATE SET label=excluded.label, updated_at=excluded.updated_at '
+                    'WHERE excluded.updated_at >= device_labels.updated_at',
+                    (target, label.strip(), at))
+                continue
             device_id = _device_id(event)
             session_key = (device_id, session)
             if not isinstance(session, str) or not session or not _valid_time(at):

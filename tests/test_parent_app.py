@@ -533,7 +533,7 @@ class ParentAppTests(unittest.TestCase):
         named = json.loads(self.request('GET', f'/api/report?device={device_id}')[2])
         self.assertEqual(next(device['label'] for device in named['devices']
                               if device['device_id'] == device_id), "Annika's MacBook")
-        self.assertNotIn(b"Annika's MacBook", self.server.device_labels.read_bytes())
+        self.assertNotIn(b"Annika's MacBook", self.server.data.read_bytes())
 
     def test_import_normalizes_legacy_expiry_before_marking_records_current(self):
         import sqlite3

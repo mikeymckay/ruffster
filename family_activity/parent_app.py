@@ -63,9 +63,6 @@ class ParentServer(HTTPServer):
     def labels(self): return self.folder / 'network-labels.sealed'
 
     @property
-    def device_labels(self): return self.folder / 'computer-labels.sealed'
-
-    @property
     def schedule(self): return self.folder / 'school-schedule.sealed'
 
     def _expire_private_key(self):
@@ -247,7 +244,7 @@ class Handler(BaseHTTPRequestHandler):
                     raise ValueError('invalid report selection')
                 selected_device = query.get('device', [None])[0]
                 self._json(_report(self.server.data, self.server.private_key, self.server.labels,
-                                   self.server.schedule, self.server.device_labels, selected_device))
+                                   self.server.schedule, selected_device))
             except Exception:
                 self._json({'error': 'The report could not be opened with this key.'}, 400)
             return
@@ -427,8 +424,9 @@ class Handler(BaseHTTPRequestHandler):
                     projection.close()
                 if body.get('device_id') not in known_devices:
                     raise ValueError('computer is not in this report')
-                device_labels.set_label(self.server.device_labels, self.server.private_key,
-                                        body['device_id'], body['label'])
+                _prune_report_file(self.server.data, self.server.private_key, self.server.retention_days)
+                device_labels.set_label(self.server.data, self.server.private_key,
+                                        body['device_id'], body['label'], self.server.retention_days)
                 self._json({'ok': True})
             except Exception:
                 self._json({'error': 'The computer name could not be saved.'}, 400)
@@ -599,14 +597,14 @@ def _prune_report_file(path, private_key, retention_days):
             os.unlink(temp_path)
 
 
-def _report(path, private_key, labels_path, schedule_path, device_labels_path=None, selected_device=None):
+def _report(path, private_key, labels_path, schedule_path, selected_device=None):
     db, incomplete = encrypted_view.open_projection(path, private_key)
     try:
         now = datetime.now(timezone.utc)
         device_rows = db.execute(
             'SELECT device_id, MAX(heartbeat_at) FROM sessions GROUP BY device_id '
             'ORDER BY MAX(heartbeat_at) DESC, device_id').fetchall()
-        saved_device_labels = device_labels.load(device_labels_path, private_key) if device_labels_path else {}
+        saved_device_labels = dict(db.execute('SELECT device_id, label FROM device_labels'))
         devices = []
         for identifier, last_seen in device_rows:
             default_label = ('Older untagged records' if identifier == 'legacy'
