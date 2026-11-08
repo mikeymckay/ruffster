@@ -788,3 +788,10 @@ Updated the README, project home page, and family installation guide to say the 
 ## 2026-11-08 — Diagnose the native Mac status self-check
 
 SSH to the test Mac briefly succeeded. The latest `native/macos/status.swift` compiled successfully there with `swiftc`, but `/tmp/family-activity-status --self-test-state` exited 1 without identifying the failing assertion. The host then went offline before the result could be retrieved through a subsequent SSH session. Updated the self-check to print the names of failed state checks and added source regression coverage; all 24 documentation-site tests pass and `git diff --check` is clean. The diagnostic change still needs transfer, native compilation, and execution on the Mac. `pmset -g custom` showed AC `sleep 0`, and `caffeinate -s` was active, so the sleep setting itself was correct.
+
+
+## 2026-11-08 — Pass the native Mac helper and portable local-share suite
+
+the test Mac returned. The diagnostic from `--self-test-state` showed that the oversized-interval assertion used a heartbeat age of 46 seconds even though an invalid interval falls back to the default 15-second sampling interval, whose stale threshold is 50 seconds. Changed that fixture to 51 seconds; `swiftc` compiled the helper and its native state self-check passed on the Mac.
+
+A full macOS test run then found that `LocalShareTests.setUp` always kept a UDP discovery socket open while some test methods started another server on the same fixed port. Linux permits that reuse pattern; macOS returns `EADDRINUSE`. Changed the fixture to start its report server only in the three tests that need it. The complete suite passed 234 tests on macOS (228 passed; 2 Node.js and 4 PowerShell checks skipped) and 234 tests on Linux (no skips). A second verbose macOS run confirmed the skip reasons. The Mac run used a temporary source copy and Python 3.15 virtual environment under `/tmp`; no monitoring service or real activity collection was started.

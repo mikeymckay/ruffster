@@ -18,6 +18,13 @@ def _powershell_executable():
 
 
 class WindowsAdapterTests(unittest.TestCase):
+    def test_foreground_adapter_never_reads_window_titles(self):
+        import inspect
+        source = inspect.getsource(windows.foreground_application)
+        self.assertNotIn('GetWindowText', source)
+        self.assertNotIn('GetWindowTextLength', source)
+        self.assertIn('ntpath.basename(buf.value)', source)
+
     @unittest.skipUnless(_powershell_executable(), 'requires PowerShell')
     def test_default_route_script_parses_in_powershell(self):
         import os

@@ -15,6 +15,8 @@ from family_activity.public_key_file import decode as decode_public_key_file
 class LocalShareTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
+        self.server = None
+        self.thread = None
         self.path = Path(self.tmp.name)/'db'
         self.key = PrivateKey.generate()
         writer = EncryptedAgentStore(self.path,self.key.public_key,30)
@@ -30,13 +32,20 @@ class LocalShareTests(unittest.TestCase):
         old.execute('INSERT INTO encrypted_events(expires_on,ciphertext) VALUES (?,?)',('2030-01-01',legacy));old.commit();old.close()
         con = sqlite3.connect(self.path)
         con.execute('CREATE TABLE extra(secret TEXT)'); con.execute('INSERT INTO extra VALUES (?)', ('UNRELATED_SECRET_MARKER',)); con.commit(); con.close()
+    def start_report_server(self):
         self.server = ShareServer(self.path, lifetime=30)
-        self.thread = threading.Thread(target=self.server.serve_forever,daemon=True); self.thread.start()
+        self.thread = threading.Thread(target=self.server.serve_forever,daemon=True)
+        self.thread.start()
 
     def tearDown(self):
-        self.server.shutdown(); self.thread.join(timeout=5); self.server.server_close(); self.tmp.cleanup()
+        if self.server is not None:
+            self.server.shutdown()
+            self.thread.join(timeout=5)
+            self.server.server_close()
+        self.tmp.cleanup()
 
     def test_pin_token_one_use_and_sanitized_snapshot(self):
+        self.start_report_server()
         parts = decode_code(self.server.code)
         bad_pin = encode_code(parts['host'],parts['port'],'0'*64,parts['token'])
         with self.assertRaises(ValueError): fetch(bad_pin)
@@ -59,6 +68,7 @@ class LocalShareTests(unittest.TestCase):
         with self.assertRaises(ValueError): fetch(self.server.code)
 
     def test_expired_and_invalid_codes_fail(self):
+        self.start_report_server()
         self.server.deadline = time.monotonic() - 1
         with self.assertRaises(ValueError): fetch(self.server.code)
         for code in ('', '%%%','a'*2000):
@@ -66,6 +76,7 @@ class LocalShareTests(unittest.TestCase):
         with self.assertRaises(ValueError): encode_code('8.8.8.8',443,'0'*64,'A'*43)
 
     def test_two_digit_code_resolves_over_local_discovery(self):
+        self.start_report_server()
         self.assertEqual(len(self.server.short_code), 2)
         self.assertRegex(self.server.short_code, r'^[0-9]{2}$')
         resolved = discover_code(self.server.short_code, target='127.0.0.1')

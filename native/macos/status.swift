@@ -284,7 +284,7 @@ if CommandLine.arguments.contains("--self-test-state") {
         MonitoringState.sampleInterval(from: "nan") == 15 &&
         MonitoringState.sampleInterval(from: "3600.01") == 15 &&
         MonitoringState.sampleInterval(from: "300") == 300
-    let hugeIntervalHeartbeat = MonitoringState.from(lastHeartbeat: now.addingTimeInterval(-46), now: now, sampleInterval: .infinity)
+    let hugeIntervalHeartbeat = MonitoringState.from(lastHeartbeat: now.addingTimeInterval(-51), now: now, sampleInterval: .infinity)
     let visibleLabels = starting.buttonText == "Monitoring …" &&
         active.buttonText == "Monitoring On" && paused.buttonText == "Monitoring Paused"
     let accessibleLabels = starting.accessibilityLabel.contains("starting") &&

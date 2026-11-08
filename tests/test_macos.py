@@ -21,6 +21,16 @@ class MacNetworkTests(unittest.TestCase):
         self.assertEqual(traffic_delta(before, after), {'en0': (10, 5)})
 
 class ForegroundTests(unittest.TestCase):
+    def test_native_helper_reads_app_identity_without_window_content(self):
+        from pathlib import Path
+        source = (Path(__file__).parents[1] / 'native/macos/foreground.swift').read_text(encoding='utf-8')
+        self.assertIn('app.localizedName', source)
+        self.assertIn('app.bundleIdentifier', source)
+        for window_detail_api in ('GetWindowText', 'window.title', 'windowTitle',
+                                  'CGWindowListCopyWindowInfo', 'kCGWindowName'):
+            with self.subTest(api=window_detail_api):
+                self.assertNotIn(window_detail_api, source)
+
     def test_helper_success_and_invalid_output(self):
         from unittest.mock import patch
         from types import SimpleNamespace
