@@ -1,4 +1,5 @@
 import hashlib
+import os
 import sqlite3
 import tempfile
 import threading
@@ -9,7 +10,8 @@ from nacl.public import PrivateKey
 from family_activity.encrypted_agent_store import EncryptedAgentStore
 from family_activity.encrypted_view import open_projection_bytes
 from family_activity.local_share import (PublicKeyShareServer, ShareServer, decode_code,
-                                         discover_code, encode_code, fetch, fetch_public_key)
+                                         discover_code, encode_code, fetch, fetch_public_key,
+                                         save_encrypted_snapshot)
 from family_activity.public_key_file import decode as decode_public_key_file
 
 class LocalShareTests(unittest.TestCase):
@@ -66,6 +68,39 @@ class LocalShareTests(unittest.TestCase):
         self.assertEqual(db.execute('SELECT domain FROM website_samples').fetchone()[0], 'example.com')
         db.close()
         with self.assertRaises(ValueError): fetch(self.server.code)
+
+    def test_save_encrypted_snapshot_creates_parent_decryptable_ciphertext_only_copy(self):
+        from family_activity.encrypted_view import open_projection
+        destination = Path(self.tmp.name) / 'report.sqlite3'
+        size = save_encrypted_snapshot(self.path, destination)
+        self.assertEqual(size, destination.stat().st_size)
+        if os.name != 'nt':
+            self.assertEqual(destination.stat().st_mode & 0o777, 0o600)
+        self.assertNotIn(b'TEST_SHARE_PRIVATE_APP', destination.read_bytes())
+        self.assertNotIn(b'UNRELATED_SECRET_MARKER', destination.read_bytes())
+        db, _ = open_projection(destination, self.key)
+        try:
+            self.assertEqual(db.execute('SELECT app_name FROM foreground_samples').fetchone()[0],
+                             'TEST_SHARE_PRIVATE_APP')
+        finally:
+            db.close()
+        original = destination.read_bytes()
+        with self.assertRaises(FileExistsError):
+            save_encrypted_snapshot(self.path, destination)
+        self.assertEqual(destination.read_bytes(), original)
+        destination.write_bytes(b'old file')
+        save_encrypted_snapshot(self.path, destination, overwrite=True)
+        self.assertEqual(destination.read_bytes(), original)
+
+    def test_export_report_cli_writes_a_sanitized_file(self):
+        import subprocess, sys
+        destination = Path(self.tmp.name) / 'cli-report.sqlite3'
+        result = subprocess.run([sys.executable, '-m', 'family_activity', 'export-report',
+                                 '--db', str(self.path), '--output', str(destination)],
+                                capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('Encrypted report copy saved', result.stdout)
+        self.assertNotIn('TEST_SHARE_PRIVATE_APP', destination.read_bytes().decode('latin-1'))
 
     def test_expired_and_invalid_codes_fail(self):
         self.start_report_server()

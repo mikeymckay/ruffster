@@ -62,6 +62,8 @@ final class StatusController: NSObject, NSApplicationDelegate {
     private var heading: NSMenuItem?
     private var timer: Timer?
     private var shareProcess: Process?
+    private var exportProcess: Process?
+    private var exportWindow: NSWindow?
     private var heartbeatSource: DispatchSourceRead?
     private var heartbeatBuffer = Data()
     private var lastHeartbeat: Date?
@@ -85,6 +87,9 @@ final class StatusController: NSObject, NSApplicationDelegate {
             let share = NSMenuItem(title: "Share an encrypted report…", action: #selector(shareReport), keyEquivalent: "")
             share.target = self
             menu.addItem(share)
+            let export = NSMenuItem(title: "Save an encrypted report file…", action: #selector(saveEncryptedReport), keyEquivalent: "")
+            export.target = self
+            menu.addItem(export)
             let stop = NSMenuItem(title: "Stop sharing", action: #selector(stopSharing), keyEquivalent: "")
             stop.target = self
             menu.addItem(stop)
@@ -99,6 +104,7 @@ final class StatusController: NSObject, NSApplicationDelegate {
             guard let self = self else { return }
             if getppid() != self.parent || kill(self.parent, 0) != 0 {
                 self.stopSharing()
+                self.stopExport()
                 NSApplication.shared.terminate(nil)
                 return
             }
@@ -265,6 +271,94 @@ final class StatusController: NSObject, NSApplicationDelegate {
         if let process = shareProcess, process.isRunning { process.terminate() }
         shareProcess = nil
         refreshIndicator()
+    }
+
+    @objc private func saveEncryptedReport() {
+        guard let python = sharePython, let database = shareDatabase else { return }
+        if exportProcess?.isRunning == true {
+            message("A report copy is already being prepared", "Wait for the current encrypted copy to finish.")
+            return
+        }
+        let consent = NSAlert()
+        consent.messageText = "Save an encrypted report file?"
+        consent.informativeText = "The file contains encrypted activity records only. It does not include the parent key or PIN. Move it to your parent computer, then choose Open a report file instead in the parent dashboard. This option does not use the local network."
+        consent.addButton(withTitle: "Continue")
+        consent.addButton(withTitle: "Cancel")
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        guard consent.runModal() == .alertFirstButtonReturn else { return }
+
+        let panel = NSSavePanel()
+        panel.title = "Save an encrypted report for your parent"
+        panel.nameFieldStringValue = "family-activity-report.sqlite3"
+        panel.prompt = "Save encrypted report"
+        panel.canCreateDirectories = true
+        guard panel.runModal() == .OK, let destination = panel.url else { return }
+
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: python)
+        let frozen = ProcessInfo.processInfo.environment["FAMILY_ACTIVITY_SHARE_FROZEN"] == "1"
+        process.arguments = (frozen ? ["export-report"] : ["-m", "family_activity", "export-report"]) +
+            ["--db", database, "--output", destination.path]
+        if FileManager.default.fileExists(atPath: destination.path) {
+            process.arguments?.append("--overwrite")
+        }
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        process.terminationHandler = { [weak self] finished in
+            DispatchQueue.main.async {
+                guard let self, self.exportProcess === finished else { return }
+                self.exportWindow?.close()
+                self.exportWindow = nil
+                self.exportProcess = nil
+                if finished.terminationStatus == 0 {
+                    self.message("Encrypted report saved", "Move the file to your parent computer, then choose Open a report file instead in the parent dashboard.")
+                } else {
+                    self.message("Could not save the encrypted report", "Choose another folder with enough free space, then try again.")
+                }
+            }
+        }
+        do { try process.run() }
+        catch {
+            exportProcess = nil
+            message("Could not save the encrypted report", "The report copy could not start. Try again or use Share an encrypted report.")
+            return
+        }
+        exportProcess = process
+        showExportProgressWindow()
+    }
+
+    private func showExportProgressWindow() {
+        let content = NSStackView()
+        content.orientation = .vertical
+        content.alignment = .leading
+        content.spacing = 14
+        content.edgeInsets = NSEdgeInsets(top: 22, left: 24, bottom: 20, right: 24)
+        let title = NSTextField(labelWithString: "Saving an encrypted report copy")
+        title.font = .boldSystemFont(ofSize: 15)
+        let detail = NSTextField(wrappingLabelWithString: "This can take a little while for a larger report. Keep Family Activity open.")
+        detail.setAccessibilityLabel("Preparing the encrypted report file")
+        let progress = NSProgressIndicator()
+        progress.style = .spinning
+        progress.isIndeterminate = true
+        progress.startAnimation(nil)
+        content.addArrangedSubview(title)
+        content.addArrangedSubview(detail)
+        content.addArrangedSubview(progress)
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 430, height: 150),
+                              styleMask: [.titled], backing: .buffered, defer: false)
+        window.title = "Family Activity"
+        window.contentView = content
+        window.center()
+        window.makeKeyAndOrderFront(nil)
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        exportWindow = window
+    }
+
+    private func stopExport() {
+        if let process = exportProcess, process.isRunning { process.terminate() }
+        exportProcess = nil
+        exportWindow?.close()
+        exportWindow = nil
     }
 
     private func message(_ title: String, _ text: String) {

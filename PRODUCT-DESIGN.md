@@ -14,6 +14,14 @@ Status: product direction; the family journey and interface have not been valida
 
 ## Design iterations
 
+### Connecting parent and child devices
+
+The current prototype assumes both computers can connect directly over the same LAN. The two-digit code selects a temporary transfer session; it is not a password. Keep the direct encrypted LAN path as the first option and retain encrypted report-file export/import as the fallback. Do not ask families to change router or firewall security settings.
+
+An optional cloud rendezvous service is a later usability improvement: both apps make outbound connections to exchange a short-lived session identifier and connection candidates, then attempt a direct LAN connection. The service should never receive report contents or the parent private key. Rendezvous cannot overcome client isolation, blocked peer traffic, or networks that do not permit a direct path; in those cases use the file workflow. A future data-relay fallback is a separate feature requiring explicit opt-in and retention, cost, abuse, and privacy design. Use rate limits and short expirations because a two-digit selector has very little entropy. Keep this cloud service optional and avoid creating a cloud account requirement.
+
+Do not add compression to direct LAN transfer. Revisit compression only if a future server-relay feature makes bandwidth or temporary storage a concern; then measure representative reports and compress before any outer encryption. Activity rows are already individually encrypted, so measure actual package sizes rather than assume compression will help.
+
 - **V1: dashboard on the child's machine with a parent password.** Easy to set up, but the computer must decrypt data when viewed; a password alone does not make data safe from a privileged or compromised machine. It also leaves parents dependent on physical access.
 - **V2: pair a parent's device, keep the private key there, and encrypt observations to its public key.** Better parent-only access to stored reports and a more natural dashboard. The child device still sees observations before encryption and metadata may remain; protect transport and local temporary data. Parent device availability, recovery and data synchronization add complexity.
 - **Recommended direction: V2, with a local-first incremental rollout.** Provide an explicitly explained same-device option if user research establishes its need; make separate-device viewing a first-class capability. No required cloud account. Remote access beyond the home requires a separately designed secure transport or optional end-to-end encrypted relay, not port forwarding instructions for families. Work offline and indicate when reports last synced.

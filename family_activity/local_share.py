@@ -241,6 +241,48 @@ def encrypted_snapshot(path):
         source.close(); target.close()
 
 
+def save_encrypted_snapshot(database, destination, *, overwrite=False):
+    """Save a sanitized ciphertext-only report, refusing accidental replacement."""
+    destination = Path(destination).expanduser()
+    if not destination.name or not destination.parent.is_dir():
+        raise ValueError('choose an existing folder for the encrypted report')
+    if destination.is_symlink():
+        raise ValueError('the report destination must not be a symbolic link')
+    data = encrypted_snapshot(database)
+    if overwrite:
+        descriptor, temporary = tempfile.mkstemp(prefix='.family-activity-report-', suffix='.tmp',
+                                                  dir=str(destination.parent))
+        try:
+            with os.fdopen(descriptor, 'wb') as output:
+                output.write(data)
+                output.flush()
+                os.fsync(output.fileno())
+            os.replace(temporary, destination)
+        finally:
+            try:
+                os.unlink(temporary)
+            except FileNotFoundError:
+                pass
+        return len(data)
+
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    if hasattr(os, 'O_BINARY'):
+        flags |= os.O_BINARY
+    descriptor = os.open(destination, flags, 0o600)
+    try:
+        with os.fdopen(descriptor, 'wb') as output:
+            output.write(data)
+            output.flush()
+            os.fsync(output.fileno())
+    except BaseException:
+        try:
+            destination.unlink()
+        except OSError:
+            pass
+        raise
+    return len(data)
+
+
 class _Handler(BaseHTTPRequestHandler):
     def log_message(self, format, *args): pass
     def do_GET(self):

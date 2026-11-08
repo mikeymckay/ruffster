@@ -106,6 +106,11 @@ class WindowsSetupDisclosureTests(unittest.TestCase):
         self.assertIn('Monitoring is starting', tray)
         self.assertIn('Monitoring is on', tray)
         self.assertIn('Monitoring is paused', tray)
+        self.assertIn('Save an encrypted report file…', tray)
+        self.assertIn('This option does not use the local network.', tray)
+        self.assertIn('RunReportExportUiSelfTest()', entry)
+        self.assertIn('export-report', tray)
+        self.assertIn('ProgressBarStyle.Marquee', tray)
 
     def test_live_windows_task_validator_uses_only_synthetic_activity(self):
         root = Path(__file__).parents[1]

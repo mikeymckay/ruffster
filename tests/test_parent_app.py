@@ -384,6 +384,22 @@ class ParentAppTests(unittest.TestCase):
         finally:
             share.shutdown(); thread.join(timeout=5); share.server_close()
 
+    def test_encrypted_file_export_opens_in_parent_dashboard(self):
+        from family_activity.local_share import save_encrypted_snapshot
+        self.login(); self.create_parent_key('638204')
+        public = self.request('GET', '/api/public')[2]
+        source = Path(self.tmp.name)/'child.db'
+        writer = EncryptedAgentStore(source, decode(public), 30)
+        writer.event('start')
+        writer.event('foreground', application=['FILE_RETURN_TEST_APP', 'test'])
+        writer.event('stop'); writer.close()
+        report_file = Path(self.tmp.name)/'family-activity-report.sqlite3'
+        self.assertGreater(save_encrypted_snapshot(source, report_file), 0)
+        self.assertEqual(self.request('POST', '/api/import', report_file.read_bytes())[0], 200)
+        report = json.loads(self.request('GET', '/api/report')[2])
+        self.assertEqual(len(report['sessions']), 1)
+        self.assertNotIn(b'FILE_RETURN_TEST_APP', self.server.data.read_bytes())
+
     def test_report_pairing_error_points_mac_users_to_local_network_access(self):
         from unittest.mock import patch
         self.login(); self.create_parent_key('638204')

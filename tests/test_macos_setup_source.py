@@ -3,6 +3,14 @@ from pathlib import Path
 
 
 class MacSetupSourceTests(unittest.TestCase):
+    def test_status_menu_can_save_encrypted_report_for_offline_transfer(self):
+        source = (Path(__file__).parents[1] / 'native' / 'macos' / 'status.swift').read_text()
+        self.assertIn('Save an encrypted report file…', source)
+        self.assertIn('This option does not use the local network.', source)
+        self.assertIn('export-report', source)
+        self.assertIn('showExportProgressWindow()', source)
+        self.assertIn('Open a report file instead', source)
+
     def test_welcome_screen_separates_release_status_privacy_and_next_actions(self):
         source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text()
         launch = source[source.index('func applicationDidFinishLaunching'):source.index('private func showWelcomeWindow')]

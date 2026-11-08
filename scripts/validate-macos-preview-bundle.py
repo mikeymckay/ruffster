@@ -29,7 +29,7 @@ def validate(app_path):
     checked = _run([str(setup), '--check-bundle'])
     if checked.returncode:
         raise RuntimeError('the bundled setup check failed: ' + checked.stderr.strip())
-    for command in ('agent', 'share'):
+    for command in ('agent', 'share', 'export-report'):
         result = _run([str(core), command, '--help'])
         if result.returncode:
             raise RuntimeError(f'the frozen {command} command failed: {result.stderr.strip()}')

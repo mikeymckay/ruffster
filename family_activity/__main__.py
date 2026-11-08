@@ -403,6 +403,10 @@ def main():
     share.add_argument("--lifetime", type=int, default=300, help="Maximum seconds to wait, at most 600")
     share.add_argument("--code-file", help="Write the two-digit nearby code to a file for graphical setup tools")
     share.add_argument("--cancel-file", help="Stop a graphical share when this file appears")
+    export_report = sub.add_parser("export-report", help="Save a parent-encrypted report copy for transfer by file")
+    export_report.add_argument("--db", required=True, help="Encrypted child activity database")
+    export_report.add_argument("--output", required=True, help="New report file path")
+    export_report.add_argument("--overwrite", action="store_true", help="Replace the selected report file")
     pair_key = sub.add_parser("fetch-public-key", help="Fetch a parent's public key using a two-digit nearby code")
     pair_key.add_argument("--code", help="Two-digit nearby parent code (for graphical setup tools)")
     pair_key.add_argument("--output", help="Write the fetched public key to this temporary path instead of standard output")
@@ -505,6 +509,13 @@ def main():
                 if temporary:
                     try: Path(temporary).unlink(missing_ok=True)
                     except OSError: pass
+    elif args.command == "export-report":
+        from .local_share import save_encrypted_snapshot
+        try:
+            size = save_encrypted_snapshot(args.db, args.output, overwrite=args.overwrite)
+        except (OSError, ValueError, sqlite3.Error) as error:
+            parser.error(str(error))
+        print(f"Encrypted report copy saved ({size} bytes). Transfer this file to the parent computer and open it in the parent dashboard.", flush=True)
     elif args.command == "fetch-public-key":
         from .local_share import fetch_public_key
         code = args.code if args.code is not None else sys.stdin.readline(2049).strip()

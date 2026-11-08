@@ -148,7 +148,7 @@ def validate(package_path):
     if not setup.is_file() or not core.is_file():
         raise RuntimeError('the preview is missing its setup executable or frozen core')
 
-    for command in ('agent', 'share'):
+    for command in ('agent', 'share', 'export-report'):
         result = _run([str(core), command, '--help'])
         if result.returncode:
             raise RuntimeError(f'the frozen {command} command failed: {result.stderr.strip()}')

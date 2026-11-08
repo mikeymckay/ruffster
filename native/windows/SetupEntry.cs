@@ -26,6 +26,7 @@ internal static class Program
             {
                 SetupApplication.RunUiSelfTest();
                 TrayCompanion.RunStatusSelfTest();
+                TrayCompanion.RunReportExportUiSelfTest();
             }
             catch { Environment.ExitCode = 1; }
             return;

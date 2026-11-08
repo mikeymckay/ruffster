@@ -11,6 +11,8 @@ internal static class TrayCompanion
     private enum TrayState { Starting, On, Paused }
     private static Process? activeShare;
     private static Form? activeShareForm;
+    private static Process? activeExport;
+    private static Form? activeExportForm;
 
     private static TrayState ResolveState(TimeSpan uptime, TimeSpan? lastHeartbeat, TimeSpan staleAfter)
     {
@@ -37,6 +39,8 @@ internal static class TrayCompanion
             ResolveStaleAfter(3600) != TimeSpan.FromSeconds(10805))
             throw new InvalidOperationException("The Windows tray sampling-interval check failed.");
     }
+
+    public static void RunReportExportUiSelfTest() => ExportProgressForm.RunSelfTest();
 
     public static void RunHeartbeatIpcSelfTest()
     {
@@ -82,6 +86,7 @@ internal static class TrayCompanion
         {
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add("Share an encrypted report…", null, (_, _) => ShareReport(core, database));
+            menu.Items.Add("Save an encrypted report file…", null, (_, _) => SaveEncryptedReport(core, database));
         }
         using var icon = new NotifyIcon { Icon = SystemIcons.Information, Text = "Family Activity: Starting", ContextMenuStrip = menu, Visible = true };
         var uptime = Stopwatch.StartNew();
@@ -98,6 +103,8 @@ internal static class TrayCompanion
             {
                 try { activeShareForm?.Close(); } catch { }
                 try { if (activeShare is { HasExited: false } && !activeShare.WaitForExit(2000)) activeShare.Kill(true); } catch { }
+                try { activeExportForm?.Close(); } catch { }
+                try { if (activeExport is { HasExited: false } && !activeExport.WaitForExit(2000)) activeExport.Kill(true); } catch { }
                 Application.ExitThread();
                 return;
             }
@@ -152,6 +159,10 @@ internal static class TrayCompanion
     {
         try
         {
+            var consent = MessageBox.Show(
+                "This temporary transfer needs both computers on the same trusted Wi-Fi. Windows may ask whether Family Activity can communicate on the network. Allow it only on a private network you trust; never turn off the firewall or allow public networks. If access is blocked, cancel and choose Save an encrypted report file instead.",
+                "Share an encrypted report", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+            if (consent != DialogResult.OK) return;
             var host = SelectLocalIPv4();
             var codePath = Path.Combine(Path.GetTempPath(), "family-report-code-" + Guid.NewGuid().ToString("N") + ".txt");
             var cancelPath = Path.Combine(Path.GetTempPath(), "family-report-cancel-" + Guid.NewGuid().ToString("N") + ".txt");
@@ -173,6 +184,72 @@ internal static class TrayCompanion
         catch (Exception error)
         {
             MessageBox.Show(error.Message, "Could not share the encrypted report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+    }
+
+    private static async void SaveEncryptedReport(string core, string database)
+    {
+        if (activeExport is { HasExited: false })
+        {
+            MessageBox.Show("A report copy is already being prepared.", "Family Activity", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+        var consent = MessageBox.Show(
+            "This creates a separate file containing encrypted activity records. It does not include the parent key or PIN. Move the file to your parent computer, then choose Open a report file instead in the parent dashboard. This option does not use the local network.",
+            "Save an encrypted report file?", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+        if (consent != DialogResult.OK) return;
+
+        using var dialog = new SaveFileDialog
+        {
+            Title = "Save an encrypted report for your parent",
+            FileName = "family-activity-report.sqlite3",
+            DefaultExt = "sqlite3",
+            AddExtension = true,
+            OverwritePrompt = true,
+            Filter = "Encrypted Family Activity report (*.sqlite3)|*.sqlite3|All files (*.*)|*.*",
+            CheckPathExists = true
+        };
+        if (dialog.ShowDialog() != DialogResult.OK) return;
+
+        try
+        {
+            var start = new ProcessStartInfo(core)
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                WorkingDirectory = Path.GetDirectoryName(core)!
+            };
+            foreach (var arg in new[] { "export-report", "--db", database, "--output", dialog.FileName }) start.ArgumentList.Add(arg);
+            if (File.Exists(dialog.FileName)) start.ArgumentList.Add("--overwrite");
+            var process = Process.Start(start) ?? throw new InvalidOperationException("The encrypted report copy could not start.");
+            activeExport = process;
+            using var form = new ExportProgressForm();
+            activeExportForm = form;
+            form.Show();
+            var standardOutput = process.StandardOutput.ReadToEndAsync();
+            var standardError = process.StandardError.ReadToEndAsync();
+            await process.WaitForExitAsync();
+            await Task.WhenAll(standardOutput, standardError);
+            form.Close();
+            activeExportForm = null;
+            activeExport = null;
+            if (process.ExitCode != 0)
+            {
+                var detail = standardError.Result.Trim();
+                if (detail.Length > 600) detail = detail[..600];
+                throw new InvalidOperationException(string.IsNullOrWhiteSpace(detail) ? "The encrypted report file could not be created." : detail);
+            }
+            MessageBox.Show("The encrypted report file is ready. Move it to your parent computer, then choose Open a report file instead in the parent dashboard.",
+                            "Encrypted report saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            process.Dispose();
+        }
+        catch (Exception error)
+        {
+            activeExportForm = null;
+            activeExport = null;
+            MessageBox.Show(error.Message, "Could not save the encrypted report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
     }
 
@@ -203,11 +280,11 @@ internal static class TrayCompanion
             process = runningShare; codePath = file; cancelPath = cancelFile;
             Text = "Share an encrypted report"; StartPosition = FormStartPosition.CenterParent;
             FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false; MinimizeBox = false;
-            ClientSize = new Size(500, 270); Font = new Font("Segoe UI", 9.5f);
+            ClientSize = new Size(500, 320); Font = new Font("Segoe UI", 9.5f);
             var stack = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, WrapContents = false, Padding = new Padding(20) };
             Controls.Add(stack);
             stack.Controls.Add(new Label { Text = "Show these two digits to your parent", Font = new Font(Font, FontStyle.Bold), AutoSize = true });
-            stack.Controls.Add(new Label { Text = "Your parent will enter them in the dashboard to receive an encrypted report. They are available for about five minutes. Keep both computers on the same Wi-Fi.", Width = 450, Height = 52 });
+            stack.Controls.Add(new Label { Text = "Your parent will enter them in the dashboard to receive an encrypted report. They are available for about five minutes. Keep both computers on the same trusted Wi-Fi. If the firewall blocks this, close the share and save an encrypted report file instead.", Width = 450, Height = 72 });
             stack.Controls.Add(code); stack.Controls.Add(detail);
             var buttons = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.LeftToRight, Margin = new Padding(0, 8, 0, 0) };
             copy.Click += (_, _) => { if (code.Text.Length > 0) Clipboard.SetText(code.Text); detail.Text = "Digits copied. Your parent can enter them in the dashboard."; };
@@ -234,6 +311,30 @@ internal static class TrayCompanion
                 timer.Stop(); closeShare.Text = "Close"; copy.Enabled = false;
                 detail.Text = ready ? "The transfer finished or expired. Close this window." : "The temporary share stopped before a code was ready.";
             }
+        }
+    }
+
+    private sealed class ExportProgressForm : Form
+    {
+        private readonly Label detail = new() { Text = "Preparing the encrypted report copy…", AutoSize = true };
+        private readonly ProgressBar progress = new() { Style = ProgressBarStyle.Marquee, MarqueeAnimationSpeed = 25, Width = 390 };
+
+        public ExportProgressForm()
+        {
+            Text = "Saving an encrypted report"; StartPosition = FormStartPosition.CenterScreen;
+            FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false; MinimizeBox = false; ControlBox = false;
+            ClientSize = new Size(440, 130); Font = new Font("Segoe UI", 9.5f);
+            var stack = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, WrapContents = false, Padding = new Padding(20) };
+            stack.Controls.Add(new Label { Text = "Saving a copy for your parent", Font = new Font(Font, FontStyle.Bold), AutoSize = true });
+            stack.Controls.Add(detail); stack.Controls.Add(progress); Controls.Add(stack);
+        }
+
+        public static void RunSelfTest()
+        {
+            using var form = new ExportProgressForm();
+            if (form.Text != "Saving an encrypted report" || form.progress.Style != ProgressBarStyle.Marquee ||
+                !form.detail.Text.Contains("encrypted report copy", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("The encrypted report export progress UI self-check failed.");
         }
     }
 }
