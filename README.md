@@ -6,6 +6,8 @@
 
 **This is not ready for family deployment.** The Mac package is unsigned. Windows has not been tested on a Windows computer. Setup, accessibility, security, key recovery, and family usability still need validation. Any Mac download will be an unsigned development preview, clearly marked as such; macOS will warn before opening it. There is no supported family release download.
 
+[Optional Apple-silicon Mac development preview](https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.0) · **unsigned and not for ongoing family monitoring**
+
 [Website source (Pages-ready)](docs/index.html) · [Getting started](docs/install.html) · [Progress page](docs/progress.html) · [FAQ](docs/faq.html) · [Privacy and children's rights](PRIVACY-AND-CHILDREN.md) · [Implementation plan](PLAN.md) · [Current status](PROJECT-STATUS.html)
 
 > **Platform priority:** macOS first, then Windows. Linux is a development and test host only; Linux is not a student-facing target in the current scope.

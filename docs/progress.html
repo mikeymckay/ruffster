@@ -35,8 +35,8 @@
    </section>
    <div class="wrap prose">
     <div class="notice">
-     <strong>An unsigned Mac development preview can be published; there is no supported family download.</strong>
-     Without an Apple Developer ID, macOS may warn or block first launch. Any preview must be opt-in, identify its source commit, include a SHA-256 checksum, and link Apple's Gatekeeper guidance. It is for technically comfortable testers, not ongoing family monitoring. Windows also needs testing on a real Windows computer.
+     <strong>An unsigned Mac development preview is available; there is no supported family download.</strong>
+     Without an Apple Developer ID, macOS may warn or block first launch. The opt-in prerelease identifies its source commit, includes a SHA-256 checksum, and links Apple's Gatekeeper guidance. It is for technically comfortable testers, not ongoing family monitoring. Windows also needs testing on a real Windows computer. <a href="https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.0">View the Mac prerelease and its warnings.</a>
     </div>
     <h2>What is working</h2>
     <ol class="steps">
@@ -47,8 +47,8 @@
     </ol>
     <h2>What still stands between here and family use</h2>
     <ul>
-     <li>Package a clearly labeled, unsigned opt-in preview with its source commit, SHA-256 checksum, and safe Gatekeeper instructions.</li>
      <li>Install the preview on a clean Mac and verify first open, setup, monitoring status, report transfer, update, recovery, and uninstall; separately review whether an unsigned flow is acceptable for the intended families.</li>
+     <li>Decide how to make first launch and future updates understandable to parents if Developer ID signing remains unavailable.</li>
      <li>Review the native windows with keyboard and VoiceOver, and check the Mac local-network permission flow.</li>
      <li>Validate the Windows installer, task startup, tray indicator, report transfer, update, and removal on an actual Windows computer.</li>
      <li>Run the setup and weekly report flow with parents and children, then complete accessibility, privacy, and security reviews.</li>
