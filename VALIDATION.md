@@ -753,3 +753,8 @@ Corrected the Windows status summary to reflect the built-in VPN profile indicat
 ## 2026-11-08 — Simplify the dashboard VPN message
 
 Reworded the report to use “VPN connection” and describe the three result states in plain language, while keeping the possibility of undetected VPN apps visible for every state. Added a regression check for the copy. `node --check family_activity/parent_assets/app.js` passed; the full Linux suite passed all 229 tests with no skips.
+
+
+## 2026-11-08 — Add a direct-download Windows installer
+
+Added a self-contained Windows installer that embeds the complete app bundle, extracts only validated relative paths within the signed-in user’s Local AppData program folder, adds a Start Menu entry, and opens the existing confirmation-first family setup. The release ZIP now contains this one-download installer and a short start guide. A native package self-check is configured for successful extraction and path-traversal rejection. The C# installer cross-published as win-x64 with .NET 10.0.403 and warnings treated as errors; PowerShell Core parsed the package builder, focused source/documentation checks passed, and the full Linux suite passed 230 tests with no skips. The native Windows extraction self-check, UI, installer launch, and Task Scheduler flow have not run on Windows.

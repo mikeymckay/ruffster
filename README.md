@@ -104,7 +104,7 @@ GitHub Actions is configured to run the test suite on Linux, macOS, and Windows,
 ./scripts/build-macos-preview.sh "$(pwd)/.venv/bin/python" "$(pwd)/dist/family-activity-preview"
 ```
 
-**Windows x64:** build on Windows with Python and the .NET 10 LTS SDK. The builder has not yet run on a Windows machine.
+**Windows x64:** build on Windows with Python and the .NET 10 LTS SDK. It produces a single-download per-user installer embedded with the app bundle, plus a ZIP with a start guide. The installer copies files before opening the family confirmation flow; it does not enable monitoring by itself. The builder and installer have not yet run on a Windows machine.
 
 ```powershell
 python -m pip install -e ".[build]"

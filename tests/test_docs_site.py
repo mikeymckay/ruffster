@@ -260,9 +260,11 @@ class DocumentationSiteTests(unittest.TestCase):
         windows = (ROOT / 'WINDOWS.md').read_text(encoding='utf-8')
         self.assertIn('parent computer shows two digits and the child computer enters them', windows)
         self.assertIn('digits only find the nearby computer', windows)
-        self.assertIn('compressed single-file publishing', windows)
+        self.assertIn('self-contained installer', windows)
         self.assertIn('changes to “Monitoring is paused” when samples are overdue', windows)
         self.assertIn('If the tray helper or its heartbeat channel stops, the agent exits', windows)
+        self.assertIn('FamilyActivityInstaller.exe', windows)
+        self.assertIn('copies it into the signed-in user’s Local AppData folder', windows)
         self.assertNotIn("five-minute one-use setup code", windows)
 
     def test_mac_status_state_self_check_runs_during_native_bundle_build(self):
@@ -334,5 +336,5 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('exec /bin/sleep 60', lifecycle_check)
         self.assertIn('validate-macos-install-flow.py', guide)
         self.assertIn('zero valid identities', status)
-        self.assertIn('<b>229</b><span>Linux development tests passing · no skips</span>', status)
+        self.assertIn('<b>230</b><span>Linux development tests passing · no skips</span>', status)
         self.assertIn('<b>165</b><span>Mac tests passed · 2 Node.js checks skipped (167 run)</span>', status)

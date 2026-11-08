@@ -140,7 +140,7 @@ node --check family_activity/parent_assets/app.js</code></pre>
      <code>
       ./scripts/build-windows-preview.ps1 -OutputDirectory ./dist/FamilyActivityPreview
      </code>
-     in PowerShell. Linux cross-compilation checks the .NET GUI source only; it cannot run the Windows package or tray.
+     in PowerShell. The Windows builder also creates a direct-download per-user installer that copies its files and then opens family setup; monitoring still requires family confirmation. Linux cross-compilation checks that executable can be built, but cannot run Windows extraction, setup, or tray behavior.
     </p>
     <h2>
      When family releases are ready

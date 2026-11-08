@@ -44,13 +44,33 @@ try {
   if ($LASTEXITCODE -ne 0) { throw 'The packaged Windows loopback dashboard smoke check failed.' }
   & $Python (Join-Path $Root 'scripts\validate-windows-install-flow.py') $Output
   if ($LASTEXITCODE -ne 0) { throw 'The live synthetic Windows install, restart, or removal check failed.' }
+  $Bundle = Join-Path $Stage 'FamilyActivityBundle.zip'
+  Compress-Archive -Path (Join-Path $Output '*') -DestinationPath $Bundle -CompressionLevel Optimal
+  & dotnet publish (Join-Path $Root 'native\windows\bootstrapper\FamilyActivityInstaller.csproj') -c Release -r win-x64 --self-contained true `
+    -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true `
+    "-p:FamilyBundlePath=$Bundle" -o (Join-Path $Stage 'installer')
+  if ($LASTEXITCODE -ne 0) { throw 'Could not build the direct-download Windows installer.' }
+  Copy-Item (Join-Path $Stage 'installer\FamilyActivityInstaller.exe') (Join-Path $Output 'FamilyActivityInstaller.exe')
+  & (Join-Path $Output 'FamilyActivityInstaller.exe') --self-test
+  if ($LASTEXITCODE -ne 0) { throw 'The Windows installer extraction self-check failed.' }
+  $ReleaseFolder = Join-Path $Stage 'release'
+  New-Item -ItemType Directory -Path $ReleaseFolder | Out-Null
+  Copy-Item (Join-Path $Output 'FamilyActivityInstaller.exe') $ReleaseFolder
+  Copy-Item (Join-Path $Output 'LICENSE') $ReleaseFolder
+  @'
+Family Activity for Windows
+
+Double-click FamilyActivityInstaller.exe and follow the family setup screen.
+Files are copied to this Windows account before monitoring setup begins.
+Monitoring starts only after the family reviews and confirms what is collected.
+'@ | Set-Content -LiteralPath (Join-Path $ReleaseFolder 'START-HERE.txt') -Encoding utf8
   $CreatedArchive = $true
-  Compress-Archive -Path (Join-Path $Output '*') -DestinationPath $Archive -CompressionLevel Optimal
+  Compress-Archive -Path (Join-Path $ReleaseFolder '*') -DestinationPath $Archive -CompressionLevel Optimal
   Add-Type -AssemblyName System.IO.Compression.FileSystem
   $Zip = [System.IO.Compression.ZipFile]::OpenRead($Archive)
   try {
     $Entries = @($Zip.Entries | ForEach-Object { $_.FullName })
-    foreach ($RequiredEntry in @('FamilyActivityCore/FamilyActivityCore.exe', 'FamilyActivitySetup.exe', 'LICENSE')) {
+    foreach ($RequiredEntry in @('FamilyActivityInstaller.exe', 'START-HERE.txt', 'LICENSE')) {
       if ($Entries -notcontains $RequiredEntry) { throw "The Windows preview archive is missing $RequiredEntry" }
     }
   } finally { $Zip.Dispose() }
