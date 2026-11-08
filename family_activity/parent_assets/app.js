@@ -269,7 +269,7 @@ async function render() {
     $('settings-observed').textContent = `Last observed ${formatUtcTimestamp(settings.sampled_at)}. These are indicators from the operating-system settings the agent can inspect.`;
     settingLines.push(`DNS configuration: ${settings.dns_observed === true ? 'a resolver address appeared in the inspected settings; this does not show which resolver was active or whether filtering works' : settings.dns_observed === false ? 'no resolver address appeared among the inspected settings; other DNS paths may still apply' : 'unavailable'}`);
     settingLines.push(`System proxy: ${settings.proxy_indicator === true ? 'a supported proxy setting was enabled' : settings.proxy_indicator === false ? 'no enabled supported proxy setting was reported' : 'unknown'}`);
-    settingLines.push(`VPN profile indicator: ${settings.vpn_indicator === true ? 'a connected supported VPN profile was reported; this does not detect every VPN' : settings.vpn_indicator === false ? 'no connected supported VPN profile was reported; other VPN software may not be detected' : 'status could not be determined; third-party VPNs may not be detected'}`);
+    settingLines.push(`VPN connection: ${settings.vpn_indicator === true ? 'a supported VPN connection appears active; other VPN apps may not be detected' : settings.vpn_indicator === false ? 'no built-in VPN connection appeared active; other VPN apps may not be detected' : 'could not check VPN status; some VPN apps may not be detected'}`);
   } else {
     $('settings-observed').textContent = 'No system settings observation is in this report.';
   }

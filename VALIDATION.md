@@ -748,3 +748,8 @@ Updated the public home page and FAQ to say the add-on runs in supported browser
 ## 2026-11-08 — Keep project status and add-on FAQ current
 
 Corrected the Windows status summary to reflect the built-in VPN profile indicator and replaced browser-extension implementation jargon in the parent-facing FAQ with a short description of the pause choice and temporary gap note. The 24 documentation-site tests pass, including explicit wording checks; `git diff --check` is clean.
+
+
+## 2026-11-08 — Simplify the dashboard VPN message
+
+Reworded the report to use “VPN connection” and describe the three result states in plain language, while keeping the possibility of undetected VPN apps visible for every state. Added a regression check for the copy. `node --check family_activity/parent_assets/app.js` passed; the full Linux suite passed all 229 tests with no skips.

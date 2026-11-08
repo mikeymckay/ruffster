@@ -89,6 +89,16 @@ class DashboardTests(unittest.TestCase):
         self.assertIn('formatUtcTimestamp(data.recorded_through)', script)
         self.assertNotIn('These are indicators reported by macOS', script)
 
+    def test_vpn_status_uses_plain_language_and_keeps_coverage_limit_visible(self):
+        assets = Path(__file__).parents[1] / 'family_activity' / 'parent_assets'
+        script = (assets / 'app.js').read_text()
+        self.assertIn('VPN connection:', script)
+        self.assertIn('a supported VPN connection appears active', script)
+        self.assertIn('no built-in VPN connection appeared active', script)
+        self.assertIn('could not check VPN status', script)
+        self.assertIn('other VPN apps may not be detected', script)
+        self.assertNotIn('VPN profile indicator', script)
+
     def test_rejects_untrusted_host(self):
         with tempfile.TemporaryDirectory() as tmp:
             proc = subprocess.Popen([sys.executable, '-m', 'family_activity', 'dashboard', '--db', str(Path(tmp)/'db'), '--port', '0'], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
