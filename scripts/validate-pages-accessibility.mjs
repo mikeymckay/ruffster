@@ -17,8 +17,10 @@ const viewports = [
 const mimeTypes = {
   '.css': 'text/css; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
+  '.webp': 'image/webp',
 };
 
 function chromeCandidates() {
@@ -111,19 +113,38 @@ function connectDebugger(url) {
   socket.on('message', (message) => {
     const response = JSON.parse(message.toString());
     if (!response.id || !pending.has(response.id)) return;
-    const { resolve, reject } = pending.get(response.id);
+    const { resolve, reject, timer } = pending.get(response.id);
+    clearTimeout(timer);
     pending.delete(response.id);
     if (response.error) reject(new Error(response.error.message));
     else resolve(response.result);
   });
+  const rejectPending = (error) => {
+    for (const { reject, timer } of pending.values()) {
+      clearTimeout(timer);
+      reject(error);
+    }
+    pending.clear();
+  };
+  socket.on('close', () => rejectPending(new Error('Chrome closed the DevTools connection.')));
+  socket.on('error', (error) => rejectPending(error));
   const opened = new Promise((resolve, reject) => {
     socket.once('open', resolve);
     socket.once('error', reject);
   });
   const send = (method, params = {}) => new Promise((resolve, reject) => {
     const id = ++nextId;
-    pending.set(id, { resolve, reject });
-    socket.send(JSON.stringify({ id, method, params }));
+    const timer = setTimeout(() => {
+      pending.delete(id);
+      reject(new Error(`Chrome DevTools command timed out: ${method}`));
+    }, 10000);
+    pending.set(id, { resolve, reject, timer });
+    socket.send(JSON.stringify({ id, method, params }), (error) => {
+      if (!error) return;
+      clearTimeout(timer);
+      pending.delete(id);
+      reject(error);
+    });
   });
   return { socket, opened, send };
 }
@@ -138,6 +159,20 @@ async function evaluate(send, expression) {
     throw new Error(response.exceptionDetails.exception?.description || response.exceptionDetails.text);
   }
   return response.result?.value;
+}
+
+async function waitForPageReady(send, page) {
+  const expectedPath = `/${page}`;
+  const deadline = Date.now() + 10000;
+  await new Promise((resolve) => setTimeout(resolve, 150));
+  while (Date.now() < deadline) {
+    const state = await evaluate(send, '({ pathname: location.pathname, ready: document.readyState })');
+    if (state.pathname === expectedPath && state.ready === 'complete') {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  throw new Error(`Page ${page} did not finish loading before the accessibility scan.`);
 }
 
 async function main() {
@@ -177,7 +212,7 @@ async function main() {
       });
       for (const page of pages) {
         await send('Page.navigate', { url: `http://127.0.0.1:${address.port}/${page}` });
-        await new Promise((resolve) => setTimeout(resolve, 250));
+        await waitForPageReady(send, page);
         const axeSource = JSON.stringify(axe.source);
         const result = await evaluate(send, `(() => {
           const script = document.createElement('script');

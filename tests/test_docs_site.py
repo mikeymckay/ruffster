@@ -128,6 +128,8 @@ class DocumentationSiteTests(unittest.TestCase):
             self.assertIn(f"'{page}'", script)
         self.assertIn('wcag21aa', script)
         self.assertIn('horizontal overflow', script)
+        self.assertIn('await waitForPageReady(send, page)', script)
+        self.assertIn("'.webp': 'image/webp'", script)
 
     def test_github_pages_guide_matches_published_repository_state(self):
         guide = (ROOT / 'GITHUB-PAGES.md').read_text(encoding='utf-8')
