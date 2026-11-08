@@ -39,6 +39,9 @@ with open(sys.argv[1], 'wb') as file:
                    'NSLocalNetworkUsageDescription': 'Family Activity uses your local network when you connect a parent computer or send an encrypted report.'}, file)
 PY
 "$APP/Contents/MacOS/FamilyActivitySetup" --check-bundle
+"$APP/Contents/MacOS/FamilyActivitySetup" --self-test-ui \
+  "$APP/Contents/Resources/runtime/FamilyActivityCore" "$APP/Contents/Resources/runtime" \
+  "$APP/Contents/Resources/helpers/foreground" "$APP/Contents/Resources/helpers/status"
 test -s "$APP/Contents/Resources/LICENSE"
 "$APP/Contents/Resources/runtime/FamilyActivityCore" --help >/dev/null
 "$PYTHON" "$ROOT/scripts/validate-macos-preview-bundle.py" "$APP"

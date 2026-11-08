@@ -3,6 +3,17 @@ from pathlib import Path
 
 
 class MacSetupSourceTests(unittest.TestCase):
+    def test_packaged_setup_checks_welcome_layout_without_showing_it(self):
+        root = Path(__file__).parents[1]
+        source = (root / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')
+        builder = (root / 'scripts' / 'build-macos-preview.sh').read_text(encoding='utf-8')
+        self.assertIn('func runWelcomeLayoutSelfTest()', source)
+        self.assertIn('showWelcomeWindow(visible: false)', source)
+        self.assertIn('stack.fittingSize', source)
+        self.assertIn('Set up this Mac together…', source)
+        self.assertIn('"--self-test-ui"', source)
+        self.assertIn('"$APP/Contents/MacOS/FamilyActivitySetup" --self-test-ui', builder)
+
     def test_status_menu_can_save_encrypted_report_for_offline_transfer(self):
         source = (Path(__file__).parents[1] / 'native' / 'macos' / 'status.swift').read_text()
         self.assertIn('Save an encrypted report file…', source)

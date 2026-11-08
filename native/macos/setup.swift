@@ -41,10 +41,10 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApplication.shared.activate(ignoringOtherApps: true)
-        showWelcomeWindow()
+        _ = showWelcomeWindow()
     }
 
-    private func showWelcomeWindow() {
+    private func showWelcomeWindow(visible: Bool = true) -> NSWindow {
         func heading(_ text: String) -> NSTextField {
             let field = NSTextField(labelWithString: text)
             field.font = .systemFont(ofSize: 14, weight: .semibold)
@@ -132,9 +132,40 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.title = "Family Activity"
         window.contentView = content
         window.isReleasedWhenClosed = false
-        window.center()
-        window.makeKeyAndOrderFront(nil)
-        welcomeWindow = window
+        if visible {
+            window.center()
+            window.makeKeyAndOrderFront(nil)
+            welcomeWindow = window
+        }
+        return window
+    }
+
+    func runWelcomeLayoutSelfTest() throws -> String {
+        let window = showWelcomeWindow(visible: false)
+        defer { window.close() }
+        guard let content = window.contentView,
+              let stack = content.subviews.compactMap({ $0 as? NSStackView }).first else {
+            throw NSError(domain: "FamilyActivitySetup", code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "The welcome layout is missing its content stack."])
+        }
+        content.layoutSubtreeIfNeeded()
+        stack.layoutSubtreeIfNeeded()
+        let fitting = stack.fittingSize
+        if fitting.height > content.bounds.height + 1 {
+            throw NSError(domain: "FamilyActivitySetup", code: 2,
+                          userInfo: [NSLocalizedDescriptionKey: "The welcome content needs \(Int(fitting.height)) points but the window provides \(Int(content.bounds.height)); the disclosure will be clipped."])
+        }
+        let controls = stack.arrangedSubviews.flatMap { child -> [NSButton] in
+            if let button = child as? NSButton { return [button] }
+            if let nested = child as? NSStackView { return nested.arrangedSubviews.compactMap { $0 as? NSButton } }
+            return []
+        }
+        let titles = Set(controls.map(\.title))
+        for expected in ["Open parent dashboard", "Set up this Mac together…", "More options…"] where !titles.contains(expected) {
+            throw NSError(domain: "FamilyActivitySetup", code: 3,
+                          userInfo: [NSLocalizedDescriptionKey: "The welcome action is missing: \(expected)"])
+        }
+        return "Mac setup welcome layout fits its window and exposes all three actions."
     }
 
     @objc private func openDashboardFromWelcome() {
@@ -640,6 +671,22 @@ if arguments.count > 1 && arguments[1] == "--check-bundle" {
 if arguments.count > 1 && arguments[1] == "--check-runtime" {
     let forwarded = [arguments[0]] + arguments.dropFirst(2)
     exit(Runtime(Array(forwarded)) == nil ? 1 : 0)
+}
+if arguments.count > 1 && arguments[1] == "--self-test-ui" {
+    let forwarded = [arguments[0]] + Array(arguments.dropFirst(2))
+    guard let runtime = Runtime(forwarded, frozen: true) else {
+        fputs("The UI self-test requires the packaged runtime and helpers.\n", stderr)
+        exit(2)
+    }
+    let app = NSApplication.shared
+    app.setActivationPolicy(.prohibited)
+    do {
+        print(try SetupController(runtime: runtime).runWelcomeLayoutSelfTest())
+        exit(0)
+    } catch {
+        fputs("Mac setup UI self-test failed: \(error.localizedDescription)\n", stderr)
+        exit(1)
+    }
 }
 guard let runtime = arguments.count == 1 ? bundleRuntime() : Runtime(arguments) else {
     fputs("Experimental setup requires four absolute runtime paths.\n", stderr)
