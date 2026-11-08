@@ -95,7 +95,7 @@ For local UI development, start the experimental parent app:
 
 It binds to loopback. The default CLI database and dashboard are developer tools, not a family installation path. Do not expose them to a network.
 
-GitHub Actions runs the test suite on Linux, macOS, and Windows, then builds the Mac and Windows previews on their native runners. The Mac job also exercises the harmless per-user LaunchAgent startup/restart/removal path with a sleep-only fixture. Generated previews are discarded; CI does not publish install downloads. The repository is published at [github.com/mikeymckay/ruffster](https://github.com/mikeymckay/ruffster). The [Pages source is now set to GitHub Actions](https://github.com/mikeymckay/ruffster/settings/pages); the first deployment is being triggered by the latest site update.
+GitHub Actions runs the test suite on Linux, macOS, and Windows, then builds the Mac and Windows previews on their native runners. The Mac job also exercises the harmless per-user LaunchAgent startup/restart/removal path with a sleep-only fixture. Generated previews are discarded; CI does not publish install downloads. The repository is published at [github.com/mikeymckay/ruffster](https://github.com/mikeymckay/ruffster). Its [GitHub Pages site is live](https://mikeymckay.github.io/ruffster/), with the source set to GitHub Actions.
 
 The test runner prints each test and emits Python stack traces every five minutes if a job stalls; CI also places those traces in the job summary and stops a test job after 20 minutes.
 

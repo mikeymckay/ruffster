@@ -29,7 +29,7 @@ The public entry points are:
 4. Keep `.github/workflows/pages.yml` limited to pushes to `main` that change the site or its accessibility check, plus manual runs. The workflow runs the accessibility check before publishing `docs/`, independently of app builds. Verify all four pages and screenshot links at that repository-subpath URL.
 5. Update screenshots and install/FAQ copy with every user-facing release; keep a prominent status and avoid implying unsupported platform behavior.
 
-The Ruffster repository is public, and its Pages source is now configured to use GitHub Actions. A site change on `main` triggers deployment after the accessibility scan passes; the Pages workflow also supports a manual run on `main`. The first deployment after enabling Pages is being checked.
+The Ruffster repository is public, and its Pages source is configured to use GitHub Actions. A site change on `main` triggers deployment after the accessibility scan passes; the Pages workflow also supports a manual run on `main`. The first deployment succeeded at <https://mikeymckay.github.io/ruffster/>.
 
 1. Confirm the **GitHub Actions** source remains selected under repository **Settings → Pages**.
 2. If a site change does not trigger deployment, run **Deploy Ruffster Pages** from the Actions tab on `main`.

@@ -145,8 +145,8 @@ class DocumentationSiteTests(unittest.TestCase):
 
     def test_github_pages_guide_matches_published_repository_state(self):
         guide = (ROOT / 'GITHUB-PAGES.md').read_text(encoding='utf-8')
-        self.assertIn('repository is public, and its Pages source is now configured to use GitHub Actions', guide)
-        self.assertIn('The first deployment after enabling Pages is being checked', guide)
+        self.assertIn('repository is public, and its Pages source is configured to use GitHub Actions', guide)
+        self.assertIn('The first deployment succeeded at <https://mikeymckay.github.io/ruffster/>', guide)
         self.assertIn('progress page', guide)
 
     def test_local_reports_and_key_material_are_ignored_by_source_control(self):
@@ -443,4 +443,4 @@ class DocumentationSiteTests(unittest.TestCase):
         status = (ROOT / 'PROJECT-STATUS.html').read_text(encoding='utf-8')
         self.assertIn('The latest GitHub Actions run is still in progress', status)
         self.assertIn('periodic stack traces', status)
-        self.assertIn('GitHub Pages is now set to use Actions', status)
+        self.assertIn('GitHub Pages is live at mikeymckay.github.io/ruffster', status)
