@@ -113,6 +113,11 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertNotIn('actions/upload-artifact', workflow)
         self.assertIn('CI does not publish install downloads', readme)
 
+    def test_github_pages_guide_warns_about_public_commit_author_metadata(self):
+        guide = (ROOT / 'GITHUB-PAGES.md').read_text(encoding='utf-8')
+        self.assertIn('review the author name and email in local Git commits', guide)
+        self.assertIn('private noreply address', guide)
+
     def test_local_reports_and_key_material_are_ignored_by_source_control(self):
         ignored = (ROOT / '.gitignore').read_text(encoding='utf-8').splitlines()
         for pattern in ('*.sqlite*', '*.db', '*.key', '*.vault', '*.pem', '*.p12', '*.pfx',
@@ -376,8 +381,8 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('exec /bin/sleep 60', lifecycle_check)
         self.assertIn('validate-macos-install-flow.py', guide)
         self.assertIn('zero valid identities', status)
-        self.assertIn('<b>254</b><span>Linux development tests passed · 4 PowerShell checks skipped (258 run)</span>', status)
-        self.assertIn('<b>252</b><span>Mac tests passed · 2 Node.js and 4 PowerShell checks skipped (258 run)</span>', status)
+        self.assertIn('<b>255</b><span>Linux development tests passed · 4 PowerShell checks skipped (259 run)</span>', status)
+        self.assertIn('<b>253</b><span>Mac tests passed · 2 Node.js and 4 PowerShell checks skipped (259 run)</span>', status)
         self.assertIn('Device connection decision', status)
         self.assertIn('cloud rendezvous service', status)
         self.assertIn('process traffic', status)

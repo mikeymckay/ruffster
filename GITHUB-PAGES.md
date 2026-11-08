@@ -28,7 +28,7 @@ The public entry points are:
 4. When the repository is available on GitHub, enable Pages using `main` and `/docs`, then verify all three pages and screenshot links at the published repository-subpath URL.
 5. Update screenshots and install/FAQ copy with every user-facing release; keep a prominent status and avoid implying unsupported platform behavior.
 
-The repository checkout currently has no Git remote or GitHub Pages deployment, so no public URL is configured yet. After creating the GitHub repository and pushing the current `main` branch:
+The repository checkout currently has no Git remote or GitHub Pages deployment, so no public URL is configured yet. Before the first push, review the author name and email in local Git commits; GitHub exposes that metadata with published commits. If desired, set Git to use the private noreply address shown in GitHub settings, then decide whether existing local-only commits should be rewritten to use it. After creating the GitHub repository and pushing the current `main` branch:
 
 1. Open the repository **Settings → Pages**.
 2. Under **Build and deployment**, choose **Deploy from a branch**.
