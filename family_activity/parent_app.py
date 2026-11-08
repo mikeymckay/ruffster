@@ -162,6 +162,14 @@ class Handler(BaseHTTPRequestHandler):
     def _valid_origin(self):
         return self.headers.get('Origin', '') == f'http://127.0.0.1:{self.server.server_port}'
 
+    def _valid_api_read_context(self):
+        """Reject browser API reads initiated by other loopback web origins."""
+        origin = self.headers.get('Origin')
+        if origin is not None and not self._valid_origin():
+            return False
+        fetch_site = self.headers.get('Sec-Fetch-Site')
+        return fetch_site is None or fetch_site in {'same-origin', 'none'}
+
     def _authorized(self):
         try:
             cookie = SimpleCookie(self.headers.get('Cookie', ''))
@@ -191,6 +199,8 @@ class Handler(BaseHTTPRequestHandler):
         if self.path in assets:
             file, kind = assets[self.path]
             self._headers(content_type=kind); self.wfile.write((ASSETS / file).read_bytes()); return
+        if self.path.startswith('/api/') and not self._valid_api_read_context():
+            self._json({'error': 'Forbidden'}, 403); return
         if not self._authorized():
             self._json({'error': 'Open the app from its local launcher.'}, 403); return
         if self.path == '/api/status':

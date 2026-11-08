@@ -156,6 +156,17 @@ class ParentAppTests(unittest.TestCase):
         self.assertEqual(self.request('POST', '/api/login', {'token':self.server.token})[0], 403)
         self.assertEqual(self.request('POST', '/api/lock', {}, {'Origin':'https://evil.example'})[0], 403)
 
+    def test_authenticated_api_reads_reject_other_loopback_origins(self):
+        self.login()
+        self.assertEqual(self.request('GET', '/api/status', headers={
+            'Origin': f'http://127.0.0.1:{self.server.server_port + 1}'})[0], 403)
+        self.assertEqual(self.request('GET', '/api/status', headers={
+            'Sec-Fetch-Site': 'same-site'})[0], 403)
+        self.assertEqual(self.request('GET', '/api/status', headers={
+            'Sec-Fetch-Site': 'cross-site'})[0], 403)
+        self.assertEqual(self.request('GET', '/api/status', headers={
+            'Sec-Fetch-Site': 'same-origin'})[0], 200)
+
     def test_parent_key_auto_locks_after_inactivity(self):
         import time
         from family_activity.parent_app import KEY_IDLE_TIMEOUT_SECONDS
