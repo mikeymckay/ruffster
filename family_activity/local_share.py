@@ -11,6 +11,7 @@ import hmac
 import http.client
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import ipaddress
+import select
 import json
 import os
 from pathlib import Path
@@ -125,26 +126,44 @@ def discover_code(pin, *, timeout=2.0, target=None):
     """Find one matching nearby sender and return its validated pinned-TLS code.
 
     The two-digit value is a human-friendly device selector, not a secret or an
-    authentication factor. The actual data connection still verifies its TLS
-    certificate fingerprint and one-use token.
+    authentication factor. Probe only the route-selected local subnet so replies
+    are unicast and pass stateful local firewalls; the actual data connection
+    still verifies its TLS certificate fingerprint and one-use token.
     """
     if not isinstance(pin, str) or not re.fullmatch(r'[0-9]{2}', pin):
         raise ValueError('enter the two digits shown on the nearby computer')
     if target is None:
-        target = DISCOVERY_BROADCAST
+        local_address, targets = _local_discovery_targets()
+    else:
+        local_address, targets = None, (target,)
     nonce = secrets.token_urlsafe(16)
     request = json.dumps({'v': 1, 'pin': pin, 'nonce': nonce}, separators=(',', ':')).encode('ascii')
     matches = {}
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client:
-        client.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        client.bind(('', 0))
-        client.settimeout(0.2)
-        client.sendto(request, (target, DISCOVERY_PORT))
+        if local_address is None:
+            client.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            client.bind(('', 0))
+        else:
+            client.bind((local_address, 0))
+        client.setblocking(False)
+        for address in targets:
+            # Nonblocking UDP avoids waiting for an ARP resolution timeout on
+            # every host in a local subnet. If the kernel send queue is full,
+            # wait briefly for room and retry the same host.
+            while True:
+                try:
+                    client.sendto(request, (address, DISCOVERY_PORT))
+                    break
+                except BlockingIOError:
+                    select.select([], [client], [], 0.05)
         deadline = time.monotonic() + max(0.2, min(timeout, 5.0))
         while time.monotonic() < deadline:
+            readable, _, _ = select.select([client], [], [], min(0.1, deadline - time.monotonic()))
+            if not readable:
+                continue
             try:
                 raw, _ = client.recvfrom(4096)
-            except socket.timeout:
+            except BlockingIOError:
                 continue
             try:
                 response = json.loads(raw.decode('ascii'))
@@ -415,6 +434,25 @@ def local_ipv4_address():
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as probe:
         probe.connect(('192.0.2.1', 80))
         return _address(probe.getsockname()[0])
+
+
+def _local_discovery_targets():
+    """Return the route-selected local IPv4 address and its bounded host list."""
+    try:
+        import psutil
+        local_address = local_ipv4_address()
+        for entries in psutil.net_if_addrs().values():
+            for entry in entries:
+                if (entry.family != socket.AF_INET or entry.address != local_address
+                        or not entry.netmask):
+                    continue
+                network = ipaddress.IPv4Interface(f'{entry.address}/{entry.netmask}').network
+                if 2 < network.num_addresses <= 512:
+                    return local_address, tuple(str(host) for host in network.hosts())
+                break
+    except (ImportError, OSError, ValueError, AttributeError):
+        pass
+    return None, (DISCOVERY_BROADCAST,)
 
 
 def fetch(code):

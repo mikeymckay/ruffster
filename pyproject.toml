@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Experimental, local-first family activity prototype"
 license = {file = "LICENSE"}
 requires-python = ">=3.10"
-dependencies = ["PyNaCl>=1.6.2,<2", "cryptography>=46,<52", "psutil>=7.2,<8; sys_platform == 'win32'", "tzdata>=2025.1; sys_platform == 'win32'"]
+dependencies = ["PyNaCl>=1.6.2,<2", "cryptography>=46,<52", "psutil>=7.2,<8", "tzdata>=2025.1; sys_platform == 'win32'"]
 
 [project.optional-dependencies]
 build = ["PyInstaller>=6.0,<7"]

@@ -75,6 +75,39 @@ class LocalShareTests(unittest.TestCase):
             with self.assertRaises(ValueError): decode_code(code)
         with self.assertRaises(ValueError): encode_code('8.8.8.8',443,'0'*64,'A'*43)
 
+    def test_default_discovery_targets_only_hosts_on_the_route_selected_subnet(self):
+        import socket
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from family_activity import local_share
+        adapters = {
+            'en0': [SimpleNamespace(family=socket.AF_INET, address='192.168.50.81', netmask='255.255.255.0')],
+            'utun0': [SimpleNamespace(family=socket.AF_INET, address='10.8.0.2', netmask='255.255.255.0')],
+        }
+        fake_psutil = SimpleNamespace(net_if_addrs=lambda: adapters)
+        with patch('family_activity.local_share.local_ipv4_address', return_value='192.168.50.81'), \
+             patch.dict('sys.modules', {'psutil': fake_psutil}):
+            local_address, targets = local_share._local_discovery_targets()
+        self.assertEqual(local_address, '192.168.50.81')
+        self.assertEqual(len(targets), 254)
+        self.assertIn('192.168.50.1', targets)
+        self.assertIn('192.168.50.254', targets)
+        self.assertNotIn('192.168.50.0', targets)
+        self.assertNotIn('192.168.50.255', targets)
+        self.assertFalse(any(address.startswith('10.8.0.') for address in targets))
+
+    def test_large_discovery_subnet_falls_back_to_broadcast(self):
+        import socket
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from family_activity import local_share
+        adapters = {'en0': [SimpleNamespace(family=socket.AF_INET, address='10.0.0.5', netmask='255.255.0.0')]}
+        with patch('family_activity.local_share.local_ipv4_address', return_value='10.0.0.5'), \
+             patch.dict('sys.modules', {'psutil': SimpleNamespace(net_if_addrs=lambda: adapters)}):
+            local_address, targets = local_share._local_discovery_targets()
+        self.assertIsNone(local_address)
+        self.assertEqual(targets, (local_share.DISCOVERY_BROADCAST,))
+
     def test_two_digit_code_resolves_over_local_discovery(self):
         self.start_report_server()
         self.assertEqual(len(self.server.short_code), 2)
