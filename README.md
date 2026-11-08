@@ -4,7 +4,7 @@
 
 <p align="center"><img src="docs/assets/ruffster-mascot.webp" alt="Ruffster golden retriever mascot" width="190"></p>
 
-**This is not ready for family deployment.** The Mac package is unsigned. Windows has not been tested on a Windows computer. Setup, accessibility, security, key recovery, and family usability still need validation. There is no supported release download.
+**This is not ready for family deployment.** The Mac package is unsigned. Windows has not been tested on a Windows computer. Setup, accessibility, security, key recovery, and family usability still need validation. Any Mac download will be an unsigned development preview, clearly marked as such; macOS will warn before opening it. There is no supported family release download.
 
 [Website source (Pages-ready)](docs/index.html) · [Getting started](docs/install.html) · [Progress page](docs/progress.html) · [FAQ](docs/faq.html) · [Privacy and children's rights](PRIVACY-AND-CHILDREN.md) · [Implementation plan](PLAN.md) · [Current status](PROJECT-STATUS.html)
 
@@ -67,9 +67,9 @@ The engineering requirements and open European privacy and children's-rights que
 
 ## Delivery priorities
 
-1. **Make macOS dependable first.** Validate setup and removal, visible status, sleep/wake, permissions, user changes, restart recovery, encrypted reports, and key recovery on real Macs. Finish a parent-friendly signed and notarized installer before family distribution.
+1. **Make macOS dependable first.** Validate setup and removal, visible status, sleep/wake, permissions, user changes, restart recovery, encrypted reports, and key recovery on real Macs. Without a Developer ID, provide a clearly labeled unsigned development preview with source, checksum, and careful Gatekeeper guidance; do not call it family-ready. Revisit signing and notarization before broad family distribution.
 2. **Port the finished family flow to Windows.** Test installation, startup and recovery, visible tray status, network and app observations, encrypted report handoff, parent dashboard, updates, and removal on real Windows computers.
-3. **Make the public project experience excellent.** Keep this README useful to a parent arriving for the first time and to a contributor; publish a polished GitHub Pages home page, family installation guide, progress page, and plain-language FAQ. Include current synthetic screenshots, clear readiness status, accessible responsive layouts, and no download link until a supported release exists.
+3. **Make the public project experience excellent.** Keep this README useful to a parent arriving for the first time and to a contributor; publish a polished GitHub Pages home page, family installation guide, progress page, and plain-language FAQ. Include current synthetic screenshots, clear readiness status, accessible responsive layouts, and clearly distinguish an unsigned developer preview from a supported family release.
 4. **Validate with families and reviewers.** Observe nontechnical parents and children using the whole flow; complete accessibility, security, privacy, and European children's rights reviews.
 
 Linux remains a low-priority development and test host. It is not a student-facing platform target. The task list and release gates are in [PLAN.md](PLAN.md); the Pages design and launch checklist is in [GITHUB-PAGES.md](GITHUB-PAGES.md).
@@ -95,13 +95,13 @@ For local UI development, start the experimental parent app:
 
 It binds to loopback. The default CLI database and dashboard are developer tools, not a family installation path. Do not expose them to a network.
 
-GitHub Actions runs the test suite on Linux, macOS, and Windows, then builds the Mac and Windows previews on their native runners. The Mac job also exercises the harmless per-user LaunchAgent startup/restart/removal path with a sleep-only fixture. Generated previews are discarded; CI does not publish install downloads. The repository is published at [github.com/mikeymckay/ruffster](https://github.com/mikeymckay/ruffster). Its [GitHub Pages site is live](https://mikeymckay.github.io/ruffster/), with the source set to GitHub Actions.
+GitHub Actions runs the test suite on Linux, macOS, and Windows, then builds the Mac and Windows previews on native runners. The Mac job also exercises the harmless per-user LaunchAgent startup/restart/removal path with a sleep-only fixture. A `mac-preview-*` tag runs the Mac suite and publishes an unsigned **prerelease** for Apple silicon with its source commit and SHA-256 checksum. It is not a supported family installer. The repository is published at [github.com/mikeymckay/ruffster](https://github.com/mikeymckay/ruffster). Its [GitHub Pages site is live](https://mikeymckay.github.io/ruffster/), with the source set to GitHub Actions.
 
 The test runner prints each test and emits Python stack traces every five minutes if a job stalls; CI also places those traces in the job summary and stops a test job after 20 minutes.
 
 ### Build experimental previews
 
-**macOS (Apple silicon):** build on a Mac with the project dependencies and PyInstaller installed. This makes an unsigned development bundle, not a supported installer. The builder compiles the native helpers and smoke-checks the frozen commands and loopback parent dashboard without installing monitoring. A private Developer ID signing and notarization path for a preview drag-to-Applications disk image is documented in [MACOS-DISTRIBUTION.md](MACOS-DISTRIBUTION.md); it is unverified because this project has no signing identity yet.
+**macOS (Apple silicon):** build on a Mac with the project dependencies and PyInstaller installed. The local builder makes an unsigned development bundle, not a supported installer. The tagged GitHub workflow can package an unsigned drag-to-Applications preview and publish it as a prerelease with its source commit and SHA-256 checksum. macOS may block it; read [Apple's instructions and risks](https://support.apple.com/en-us/102445) before deciding whether to use its per-app override. Ruffster never disables Gatekeeper or removes quarantine. This is for technically comfortable preview testers, not ongoing family monitoring. See [MACOS-DISTRIBUTION.md](MACOS-DISTRIBUTION.md).
 
 ```sh
 .venv/bin/python -m pip install -e ".[build]"
@@ -119,7 +119,7 @@ Read [WINDOWS.md](WINDOWS.md) before working on the Windows preview. A Linux cro
 
 ## Project website
 
-The static website source in `docs/` contains the home page, getting-started guide, progress page, FAQ, and screenshots. It has no external runtime dependencies and publishes from the repository's `/docs` folder with GitHub Pages. See [GITHUB-PAGES.md](GITHUB-PAGES.md). The website should not link to a family download until a supported signed release exists.
+The static website source in `docs/` contains the home page, getting-started guide, progress page, FAQ, and screenshots. It has no external runtime dependencies and publishes from the repository's `/docs` folder with GitHub Pages. See [GITHUB-PAGES.md](GITHUB-PAGES.md). Clearly distinguish any unsigned preview from a supported family release.
 
 Refresh the synthetic parent setup and report screenshots with `.venv/bin/python scripts/capture-parent-demo-screenshots.py` (Chrome or Chromium required). The first-run image has no parent key; the report image uses a temporary key and fictional activity records. The tool starts no monitoring agent and replaces only the two PNG files in `docs/assets/`.
 

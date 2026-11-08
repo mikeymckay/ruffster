@@ -63,15 +63,15 @@
    <div class="wrap prose">
     <div class="notice" id="status">
      <strong>
-      There is no supported family installer yet.
+      An unsigned Mac developer preview can be offered; there is no supported family installer.
      </strong>
-     The current Mac app is unsigned, the Windows setup has not run on a Windows computer, and the parent and child experiences have not been tested with families. Do not install this prototype for ongoing monitoring of a child.
+     macOS may block the preview because Ruffster has no Apple Developer ID signature or notarization. Windows setup has not run on a Windows computer, and parents and children have not tested the experience together. The preview is for technically comfortable testers only, not ongoing monitoring of a child.
     </div>
     <h2>
      For parents
     </h2>
     <p>
-     Wait for a supported release. There is no public download, signing and notarization are unfinished, Windows behavior is unverified, and independent security, privacy, accessibility, and usability reviews remain open.
+     For ordinary family use, wait for a supported release. If you choose to try the unsigned Mac preview, read the release warning, verify the published SHA-256 checksum, review the linked source commit, and understand Apple's Gatekeeper warning first. Do not disable Gatekeeper or follow Terminal commands that remove quarantine. Windows behavior is unverified, and independent security, privacy, accessibility, and usability reviews remain open.
     </p>
     <p>
      The intended flow is designed to be straightforward:
@@ -109,7 +109,7 @@
      macOS
     </h3>
     <p>
-     An unsigned Apple-silicon development bundle can be built from source. It includes a local parent dashboard, experimental encrypted collection, and a disclosed setup flow. On macOS 26.6, the latest full suite ran 281 tests (273 passed; 8 platform/dependency checks skipped). A temporary synthetic-only check verified encrypted app samples, a recorded coverage gap, the real installer's same-location update restart, launchd recovery after forced termination, and clean uninstall with the report retained. A fresh app build also passed the native layout and frozen dashboard smoke checks. It collected no real app or network data and removed its temporary service and files. The menu-bar display and VoiceOver behavior, native setup dialogs, physical sleep/wake, signing, notarization, and family usability remain unverified. There is no family download yet; the preview is for development only.
+     An unsigned Apple-silicon development bundle can be built from source and packaged as an opt-in GitHub prerelease with its source commit and SHA-256 checksum. It includes a local parent dashboard, experimental encrypted collection, and a disclosed setup flow. On macOS 26.6, the latest full suite ran 281 tests (273 passed; 8 platform/dependency checks skipped). A temporary synthetic-only check verified encrypted app samples, a recorded coverage gap, the real installer's same-location update restart, launchd recovery after forced termination, and clean uninstall with the report retained. A fresh app build also passed the native layout and frozen dashboard smoke checks. It collected no real app or network data and removed its temporary service and files. The menu-bar display and VoiceOver behavior, native setup dialogs, physical sleep/wake, Gatekeeper override, and family usability remain unverified. This is a developer preview, not for ongoing family monitoring.
     </p>
     <h3>
      Windows
@@ -148,7 +148,7 @@ node --check family_activity/parent_assets/app.js</code></pre>
      When family releases are ready
     </h2>
     <p>
-     A release download will appear only after the supported operating-system flows are tested, the packages are signed, and clear installation, update, removal, data export, key recovery, and deletion instructions are in place. Until then, the project status page in the source repository describes the open validation work.
+     An unsigned preview may be published as a prerelease, clearly labeled with its warnings and validation limits. A supported family release still requires tested operating-system flows, clear installation, update, removal, data export, key recovery, and deletion instructions, plus accessibility, security, privacy, and family usability review. The status page describes the remaining work.
     </p>
     <div class="notice">
      <strong>

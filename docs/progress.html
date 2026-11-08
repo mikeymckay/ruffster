@@ -35,8 +35,8 @@
    </section>
    <div class="wrap prose">
     <div class="notice">
-     <strong>There is no supported Mac download yet.</strong>
-     The Mac app is unsigned. A Developer ID signing identity is not available on the build Mac, so Ruffster cannot yet provide the standard download and first-open experience parents expect. Windows also needs testing on a real Windows computer. Please do not use this preview for ongoing family monitoring.
+     <strong>An unsigned Mac development preview can be published; there is no supported family download.</strong>
+     Without an Apple Developer ID, macOS may warn or block first launch. Any preview must be opt-in, identify its source commit, include a SHA-256 checksum, and link Apple's Gatekeeper guidance. It is for technically comfortable testers, not ongoing family monitoring. Windows also needs testing on a real Windows computer.
     </div>
     <h2>What is working</h2>
     <ol class="steps">
@@ -45,15 +45,15 @@
      <li><strong>Mac build and automated checks.</strong> The unsigned preview app builds on Apple silicon and passes native packaging smoke checks. The latest full suites ran 281 tests on both Mac and Linux; the Mac run had 8 platform/dependency skips and the Linux run had 5. Tracemalloc-enabled Mac checks found and verified fixes for SQLite read-handle leaks.</li>
      <li><strong>Windows prototype.</strong> A per-user setup, visible tray indicator, parent dashboard launcher, and update flow are implemented and built in CI. There is no real Windows computer validation yet.</li>
     </ol>
-    <h2>What still stands between here and a Mac download</h2>
+    <h2>What still stands between here and family use</h2>
     <ul>
-     <li>Make a Developer ID certificate and notarization setup available, then sign and notarize the Mac app.</li>
-     <li>Install the resulting download on a clean Mac and verify first open, setup, monitoring status, report transfer, update, recovery, and uninstall.</li>
+     <li>Package a clearly labeled, unsigned opt-in preview with its source commit, SHA-256 checksum, and safe Gatekeeper instructions.</li>
+     <li>Install the preview on a clean Mac and verify first open, setup, monitoring status, report transfer, update, recovery, and uninstall; separately review whether an unsigned flow is acceptable for the intended families.</li>
      <li>Review the native windows with keyboard and VoiceOver, and check the Mac local-network permission flow.</li>
      <li>Validate the Windows installer, task startup, tray indicator, report transfer, update, and removal on an actual Windows computer.</li>
      <li>Run the setup and weekly report flow with parents and children, then complete accessibility, privacy, and security reviews.</li>
     </ul>
-    <p>Once the signed Mac package passes those checks, the <a href="install.html">Getting started page</a> will link to a download hosted in GitHub Releases. The page will keep the download unavailable until that release gate is met.</p>
+    <p>The <a href="install.html">Getting started page</a> will distinguish any unsigned developer prerelease from a supported family release. Publishing a preview does not clear the family release gates.</p>
     <h2>Current automated test results</h2>
     <p><strong>Mac:</strong> 281 tests ran; 273 passed and 8 platform/dependency checks skipped. The additional run with Python resource tracing reported zero SQLite <code>ResourceWarning</code>s.</p>
     <p><strong>Linux development host:</strong> 281 tests ran; 276 passed and 5 platform/tool checks skipped. These tests do not prove Windows behavior.</p>

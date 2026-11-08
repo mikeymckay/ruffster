@@ -99,7 +99,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('rejects wildcards', plan)
         self.assertIn('browser-specific host-manifest locations', plan)
 
-    def test_github_ci_covers_three_platforms_and_does_not_publish_previews(self):
+    def test_github_ci_covers_platforms_and_unsigned_preview_is_separate_prerelease(self):
         workflow = (ROOT / '.github/workflows/ci.yml').read_text(encoding='utf-8')
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
         project = (ROOT / 'native/windows/FamilyActivityStatus.csproj').read_text(encoding='utf-8')
@@ -116,7 +116,19 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn("dotnet-version: '10.0.x'", workflow)
         self.assertIn('<TargetFramework>net10.0-windows</TargetFramework>', project)
         self.assertNotIn('actions/upload-artifact', workflow)
-        self.assertIn('CI does not publish install downloads', readme)
+        release = (ROOT / '.github/workflows/release-macos-unsigned-preview.yml').read_text(encoding='utf-8')
+        release_notes = (ROOT / '.github/UNSIGNED-MAC-PREVIEW-RELEASE-NOTES.md').read_text(encoding='utf-8')
+        packager = (ROOT / 'scripts/package-macos-unsigned-preview.sh').read_text(encoding='utf-8')
+        self.assertIn("'mac-preview-*'", release)
+        self.assertIn('--prerelease', release)
+        self.assertIn('scripts/run-tests.py', release)
+        self.assertIn('shasum -a 256', packager)
+        self.assertIn('Source commit:', packager)
+        self.assertIn("Do not disable\nGatekeeper", packager)
+        self.assertIn('status --porcelain', packager)
+        self.assertIn('must exactly match the checked-out HEAD', packager)
+        self.assertIn('not for ongoing monitoring of a child', release_notes)
+        self.assertIn('prerelease', readme)
 
     def test_test_runner_exposes_stall_diagnostics_in_github_summary(self):
         runner = (ROOT / 'scripts/run-tests.py').read_text(encoding='utf-8')
@@ -161,7 +173,7 @@ class DocumentationSiteTests(unittest.TestCase):
         guide = (SITE / 'install.html').read_text(encoding='utf-8')
         self.assertIn('macOS first, then Windows', home)
         self.assertIn('Linux is not a student-facing target', guide)
-        self.assertIn('There is no supported family installer yet', guide)
+        self.assertIn('there is no supported family installer', guide)
         self.assertIn('temporary synthetic-only check verified encrypted app samples', guide)
         self.assertIn('VoiceOver behavior', guide)
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
