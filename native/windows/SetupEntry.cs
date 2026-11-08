@@ -31,6 +31,11 @@ internal static class Program
             catch { Environment.ExitCode = 1; }
             return;
         }
+        if (args.Contains("--prepare-update", StringComparer.OrdinalIgnoreCase))
+        {
+            Environment.ExitCode = SetupApplication.RunUpdatePreparation() ? 0 : 1;
+            return;
+        }
         var manage = args.Contains("--manage", StringComparer.OrdinalIgnoreCase);
         var requestedSetup = args.Contains("--setup", StringComparer.OrdinalIgnoreCase) || manage;
         var agentPid = Environment.GetEnvironmentVariable("FAMILY_ACTIVITY_PARENT_PID");

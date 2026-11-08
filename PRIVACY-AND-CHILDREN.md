@@ -1,10 +1,10 @@
 # Privacy and children: engineering requirements
 
-This document turns privacy and children's rights principles into product and release requirements. It is a design aid, not legal advice, a DPIA, or a claim that Family Activity complies with the GDPR or any national law. Before a family release, qualified privacy counsel must assess the actual family use, jurisdictions, product distribution, and each data flow.
+This document turns privacy and children's rights principles into product and release requirements. It is a design aid, not legal advice, a DPIA, or a claim that Ruffster complies with the GDPR or any national law. Before a family release, qualified privacy counsel must assess the actual family use, jurisdictions, product distribution, and each data flow.
 
 ## Product purpose and boundaries
 
-Family Activity is intended to help a parent and child understand computer use and have a conversation. It must not become a tool for school attendance decisions, academic or behavioral scoring, advertising, profiling, punishment, or automated restrictions. Reports must distinguish observations from estimates and must never infer intent or misconduct from missing data, unfamiliar networks, or configuration indicators.
+Ruffster is intended to help a parent and child understand computer use and have a conversation. It must not become a tool for school attendance decisions, academic or behavioral scoring, advertising, profiling, punishment, or automated restrictions. Reports must distinguish observations from estimates and must never infer intent or misconduct from missing data, unfamiliar networks, or configuration indicators.
 
 The app should remain visible to the child. Setup and the running status indicator should explain what is collected, why, and how to pause or remove monitoring. Parent controls and a child-facing explanation are product safeguards; neither should be represented as legal consent or a substitute for an appropriate legal basis.
 

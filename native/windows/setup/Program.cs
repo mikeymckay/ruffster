@@ -10,13 +10,22 @@ internal static class SetupApplication
     private static string AppFolder => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "Family Activity");
     private static string StartMenuShortcut => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs", "Family Activity.lnk");
+        Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs", "Ruffster.lnk");
 
     public static void Run(bool manage)
     {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
         Application.Run(new SetupForm(manage));
+    }
+
+    public static bool RunUpdatePreparation()
+    {
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        using var setup = new SetupForm(true, true);
+        Application.Run(setup);
+        return setup.UpdatePrepared;
     }
 
     public static void RunUiSelfTest()
@@ -31,7 +40,7 @@ internal static class SetupApplication
         var confirmation = controls.OfType<CheckBox>().FirstOrDefault(control => control.AccessibleName == "Confirm the child has been told about monitoring");
         var retention = controls.OfType<ComboBox>().FirstOrDefault();
         var install = controls.OfType<Button>().FirstOrDefault(control => control.Text == "Install monitoring");
-        if (setup.Text != "Set up Family Activity" || setup.ClientSize.Width != 570 ||
+        if (setup.Text != "Set up Ruffster" || setup.ClientSize.Width != 570 ||
             code is null || code.MaxLength != 2 ||
             disclosure is null || !disclosure.ReadOnly || !disclosure.Multiline || disclosure.ScrollBars != ScrollBars.Vertical ||
             !disclosure.Text.Contains("It samples the foreground application name", StringComparison.Ordinal) ||
@@ -50,17 +59,26 @@ internal static class SetupApplication
         var manageControls = AllControls(manage).ToArray();
         var deleteData = manageControls.OfType<CheckBox>().FirstOrDefault(control =>
             control.Text.Contains("delete this computer's encrypted report", StringComparison.OrdinalIgnoreCase));
-        if (manage.Text != "Family Activity settings" || manage.ClientSize.Width != 570 ||
+        if (manage.Text != "Ruffster settings" || manage.ClientSize.Width != 570 ||
             !manageControls.OfType<Button>().Any(control => control.Text == "Stop and remove monitoring") ||
             deleteData is null || deleteData.Checked)
             throw new InvalidOperationException("The Windows monitoring settings form failed its UI self-check.");
+
+        using var update = new SetupForm(true, true);
+        update.PerformLayout();
+        var updateControls = AllControls(update).ToArray();
+        if (update.Text != "Update Ruffster" ||
+            !updateControls.OfType<Button>().Any(control => control.Text == "Pause monitoring and continue") ||
+            updateControls.OfType<Label>().All(control => !control.Text.Contains("encrypted report", StringComparison.Ordinal)) ||
+            updateControls.OfType<CheckBox>().Any())
+            throw new InvalidOperationException("The Windows update confirmation form failed its UI self-check.");
 
         SelfTestProgramRemoval();
     }
 
     private static void SelfTestProgramRemoval()
     {
-        var folder = Path.Combine(Path.GetTempPath(), "Family Activity removal self-test-" + Guid.NewGuid().ToString("N"));
+        var folder = Path.Combine(Path.GetTempPath(), "Ruffster removal self-test-" + Guid.NewGuid().ToString("N"));
         try
         {
             Directory.CreateDirectory(folder);
@@ -126,6 +144,7 @@ internal static class SetupApplication
     private sealed class SetupForm : Form
     {
         private readonly bool manage;
+        private readonly bool prepareUpdate;
         private readonly TextBox keyPath = new() { Width = 370, ReadOnly = true };
         private readonly TextBox code = new() { Width = 410, MaxLength = 2, AccessibleName = "Two digits from the parent's dashboard", PlaceholderText = "Enter the two digits from the parent's dashboard" };
         private readonly ComboBox retention = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 160 };
@@ -137,20 +156,23 @@ internal static class SetupApplication
         private readonly Button remove = new() { Text = "Stop and remove monitoring", AutoSize = true };
         private string sourceFolder = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
 
-        public SetupForm(bool manageMode)
+        public bool UpdatePrepared { get; private set; }
+
+        public SetupForm(bool manageMode, bool prepareUpdateMode = false)
         {
             manage = manageMode;
-            Text = manage ? "Family Activity settings" : "Set up Family Activity";
+            prepareUpdate = prepareUpdateMode;
+            Text = prepareUpdate ? "Update Ruffster" : manage ? "Ruffster settings" : "Set up Ruffster";
             StartPosition = FormStartPosition.CenterScreen;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false; MinimizeBox = false;
-            ClientSize = new Size(570, manage ? 400 : 700);
+            ClientSize = new Size(570, manage ? (prepareUpdate ? 340 : 400) : 700);
             Font = new Font("Segoe UI", 9.5f);
 
             var stack = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true, Padding = new Padding(22) };
             Controls.Add(stack);
-            stack.Controls.Add(new Label { Text = manage ? "Monitoring settings" : "Set up together", Font = new Font(Font, FontStyle.Bold), AutoSize = true, Margin = new Padding(0, 0, 0, 8) });
-            stack.Controls.Add(new Label { Text = manage ? "This preview runs for the signed-in Windows account. Removing monitoring stops the scheduled task. Your encrypted report stays on this computer unless you choose to delete it." : "Family Activity helps your family review computer use together. It starts when this Windows account signs in and shows a visible notification-area icon while it runs. This preview supports Windows 10 and 11 x64 only.", Width = 510, Height = 60 });
+            stack.Controls.Add(new Label { Text = prepareUpdate ? "Review this update together" : manage ? "Monitoring settings" : "Set up together", Font = new Font(Font, FontStyle.Bold), AutoSize = true, Margin = new Padding(0, 0, 0, 8) });
+            stack.Controls.Add(new Label { Text = prepareUpdate ? "Monitoring will pause while the app updates. The existing parent connection, saved settings, and encrypted report will stay on this computer. The visible status indicator will close; the new version will start monitoring again after the update.": manage ? "This preview runs for the signed-in Windows account. Removing monitoring stops the scheduled task. Your encrypted report stays on this computer unless you choose to delete it." : "Ruffster helps your family review computer use together. It starts when this Windows account signs in and shows a visible notification-area icon while it runs. This preview supports Windows 10 and 11 x64 only.", Width = 510, Height = prepareUpdate ? 82 : 60 });
 
             if (!manage)
             {
@@ -186,11 +208,20 @@ internal static class SetupApplication
             }
             else
             {
-                deleteData.Text = "Also delete this computer's encrypted report and saved connection details.";
-                deleteData.Margin = new Padding(0, 16, 0, 8);
-                stack.Controls.Add(deleteData);
-                remove.Click += async (_, _) => await RemoveAsync();
-                stack.Controls.Add(remove);
+                if (prepareUpdate)
+                {
+                    remove.Text = "Pause monitoring and continue";
+                    remove.Click += async (_, _) => await PrepareUpdateAsync();
+                    stack.Controls.Add(remove);
+                }
+                else
+                {
+                    deleteData.Text = "Also delete this computer's encrypted report and saved connection details.";
+                    deleteData.Margin = new Padding(0, 16, 0, 8);
+                    stack.Controls.Add(deleteData);
+                    remove.Click += async (_, _) => await RemoveAsync();
+                    stack.Controls.Add(remove);
+                }
             }
             status.Margin = new Padding(0, 12, 0, 0);
             stack.Controls.Add(status);
@@ -200,7 +231,7 @@ internal static class SetupApplication
 
         private void ChooseKey()
         {
-            using var dialog = new OpenFileDialog { Title = "Choose the connection file from your parent", Filter = "Family Activity connection file|family-public.key;*.key|All files|*.*", CheckFileExists = true };
+            using var dialog = new OpenFileDialog { Title = "Choose the connection file from your parent", Filter = "Ruffster connection file|family-public.key;*.key|All files|*.*", CheckFileExists = true };
             if (dialog.ShowDialog(this) == DialogResult.OK) { keyPath.Text = dialog.FileName; code.Clear(); }
         }
 
@@ -242,7 +273,7 @@ internal static class SetupApplication
                 }
                 finally { if (temporaryKey is not null) try { File.Delete(temporaryKey); } catch { } }
                 TryCreateShortcut(destination);
-                MessageBox.Show(this, "Setup is complete. Monitoring has started and its visible status indicator is ready. It may say ‘Monitoring is starting’ briefly until the first sample is saved, then it should say ‘Monitoring is on’. Confirm the Family Activity icon appears in the notification area or under Show hidden icons. It will also start when this Windows account signs in. The encrypted report can be shared with the parent from the icon menu.", "Family Activity is set up", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(this, "Setup is complete. Monitoring has started and its visible status indicator is ready. It may say ‘Monitoring is starting’ briefly until the first sample is saved, then it should say ‘Monitoring is on’. Confirm the Ruffster icon appears in the notification area or under Show hidden icons. It will also start when this Windows account signs in. The encrypted report can be shared with the parent from the icon menu.", "Ruffster is set up", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 Close();
             }
             catch (Exception error)
@@ -251,7 +282,7 @@ internal static class SetupApplication
                     "Family Activity", "windows-install.json");
                 var taskMayBeRegistered = File.Exists(record);
                 var message = taskMayBeRegistered
-                    ? error.Message + " A setup record is present. Do not run setup again; use Family Activity settings from the Start Menu to check or remove monitoring."
+                    ? error.Message + " A setup record is present. Do not run setup again; use Ruffster settings from the Start Menu to check or remove monitoring."
                     : error.Message + " You can correct the problem and try setup again.";
                 status.Text = message;
                 MessageBox.Show(this, message, "Setup could not finish", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -261,20 +292,20 @@ internal static class SetupApplication
 
         private async Task RemoveAsync()
         {
-            if (MessageBox.Show(this, "Stop monitoring for this Windows account? The encrypted report will remain on this computer unless you select delete and confirm.", "Stop Family Activity", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
-            if (deleteData.Checked && MessageBox.Show(this, "Permanently remove the encrypted report and Family Activity connection details saved on this computer? Reports already imported to a parent computer and backups are not affected.", "Delete local report?", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+            if (MessageBox.Show(this, "Stop monitoring for this Windows account? The encrypted report will remain on this computer unless you select delete and confirm.", "Stop Ruffster", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+            if (deleteData.Checked && MessageBox.Show(this, "Permanently remove the encrypted report and Ruffster connection details saved on this computer? Reports already imported to a parent computer and backups are not affected.", "Delete local report?", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
             remove.Enabled = false; status.Text = "Stopping the scheduled agent…";
             try
             {
                 var result = await RunCoreAsync(sourceFolder, deleteData.Checked ? new[] { "windows-uninstall", "--delete-data" } : new[] { "windows-uninstall" });
                 if (result != 0) throw new InvalidOperationException("Windows could not verify and remove the scheduled task. Monitoring may still be configured; contact the person who set this up.");
                 try { File.Delete(StartMenuShortcut); } catch { }
-                var message = deleteData.Checked ? "Monitoring was stopped. The local encrypted report and connection details were deleted." : "Monitoring was stopped. The encrypted report and connection details remain in the Family Activity data folder.";
+                var message = deleteData.Checked ? "Monitoring was stopped. The local encrypted report and connection details were deleted." : "Monitoring was stopped. The encrypted report and connection details remain in the Ruffster data folder.";
                 var filesScheduled = ScheduleProgramRemoval(sourceFolder);
                 message += filesScheduled
                     ? " The setup will try to remove its program files after this window closes. If the folder remains, delete it manually: " + sourceFolder + "."
                     : " The program files remain in " + sourceFolder + "; delete that folder after closing this window.";
-                MessageBox.Show(this, message, "Family Activity removed", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(this, message, "Ruffster removed", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 Close();
             }
             catch (Exception error)
@@ -285,10 +316,31 @@ internal static class SetupApplication
             }
         }
 
+        private async Task PrepareUpdateAsync()
+        {
+            if (MessageBox.Show(this, "Monitoring will pause while the downloaded update is installed. Continue?", "Update Ruffster", MessageBoxButtons.YesNo, MessageBoxIcon.Information) != DialogResult.Yes) return;
+            remove.Enabled = false;
+            status.Text = "Pausing monitoring and preserving the encrypted report…";
+            try
+            {
+                var result = await RunCoreAsync(sourceFolder, new[] { "windows-uninstall" });
+                if (result != 0) throw new InvalidOperationException("Windows could not verify and pause the scheduled agent. The update has not started; your current app and report are unchanged.");
+                UpdatePrepared = true;
+                status.Text = "Monitoring is paused. The installer will now replace the app files and restart monitoring.";
+                Close();
+            }
+            catch (Exception error)
+            {
+                status.Text = error.Message;
+                MessageBox.Show(this, error.Message, "Could not prepare the update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                remove.Enabled = true;
+            }
+        }
+
         private string EnsureInstalledCopy()
         {
             if (Path.GetFullPath(sourceFolder).Equals(Path.GetFullPath(AppFolder), StringComparison.OrdinalIgnoreCase)) return AppFolder;
-            if (Directory.Exists(AppFolder)) throw new IOException("A previous Family Activity preview folder already exists in Local AppData Programs. Remove that old preview folder before installing this copy.");
+            if (Directory.Exists(AppFolder)) throw new IOException("A previous Ruffster preview folder already exists in Local AppData Programs. Remove that old preview folder before installing this copy.");
             var source = Path.GetFullPath(sourceFolder).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
             var destination = Path.GetFullPath(AppFolder).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
             if (destination.StartsWith(source, StringComparison.OrdinalIgnoreCase)) throw new IOException("Move the preview folder outside Local AppData Programs, then open setup again.");
@@ -318,10 +370,10 @@ internal static class SetupApplication
         private static async Task<int> RunCoreAsync(string root, IEnumerable<string> arguments)
         {
             var core = Path.Combine(root, "FamilyActivityCore", "FamilyActivityCore.exe");
-            if (!File.Exists(core)) throw new FileNotFoundException("The Family Activity application files are incomplete.", core);
+            if (!File.Exists(core)) throw new FileNotFoundException("The Ruffster application files are incomplete.", core);
             var start = new ProcessStartInfo(core) { WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true };
             foreach (var argument in arguments) start.ArgumentList.Add(argument);
-            using var process = Process.Start(start) ?? throw new InvalidOperationException("The Family Activity helper could not start.");
+            using var process = Process.Start(start) ?? throw new InvalidOperationException("The Ruffster helper could not start.");
             await process.WaitForExitAsync();
             return process.ExitCode;
         }
@@ -338,7 +390,7 @@ internal static class SetupApplication
                 shortcut.TargetPath = Path.Combine(root, "FamilyActivitySetup.exe");
                 shortcut.Arguments = "--manage";
                 shortcut.WorkingDirectory = root;
-                shortcut.Description = "View or remove Family Activity monitoring settings";
+                shortcut.Description = "View or remove Ruffster monitoring settings";
                 shortcut.Save();
             }
             catch { /* The setup window still shows the installation path if shortcuts are unavailable. */ }

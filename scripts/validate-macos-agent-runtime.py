@@ -22,6 +22,9 @@ from datetime import datetime
 
 from nacl.public import PrivateKey
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT))
+
 from family_activity import encrypted_view, macos_install, public_key_file
 
 
@@ -116,23 +119,31 @@ def _validate_launchd(root, folder, foreground, status):
         first_pid = _service_pid(domain, label)
         if first_pid is None:
             raise RuntimeError('launchd did not report the synthetic agent as running')
+        update = macos_install.restart_after_update(
+            home, uid, sys.executable, runtime, foreground, status,
+            label=label, runner=runner)
+        if update['pid'] == first_pid or update['previous_pid'] != first_pid:
+            raise RuntimeError('the update action did not replace the managed agent process')
+        report = _wait_for_samples(database, private_key, 4, 45)
+        if len(report['samples']) < 4 or len(report['sessions']) < 2:
+            raise RuntimeError('the updated agent did not resume encrypted synthetic sampling')
+
         result = _launchctl('kill', 'SIGKILL', f'{domain}/{label}')
         if result.returncode:
             raise RuntimeError('could not terminate the synthetic launchd agent: ' + result.stderr.strip())
 
         deadline = time.monotonic() + 40
         restarted_pid = None
-        report = first
         while time.monotonic() < deadline:
             pid = _service_pid(domain, label)
-            if pid is not None and pid != first_pid:
+            if pid is not None and pid != update['pid']:
                 restarted_pid = pid
                 if database.exists():
                     report = _projection(database, private_key)
-                    if len(report['sessions']) >= 2 and len(report['samples']) >= 4 and report['gaps']:
+                    if len(report['sessions']) >= 3 and len(report['samples']) >= 6 and report['gaps']:
                         break
             time.sleep(0.25)
-        if restarted_pid is None or len(report['sessions']) < 2 or not report['gaps']:
+        if restarted_pid is None or len(report['sessions']) < 3 or not report['gaps']:
             raise RuntimeError('launchd did not restart the real agent into a new encrypted session with an observed gap')
         if any(name != 'Synthetic Study App' or bundle != 'org.example.synthetic-study'
                for name, bundle in report['samples']):
@@ -147,7 +158,7 @@ def _validate_launchd(root, folder, foreground, status):
         if _service_pid(domain, label) is not None:
             raise RuntimeError('installer removal left the disposable agent registered')
         final = _projection(database, private_key)
-        if len(final['sessions']) != 2 or final['sessions'][-1][2] is None:
+        if len(final['sessions']) != 3 or final['sessions'][-1][2] is None:
             raise RuntimeError('installer removal did not close the restarted agent session')
         process = subprocess.run(['/bin/ps', '-p', str(restarted_pid)], capture_output=True, text=True)
         if process.returncode == 0:
@@ -157,9 +168,10 @@ def _validate_launchd(root, folder, foreground, status):
             raise RuntimeError('temporary encrypted data remained after validation cleanup')
         interval = (datetime.fromisoformat(report['gaps'][0][1]) -
                     datetime.fromisoformat(report['gaps'][0][0])).total_seconds()
-        return (f'real installer started the synthetic agent; launchd restarted it under a new PID '
-                f'and recorded a {interval:.1f}-second gap. Uninstall stopped the job and retained '
-                'the encrypted report as designed; the validation harness then removed its temporary home.')
+        return (f'real installer started the synthetic agent; the update action replaced its PID and '
+                f'resumed encrypted sampling, then launchd restarted it after SIGKILL and recorded a '
+                f'{interval:.1f}-second gap. Uninstall stopped the job and retained the encrypted report; '
+                'the validation harness then removed its temporary home.')
     finally:
         if installed:
             try:
@@ -177,7 +189,7 @@ def _validate_launchd(root, folder, foreground, status):
 def validate():
     if sys.platform != 'darwin':
         raise SystemExit('Run this validation on macOS.')
-    root = Path(__file__).resolve().parents[1]
+    root = PROJECT_ROOT
     with tempfile.TemporaryDirectory(prefix='family-activity-agent-check-') as temporary:
         folder = Path(temporary)
         os.chmod(folder, 0o700)

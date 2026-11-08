@@ -26,7 +26,7 @@ try {
     --paths $Root --add-data "$Root\family_activity\parent_assets;family_activity\parent_assets" `
     --collect-all tzdata `
     --distpath $Dist --workpath $Work --specpath $Stage (Join-Path $Root 'scripts\frozen_main.py')
-  if ($LASTEXITCODE -ne 0) { throw 'Could not bundle the Family Activity core.' }
+  if ($LASTEXITCODE -ne 0) { throw 'Could not bundle the Ruffster core.' }
   $CorePackage = Join-Path $Output 'FamilyActivityCore'
   New-Item -ItemType Directory -Path $CorePackage | Out-Null
   Copy-Item (Join-Path $Dist 'FamilyActivityCore\*') $CorePackage -Recurse
@@ -50,17 +50,17 @@ try {
     -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true `
     "-p:FamilyBundlePath=$Bundle" -o (Join-Path $Stage 'installer')
   if ($LASTEXITCODE -ne 0) { throw 'Could not build the direct-download Windows installer.' }
-  Copy-Item (Join-Path $Stage 'installer\FamilyActivityInstaller.exe') (Join-Path $Output 'FamilyActivityInstaller.exe')
-  & (Join-Path $Output 'FamilyActivityInstaller.exe') --self-test
+  Copy-Item (Join-Path $Stage 'installer\FamilyActivityInstaller.exe') (Join-Path $Output 'RuffsterSetup.exe')
+  & (Join-Path $Output 'RuffsterSetup.exe') --self-test
   if ($LASTEXITCODE -ne 0) { throw 'The Windows installer extraction self-check failed.' }
   $ReleaseFolder = Join-Path $Stage 'release'
   New-Item -ItemType Directory -Path $ReleaseFolder | Out-Null
-  Copy-Item (Join-Path $Output 'FamilyActivityInstaller.exe') $ReleaseFolder
+  Copy-Item (Join-Path $Output 'RuffsterSetup.exe') $ReleaseFolder
   Copy-Item (Join-Path $Output 'LICENSE') $ReleaseFolder
   @'
-Family Activity for Windows
+Ruffster for Windows
 
-Double-click FamilyActivityInstaller.exe and follow the family setup screen.
+Double-click RuffsterSetup.exe and follow the family setup screen.
 Files are copied to this Windows account before monitoring setup begins.
 Monitoring starts only after the family reviews and confirms what is collected.
 '@ | Set-Content -LiteralPath (Join-Path $ReleaseFolder 'START-HERE.txt') -Encoding utf8
@@ -70,7 +70,7 @@ Monitoring starts only after the family reviews and confirms what is collected.
   $Zip = [System.IO.Compression.ZipFile]::OpenRead($Archive)
   try {
     $Entries = @($Zip.Entries | ForEach-Object { $_.FullName })
-    foreach ($RequiredEntry in @('FamilyActivityInstaller.exe', 'START-HERE.txt', 'LICENSE')) {
+    foreach ($RequiredEntry in @('RuffsterSetup.exe', 'START-HERE.txt', 'LICENSE')) {
       if ($Entries -notcontains $RequiredEntry) { throw "The Windows preview archive is missing $RequiredEntry" }
     }
   } finally { $Zip.Dispose() }

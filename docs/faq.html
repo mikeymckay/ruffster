@@ -3,10 +3,10 @@
  <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1" name="viewport"/>
-  <meta content="Answers about Family Activity's data collection, encryption, network measurements, and preview status." name="description"/>
+  <meta content="Answers about Ruffster's data collection, encryption, network measurements, and preview status." name="description"/>
   <meta content="#f5f4ee" name="theme-color"/>
   <title>
-   FAQ — Family Activity
+   FAQ — Ruffster
   </title>
   <link href="favicon.svg" rel="icon" type="image/svg+xml"/>
  <link href="assets/site.css" rel="stylesheet"/>
@@ -19,15 +19,14 @@
    <div class="wrap topbar-in">
     <a class="brand" href="index.html">
      <span aria-hidden="true" class="brand-mark">
-      <svg fill="none" viewBox="0 0 24 24">
-       <path d="M5 13.2c1.7-3.1 4-4.7 7-4.7s5.3 1.6 7 4.7M8.1 16.1c1-1.6 2.3-2.4 3.9-2.4s2.9.8 3.9 2.4M12 19h.01" stroke="currentColor" stroke-linecap="round" stroke-width="2.2">
-       </path>
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+       <ellipse cx="6.5" cy="7" rx="2.1" ry="2.7"/><ellipse cx="12" cy="5.3" rx="2.1" ry="2.7"/><ellipse cx="17.5" cy="7" rx="2.1" ry="2.7"/><ellipse cx="4.4" cy="12" rx="1.9" ry="2.4"/><path d="M12 10c-3.9 0-6.7 3.5-6.7 6.3 0 1.9 1.7 2.8 3.2 2.1l2.5-1.1a2.4 2.4 0 0 1 2 0l2.5 1.1c1.5.7 3.2-.2 3.2-2.1C18.7 13.5 15.9 10 12 10z"/>
       </svg>
      </span>
      <span>
-      Family Activity
+      Ruffster
       <small>
-       technology, together
+       your trusted family companion
       </small>
      </span>
     </a>
@@ -57,14 +56,14 @@
       Know what is collected—and what it cannot show.
      </h1>
      <p>
-      Family Activity is meant to make technology use easier to discuss. These answers describe the current prototype and its limits, not a promise that a final product is ready.
+      Ruffster is meant to make technology use easier to discuss. These answers describe the current prototype and its limits, not a promise that a final product is ready.
      </p>
     </div>
    </section>
    <div class="wrap prose">
     <section class="faq-item">
      <h2>
-      Is Family Activity ready to install on my child's computer?
+      Is Ruffster ready to install on my child's computer?
      </h2>
      <p>
       No. The Mac bundle is unsigned, the Windows package has not been run on Windows, and the experience has not been validated with families. See the
@@ -126,7 +125,15 @@
       Is my child's information uploaded to a cloud service?
      </h2>
      <p>
-      The prototype has no required cloud account. The handoff works the same way in either direction: the computer sending something shows two digits, and the receiving computer enters them. Both must be on the same Wi-Fi. The digits only find the nearby computer; they are not a password. The app creates a protected connection and sends only the parent's public key or an already-encrypted report. On a Mac, macOS may ask to allow local-network access; this is used only for finding the other computer and transferring the public key or encrypted report, not for monitoring. If access is denied, allow it in System Settings → Privacy &amp; Security → Local Network. Local discovery may be blocked by a network or firewall. The child computer can save a separate encrypted report file for the parent dashboard to open; this file contains no parent key and does not use the local network. The transfer methods have not received an independent security review.
+      The prototype has no required cloud account. The handoff works the same way in either direction: the computer sending something shows two digits, and the receiving computer enters them. Both must be on the same Wi-Fi. The digits only find the nearby computer; they are not a password. The app creates a protected connection and sends only the parent's public key or an already-encrypted report. A received report adds new records to the report already on the parent computer; exact repeats of encrypted records are ignored, and the parent's retention setting still applies. The preview has no separate computer profiles, so do not connect multiple child computers to one parent report: their observations would be combined without identifying the source. On a Mac, macOS may ask to allow local-network access; this is used only for finding the other computer and transferring the public key or encrypted report, not for monitoring. If access is denied, allow it in System Settings → Privacy &amp; Security → Local Network. Local discovery may be blocked by a network or firewall. The child computer can save a separate encrypted report file for the parent dashboard to open; this file contains no parent key and does not use the local network. The transfer methods have not received an independent security review.
+     </p>
+    </section>
+    <section class="faq-item">
+     <h2>
+      Can I use one parent report for more than one child computer?
+     </h2>
+     <p>
+      Not in this preview. Reports from multiple child computers would be combined, and the dashboard cannot show which computer produced each observation. Use one monitored computer per parent report until separate computer profiles are implemented.
      </p>
     </section>
     <section class="faq-item">
@@ -208,9 +215,9 @@
        </svg>
       </span>
       <span>
-       Family Activity
+       Ruffster
        <small>
-        technology, together
+        your trusted family companion
        </small>
       </span>
      </a>

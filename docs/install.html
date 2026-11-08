@@ -3,10 +3,10 @@
  <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1" name="viewport"/>
-  <meta content="Current preview status, developer setup, and the planned family installation journey for Family Activity." name="description"/>
+  <meta content="Current preview status, developer setup, and the planned family installation journey for Ruffster." name="description"/>
   <meta content="#f5f4ee" name="theme-color"/>
   <title>
-   Getting started — Family Activity
+   Getting started — Ruffster
   </title>
   <link href="favicon.svg" rel="icon" type="image/svg+xml"/>
  <link href="assets/site.css" rel="stylesheet"/>
@@ -19,15 +19,14 @@
    <div class="wrap topbar-in">
     <a class="brand" href="index.html">
      <span aria-hidden="true" class="brand-mark">
-      <svg fill="none" viewBox="0 0 24 24">
-       <path d="M5 13.2c1.7-3.1 4-4.7 7-4.7s5.3 1.6 7 4.7M8.1 16.1c1-1.6 2.3-2.4 3.9-2.4s2.9.8 3.9 2.4M12 19h.01" stroke="currentColor" stroke-linecap="round" stroke-width="2.2">
-       </path>
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+       <ellipse cx="6.5" cy="7" rx="2.1" ry="2.7"/><ellipse cx="12" cy="5.3" rx="2.1" ry="2.7"/><ellipse cx="17.5" cy="7" rx="2.1" ry="2.7"/><ellipse cx="4.4" cy="12" rx="1.9" ry="2.4"/><path d="M12 10c-3.9 0-6.7 3.5-6.7 6.3 0 1.9 1.7 2.8 3.2 2.1l2.5-1.1a2.4 2.4 0 0 1 2 0l2.5 1.1c1.5.7 3.2-.2 3.2-2.1C18.7 13.5 15.9 10 12 10z"/>
       </svg>
      </span>
      <span>
-      Family Activity
+      Ruffster
       <small>
-       technology, together
+       your trusted family companion
       </small>
      </span>
     </a>
@@ -88,7 +87,7 @@
       <strong>
        Set up the child's computer together.
       </strong>
-      Read what is recorded together, choose how long to keep detailed records, and verify the visible status indicator. For setup, the parent computer shows two digits and the child computer enters them. When returning a report, the child computer shows two digits and the parent computer enters them. Both devices need the same Wi-Fi and local network discovery must be allowed. On a Mac, the system may ask to allow Family Activity to use the local network; this is only for finding the other computer and transferring the public key or encrypted report, not for activity monitoring. If access is denied, pairing cannot work until it is allowed in System Settings → Privacy &amp; Security → Local Network. If the local network blocks report transfer, choose <strong>Save an encrypted report file</strong> in the child computer’s status menu, move the file to the parent computer, and choose <strong>Open a report file instead</strong> in the dashboard.
+      Read what is recorded together, choose how long to keep detailed records, and verify the visible status indicator. For setup, the parent computer shows two digits and the child computer enters them. When returning a report, the child computer shows two digits and the parent computer enters them. Both devices need the same Wi-Fi and local network discovery must be allowed. On a Mac, the system may ask to allow Ruffster to use the local network; this is only for finding the other computer and transferring the public key or encrypted report, not for activity monitoring. If access is denied, pairing cannot work until it is allowed in System Settings → Privacy &amp; Security → Local Network. If the local network blocks report transfer, choose <strong>Save an encrypted report file</strong> in the child computer’s status menu, move the file to the parent computer, and choose <strong>Open a report file instead</strong> in the dashboard.
      </li>
      <li>
       <strong>
@@ -110,7 +109,7 @@
      macOS
     </h3>
     <p>
-     An unsigned Apple-silicon development bundle can be built from source. It includes a local parent dashboard, experimental encrypted collection, and a disclosed setup flow. On the test Mac, a temporary synthetic-only test verified encrypted app samples, a recorded coverage gap, restart of the real agent after forced termination, and clean stop. It collected no real app or network data and removed its temporary service and files. The menu-bar display and VoiceOver behavior, native setup dialogs, physical sleep/wake, signing, notarization, and family usability remain unverified. The preview is for development only.
+     An unsigned Apple-silicon development bundle can be built from source. It includes a local parent dashboard, experimental encrypted collection, and a disclosed setup flow. On the test Mac, a temporary synthetic-only test verified encrypted app samples, a recorded coverage gap, the real installer's same-location update restart, launchd recovery after forced termination, and clean uninstall with the report retained. It collected no real app or network data and removed its temporary service and files. The menu-bar display and VoiceOver behavior, native setup dialogs, physical sleep/wake, signing, notarization, and family usability remain unverified. The preview is for development only.
     </p>
     <h3>
      Windows
@@ -177,9 +176,9 @@ node --check family_activity/parent_assets/app.js</code></pre>
        </svg>
       </span>
       <span>
-       Family Activity
+       Ruffster
        <small>
-        technology, together
+        your trusted family companion
        </small>
       </span>
      </a>

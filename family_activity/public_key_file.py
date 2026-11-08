@@ -15,4 +15,4 @@ def decode(data, *, allow_legacy=False):
         return PublicKey(data[len(MAGIC):])
     if allow_legacy and len(data) == PublicKey.SIZE:
         return PublicKey(data)
-    raise ValueError('not a Family Activity public-key file')
+    raise ValueError('not a Ruffster public-key file')

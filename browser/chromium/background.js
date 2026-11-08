@@ -30,8 +30,8 @@ function updateBadge() {
   const title = paused
     ? 'Website observations paused. Click to review or resume.'
     : connected && lastAccepted
-      ? 'Website domain observations are being sent to the local Family Activity agent.'
-      : 'Website observations are waiting for the local Family Activity agent.';
+      ? 'Website domain observations are being sent to the local Ruffster agent.'
+      : 'Website observations are waiting for the local Ruffster agent.';
   chrome.action.setBadgeText({text});
   chrome.action.setBadgeBackgroundColor({color: paused ? '#6c756f' : connected && lastAccepted ? '#27734d' : '#aa5a20'});
   chrome.action.setTitle({title});

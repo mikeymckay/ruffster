@@ -17,4 +17,4 @@ build = ["PyInstaller>=6.0,<7"]
 include = ["family_activity*"]
 
 [tool.setuptools.package-data]
-family_activity = ["parent_assets/*.html", "parent_assets/*.css", "parent_assets/*.js"]
+family_activity = ["parent_assets/*.html", "parent_assets/*.css", "parent_assets/*.js", "parent_assets/*.webp"]

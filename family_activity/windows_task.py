@@ -38,7 +38,7 @@ def task_xml(user, python_exe, database, public_key, status_exe, working_directo
     validate_retention_days(retention_days)
     task = ET.Element(f'{{{NS}}}Task', {'version': '1.4'})
     registration = _node(task, 'RegistrationInfo')
-    _node(registration, 'Description', 'Family Activity disclosed experimental monitoring')
+    _node(registration, 'Description', 'Ruffster disclosed experimental monitoring')
     triggers = _node(task, 'Triggers')
     logon = _node(triggers, 'LogonTrigger')
     _node(logon, 'Enabled', 'true')

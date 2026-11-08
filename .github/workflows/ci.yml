@@ -9,6 +9,20 @@ permissions:
   contents: read
 
 jobs:
+  pages-accessibility:
+    name: Check Pages accessibility and mobile overflow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install pinned site-check dependencies
+        run: npm ci
+      - name: Scan all Pages screens at desktop and phone sizes
+        run: npm run check:pages-a11y
+
   windows-bundle-extractor:
     name: Test Windows installer archive extraction
     runs-on: ubuntu-latest

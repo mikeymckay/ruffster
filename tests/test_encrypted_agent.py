@@ -37,7 +37,9 @@ class EncryptedAgentTests(unittest.TestCase):
             database = Path(tmp) / 'activity.sqlite3'
             sampler = SyntheticSampler()
             previous = signal.getsignal(signal.SIGTERM)
-            stop = threading.Timer(.2, lambda: os.kill(os.getpid(), signal.SIGTERM))
+            # Give the first synthetic sample time to complete even on a busy
+            # CI runner before requesting a graceful stop.
+            stop = threading.Timer(1.0, lambda: os.kill(os.getpid(), signal.SIGTERM))
             try:
                 with patch('family_activity.__main__.start_status', return_value=None), \
                      patch('family_activity.process_network.MacProcessNetworkSampler', return_value=sampler), \

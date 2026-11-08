@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Family Activity — Website Visibility (Experimental)",
+  "name": "Ruffster — Website Visibility (Experimental)",
   "version": "0.1.0",
   "description": "Disclosed, optional domain-only activity observations. No page content or full URLs are sent.",
   "permissions": ["tabs", "nativeMessaging", "storage"],
   "background": {"service_worker": "background.js"},
   "action": {
-    "default_title": "Family Activity website visibility",
+    "default_title": "Ruffster website visibility",
     "default_popup": "popup.html"
   }
 }

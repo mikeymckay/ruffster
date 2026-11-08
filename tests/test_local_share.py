@@ -155,6 +155,50 @@ class LocalShareTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'two digits'):
             discover_code('8')
 
+    def test_two_digit_discovery_reports_ambiguous_matching_senders(self):
+        import json
+        from unittest.mock import patch
+        from family_activity import local_share
+
+        class FakeSocket:
+            def __init__(self):
+                self.responses = []
+
+            def __enter__(self): return self
+            def __exit__(self, *_): self.close()
+            def setsockopt(self, *_): pass
+            def bind(self, *_): pass
+            def setblocking(self, *_): pass
+            def close(self): pass
+
+            def sendto(self, raw, address):
+                request = json.loads(raw.decode('ascii'))
+                for host, port, fingerprint, token in (
+                        ('192.168.1.20', 41001, 'a' * 64, 'A' * 43),
+                        ('192.168.1.21', 41002, 'b' * 64, 'B' * 43)):
+                    code = encode_code(host, port, fingerprint, token)
+                    response = {'v': 1, 'pin': request['pin'], 'nonce': request['nonce'],
+                                'connection': code}
+                    self.responses.append((json.dumps(response).encode('ascii'), (host, 49372)))
+
+            def recvfrom(self, _):
+                if not self.responses:
+                    raise BlockingIOError
+                return self.responses.pop(0)
+
+        client = FakeSocket()
+
+        def fake_select(readers, writers, errors, timeout):
+            if client.responses:
+                return [client], [], []
+            time.sleep(timeout)
+            return [], [], []
+
+        with patch('family_activity.local_share.socket.socket', return_value=client), \
+                patch('family_activity.local_share.select.select', side_effect=fake_select):
+            with self.assertRaisesRegex(ValueError, 'More than one nearby computer matched'):
+                discover_code('42', timeout=0.2, target='192.168.1.5')
+
     def test_public_key_share_is_pinned_one_use_and_contains_no_private_key(self):
         server = PublicKeyShareServer(self.key.public_key, '127.0.0.1', lifetime=30)
         thread = threading.Thread(target=server.serve_once, daemon=True); thread.start()

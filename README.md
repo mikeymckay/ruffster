@@ -1,6 +1,8 @@
-# Family Activity
+# Ruffster
 
-**Make computer use easier to talk about.** Family Activity is an open-source prototype for parents and children to review computer use together, with visible monitoring, local reports, and explicit limits on what the data can tell you.
+**Make computer use easier to talk about.** Ruffster is an open-source prototype for parents and children to review computer use together, with visible monitoring, local reports, and explicit limits on what the data can tell you. Its golden retriever mascot stands for a friendly family companion: present, easy to understand, and never there to judge.
+
+<p align="center"><img src="docs/assets/ruffster-mascot.webp" alt="Ruffster golden retriever mascot" width="190"></p>
 
 **This is not ready for family deployment.** The Mac package is unsigned. Windows has not been tested on a Windows computer. Setup, accessibility, security, key recovery, and family usability still need validation. There is no supported release download.
 
@@ -43,7 +45,7 @@ The school-hours view uses a schedule chosen by the parent; it does not prove th
 
 ## Privacy and encryption
 
-The encrypted agent stores ciphertext and coarse retention metadata in a local SQLite database. Parent setup uses a six-digit PIN the child should not know. The child's computer can lock reports for you, but it cannot open them. Keep the encrypted recovery copy somewhere the child cannot access; use it with your PIN if you move to a new parent computer. The handoff uses one simple pattern in either direction: the sending computer shows two digits, and the receiving computer enters them. The digits only find a nearby computer; they are not a password. The transfer is encrypted and requires both devices on the same local network. A synthetic encrypted report has crossed the home Wi-Fi between the test Mac and the Linux development computer; Mac-to-Mac and Windows transfers remain unverified. On Mac, the system may ask for local-network access, used only to find the other computer and transfer the key or encrypted report, not to monitor activity. If direct transfer is unavailable, the child app can save a separate encrypted report file for the parent dashboard to open. No cloud account is required.
+The encrypted agent stores ciphertext and coarse retention metadata in a local SQLite database. Parent setup uses a six-digit PIN the child should not know. The child's computer can lock reports for you, but it cannot open them. Keep the encrypted recovery copy somewhere the child cannot access; use it with your PIN if you move to a new parent computer. The handoff uses one simple pattern in either direction: the sending computer shows two digits, and the receiving computer enters them. The digits only find a nearby computer; they are not a password. The transfer is encrypted and requires both devices on the same local network. Received reports add new encrypted records to the parent copy, ignore exact repeats, and honor the parent retention setting. The preview has no separate child-computer profiles, so use only one monitored computer per parent report; combining multiple computers would mix observations without identifying their source. A synthetic encrypted report has crossed the home Wi-Fi between the test Mac and the Linux development computer; Mac-to-Mac and Windows transfers remain unverified. On Mac, the system may ask for local-network access, used only to find the other computer and transfer the key or encrypted report, not to monitor activity. If direct transfer is unavailable, the child app can save a separate encrypted report file for the parent dashboard to open. No cloud account is required.
 
 Encryption does not hide every detail: record counts, ordering, approximate record-size buckets, expiry days, file growth, and filesystem timestamps remain visible. Observation plaintext exists in the agent's memory before encryption. A person with administrator access to the child computer can inspect or change the agent. The prototype is not tamper-proof and has not received an independent security review. If the parent loses every usable encrypted recovery copy and forgets their PIN, the encrypted reports cannot be opened. Recovery files created by older versions can still be restored with their original longer passphrase.
 
@@ -52,7 +54,7 @@ The monitoring agent now refuses to start without the parent's public key and wr
 ```sh
 python -m family_activity encrypt-legacy \
   --source /path/to/old-activity.sqlite3 \
-  --public-key /path/to/family-public.key \
+  --public-key /path/to/ruffster-public.key \
   --output /path/to/activity-encrypted.sqlite3 \
   --retention-days 30
 ```

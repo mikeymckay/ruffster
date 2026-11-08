@@ -679,3 +679,10 @@ img {
   outline:3px solid #bb6b16;
   outline-offset:3px
 }
+
+/* Ruffster identity */
+:root { --honey:#c58a36; --honey-pale:#f3e4c4 }
+.brand-mark { background:#bd842f; color:#fff9e9 }
+.hero-figure { position:relative }
+.hero-mascot { display:block; width:min(40%,220px); height:auto; margin:-1.5rem 0 -1rem auto; filter:drop-shadow(0 10px 14px #382d1c20) }
+@media (max-width:760px) { .hero-mascot { width:150px; margin:-1rem 0 .5rem auto } }

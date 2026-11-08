@@ -88,7 +88,7 @@ internal static class TrayCompanion
             menu.Items.Add("Share an encrypted report…", null, (_, _) => ShareReport(core, database));
             menu.Items.Add("Save an encrypted report file…", null, (_, _) => SaveEncryptedReport(core, database));
         }
-        using var icon = new NotifyIcon { Icon = SystemIcons.Information, Text = "Family Activity: Starting", ContextMenuStrip = menu, Visible = true };
+        using var icon = new NotifyIcon { Icon = SystemIcons.Information, Text = "Ruffster: Starting", ContextMenuStrip = menu, Visible = true };
         var uptime = Stopwatch.StartNew();
         TimeSpan? lastHeartbeat = null;
         var sampleInterval = 15.0;
@@ -125,9 +125,9 @@ internal static class TrayCompanion
             };
             icon.Text = state switch
             {
-                TrayState.Starting => "Family Activity: Starting",
-                TrayState.On => "Family Activity: Monitoring on",
-                _ => "Family Activity: Monitoring paused",
+                TrayState.Starting => "Ruffster: Starting",
+                TrayState.On => "Ruffster: Monitoring on",
+                _ => "Ruffster: Monitoring paused",
             };
         };
         timer.Start();
@@ -150,9 +150,9 @@ internal static class TrayCompanion
         if (!int.TryParse(Environment.GetEnvironmentVariable("FAMILY_ACTIVITY_RETENTION_DAYS"), out int retentionDays) || retentionDays <= 0) retentionDays = 30;
         if (!double.TryParse(Environment.GetEnvironmentVariable("FAMILY_ACTIVITY_SAMPLE_INTERVAL"), NumberStyles.Float,
                              CultureInfo.InvariantCulture, out double interval) || interval <= 0) interval = 15;
-        var message = $"While this visible indicator is running, Family Activity samples the foreground app name about every {interval:0.#} seconds, records total network bytes by interface, and records a pseudonymous hint for the default router when one is available. The raw router address is not saved, and the hint does not prove where the computer is. It stores only whether Windows reports IPv4/IPv6 DNS resolver settings or Internet Settings proxy configuration. It does not record resolver addresses, proxy addresses, window titles, website addresses, screenshots, keystrokes, audio, camera, or messages. VPN status is unknown. " +
+        var message = $"While this visible indicator is running, Ruffster samples the foreground app name about every {interval:0.#} seconds, records total network bytes by interface, and records a pseudonymous hint for the default router when one is available. The raw router address is not saved, and the hint does not prove where the computer is. It stores only whether Windows reports IPv4/IPv6 DNS resolver settings or Internet Settings proxy configuration. It does not record resolver addresses, proxy addresses, window titles, website addresses, screenshots, keystrokes, audio, camera, or messages. VPN status is unknown. " +
                       $"Reports are locked on this computer and can be opened on your parent's computer. Detailed records are kept for up to {retentionDays} days; pruning happens while the agent is running. Uninstall keeps the encrypted local report unless your parent chooses to delete it. Ask your parent or guardian about the report and these settings.";
-        MessageBox.Show(message, "What Family Activity records", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        MessageBox.Show(message, "What Ruffster records", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     private static void ShareReport(string core, string database)
@@ -160,7 +160,7 @@ internal static class TrayCompanion
         try
         {
             var consent = MessageBox.Show(
-                "This temporary transfer needs both computers on the same trusted Wi-Fi. Windows may ask whether Family Activity can communicate on the network. Allow it only on a private network you trust; never turn off the firewall or allow public networks. If access is blocked, cancel and choose Save an encrypted report file instead.",
+                "This temporary transfer needs both computers on the same trusted Wi-Fi. Windows may ask whether Ruffster can communicate on the network. Allow it only on a private network you trust; never turn off the firewall or allow public networks. If access is blocked, cancel and choose Save an encrypted report file instead.",
                 "Share an encrypted report", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
             if (consent != DialogResult.OK) return;
             var host = SelectLocalIPv4();
@@ -191,7 +191,7 @@ internal static class TrayCompanion
     {
         if (activeExport is { HasExited: false })
         {
-            MessageBox.Show("A report copy is already being prepared.", "Family Activity", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("A report copy is already being prepared.", "Ruffster", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
         var consent = MessageBox.Show(
@@ -202,11 +202,11 @@ internal static class TrayCompanion
         using var dialog = new SaveFileDialog
         {
             Title = "Save an encrypted report for your parent",
-            FileName = "family-activity-report.sqlite3",
+            FileName = "ruffster-report.sqlite3",
             DefaultExt = "sqlite3",
             AddExtension = true,
             OverwritePrompt = true,
-            Filter = "Encrypted Family Activity report (*.sqlite3)|*.sqlite3|All files (*.*)|*.*",
+            Filter = "Encrypted Ruffster report (*.sqlite3)|*.sqlite3|All files (*.*)|*.*",
             CheckPathExists = true
         };
         if (dialog.ShowDialog() != DialogResult.OK) return;

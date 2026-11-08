@@ -161,7 +161,7 @@ $('restore-key').addEventListener('click', async () => {
 $('prepare-key-share').addEventListener('click', async () => {
   $('prepare-key-share').disabled = true;
   try {
-    const result = await api('/api/public-key-share');
+    const result = await post('/api/public-key-share', {});
     $('public-key-code').value = result.code;
     $('public-key-code').hidden = false;
     $('copy-key-code').hidden = false;
@@ -351,13 +351,13 @@ $('connection-code').addEventListener('input', () => {
 $('connect').addEventListener('click', async () => {
   const code = $('connection-code').value.trim(); $('connection-code').value=''; $('connect').disabled = true;
   if (!/^[0-9]{2}$/.test(code)) { show('Enter the two digits shown on the child computer.'); return; }
-  try { show('Connecting on the local network…'); await post('/api/sync', {code}); show('Encrypted report received.'); await refresh(); }
+  try { show('Connecting on the local network…'); await post('/api/sync', {code}); show('Report received. Earlier observations were kept, and exact repeats were ignored.'); await refresh(); }
   catch(error) { show(error.message); }
 });
 $('import').addEventListener('click', async () => {
   const file = $('report-file').files[0];
   if (!file) { show('Choose an encrypted report file first.'); return; }
-  try { await api('/api/import', {method:'POST',headers:{'Content-Type':'application/octet-stream'},body:file}); $('report-file').value=''; show('Report opened on this device.'); await refresh(); }
+  try { await api('/api/import', {method:'POST',headers:{'Content-Type':'application/octet-stream'},body:file}); $('report-file').value=''; show('Report opened. Earlier observations were kept, and exact repeats were ignored.'); await refresh(); }
   catch(error) { show(error.message); }
 });
 (async () => {

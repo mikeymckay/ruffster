@@ -1,5 +1,6 @@
 import http.client
 import json
+from contextlib import closing
 from pathlib import Path
 import tempfile
 import threading
@@ -79,6 +80,9 @@ class ParentAppTests(unittest.TestCase):
         self.assertIn(b'id="backup-confirm-check"', page)
         self.assertIn(b'id="confirm-backup"', page)
         self.assertIn(b'id="report-transfer" hidden', page)
+        self.assertIn(b'using several would combine their observations without showing which computer produced them', page)
+        self.assertIn(b'New observations are added to the report already saved here.', page)
+        self.assertIn(b'exact copies of the same records are ignored', page)
         self.assertIn(b'I already set up parent access', page)
         self.assertIn(b'Estimated time', page)
         self.assertIn(b'Measured interface bytes', page)
@@ -99,6 +103,7 @@ class ParentAppTests(unittest.TestCase):
         self.assertIn(b"$('key-state').hidden = !status.unlocked", script)
         self.assertIn(b"$('child-setup').hidden = !(status.unlocked && status.backup_confirmed)", script)
         self.assertIn(b"$('backup-required').hidden = !(status.unlocked && !status.backup_confirmed)", script)
+        self.assertIn(b"post('/api/public-key-share', {})", script)
         self.assertIn(b"/api/confirm-key-backup", script)
         self.assertIn(b"$('report-transfer').hidden = !status.unlocked", script)
         self.assertIn(b"status.has_report", script)
@@ -111,6 +116,10 @@ class ParentAppTests(unittest.TestCase):
         self.assertIn(b'.steps li.current', styles)
         self.assertIn(b'select:focus-visible', styles)
         self.assertIn(b'button:disabled', styles)
+        status, _, mascot = self.request('GET', '/ruffster-mascot.webp')
+        self.assertEqual(status, 200)
+        self.assertTrue(mascot.startswith(b'RIFF'))
+        self.assertIn(b'RUFFSTER', page)
 
     def test_parent_cli_closes_loopback_server_on_termination(self):
         import socket
@@ -202,17 +211,19 @@ class ParentAppTests(unittest.TestCase):
                                       {'passphrase':password, 'confirm':password})[0], 200)
         status = json.loads(self.request('GET', '/api/status')[2])
         self.assertFalse(status['backup_confirmed'])
-        self.assertEqual(self.request('GET', '/api/public-key-share')[0], 403)
+        self.assertEqual(self.request('GET', '/api/public-key-share')[0], 404)
         self.assertEqual(self.request('GET', '/api/public')[0], 403)
         self.assertEqual(self.request('POST', '/api/confirm-key-backup', {'confirmed':True})[0], 400)
 
         code, headers, backup = self.request('GET', '/api/backup')
         self.assertEqual(code, 200)
-        self.assertIn('family-parent-backup.vault', headers['Content-Disposition'])
+        self.assertIn('ruffster-parent-backup.vault', headers['Content-Disposition'])
         self.assertEqual(self.request('POST', '/api/confirm-key-backup', {'confirmed':True})[0], 200)
         status = json.loads(self.request('GET', '/api/status')[2])
         self.assertTrue(status['backup_confirmed'])
         self.assertEqual(self.request('GET', '/api/public')[0], 200)
+        self.assertEqual(self.request('GET', '/api/public-key-share')[0], 404)
+        self.assertIsNone(self.server._key_share_server)
 
         reopened = ParentServer(self.folder)
         try:
@@ -349,7 +360,7 @@ class ParentAppTests(unittest.TestCase):
         connection.commit(); connection.close()
         status, headers, backup=self.request('GET','/api/report-backup')
         self.assertEqual(status,200)
-        self.assertIn('family-activity-report.sqlite3',headers['Content-Disposition'])
+        self.assertIn('ruffster-report.sqlite3',headers['Content-Disposition'])
         self.assertNotIn(b'DELETE_ME_TEST_APP',backup)
         self.assertNotIn(b'UNRELATED_REPORT_MARKER',backup)
         from family_activity.encrypted_view import open_projection_bytes
@@ -399,12 +410,70 @@ class ParentAppTests(unittest.TestCase):
         writer.event('start')
         writer.event('foreground', application=['FILE_RETURN_TEST_APP', 'test'])
         writer.event('stop'); writer.close()
-        report_file = Path(self.tmp.name)/'family-activity-report.sqlite3'
+        report_file = Path(self.tmp.name)/'ruffster-report.sqlite3'
         self.assertGreater(save_encrypted_snapshot(source, report_file), 0)
         self.assertEqual(self.request('POST', '/api/import', report_file.read_bytes())[0], 200)
         report = json.loads(self.request('GET', '/api/report')[2])
         self.assertEqual(len(report['sessions']), 1)
         self.assertNotIn(b'FILE_RETURN_TEST_APP', self.server.data.read_bytes())
+
+    def test_imported_reports_merge_without_losing_newer_data_or_duplicating_events(self):
+        import sqlite3
+        from datetime import datetime, timedelta, timezone
+        self.login(); self.create_parent_key('638204')
+        public = decode(self.request('GET', '/api/public')[2])
+        now = datetime.now(timezone.utc) - timedelta(seconds=10)
+
+        def snapshot(filename, timestamp, app):
+            path = Path(self.tmp.name) / filename
+            writer = EncryptedAgentStore(path, public, 30)
+            writer.event('start', at=timestamp.isoformat())
+            writer.event('foreground', at=timestamp.isoformat(), application=[app, 'synthetic'])
+            writer.event('foreground', at=(timestamp + timedelta(seconds=1)).isoformat(),
+                         application=[app, 'synthetic'])
+            writer.event('stop', at=(timestamp + timedelta(seconds=2)).isoformat())
+            writer.close()
+            return path.read_bytes()
+
+        earlier = snapshot('earlier-report.db', now - timedelta(minutes=2), 'EarlierSyntheticApp')
+        newer = snapshot('newer-report.db', now, 'NewerSyntheticApp')
+        self.assertEqual(self.request('POST', '/api/import', earlier)[0], 200)
+        self.assertEqual(self.request('POST', '/api/import', newer)[0], 200)
+        with closing(sqlite3.connect(self.server.data)) as database, database:
+            merged_count = database.execute('SELECT count(*) FROM encrypted_events').fetchone()[0]
+        # Re-importing an older copy must not remove newer observations. Re-importing
+        # the same snapshot must not make durations or event counts grow twice.
+        self.assertEqual(self.request('POST', '/api/import', earlier)[0], 200)
+        with closing(sqlite3.connect(self.server.data)) as database, database:
+            self.assertEqual(database.execute('SELECT count(*) FROM encrypted_events').fetchone()[0], merged_count)
+        report = json.loads(self.request('GET', '/api/report')[2])
+        self.assertEqual(len(report['sessions']), 2)
+        self.assertEqual({entry[0] for entry in report['apps']['today']},
+                         {'EarlierSyntheticApp', 'NewerSyntheticApp'})
+        stored = self.server.data.read_bytes()
+        self.assertNotIn(b'EarlierSyntheticApp', stored)
+        self.assertNotIn(b'NewerSyntheticApp', stored)
+        with closing(sqlite3.connect(self.server.data)) as database:
+            self.assertEqual({row[0] for row in database.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'")}, {'key_commitment', 'encrypted_events'})
+
+    def test_import_normalizes_legacy_expiry_before_marking_records_current(self):
+        import sqlite3
+        from datetime import date, timedelta
+        self.login(); self.create_parent_key('638204')
+        public = decode(self.request('GET', '/api/public')[2])
+        source = Path(self.tmp.name) / 'legacy-expiry-report.db'
+        writer = EncryptedAgentStore(source, public, 30)
+        writer.event('start'); writer.close()
+        with closing(sqlite3.connect(source)) as database, database:
+            current_expiry = database.execute('SELECT expires_on FROM encrypted_events').fetchone()[0]
+            legacy_expiry = (date.fromisoformat(current_expiry) + timedelta(days=1)).isoformat()
+            database.execute('UPDATE key_commitment SET expiry_version=1')
+            database.execute('UPDATE encrypted_events SET expires_on=?', (legacy_expiry,))
+        self.assertEqual(self.request('POST', '/api/import', source.read_bytes())[0], 200)
+        with closing(sqlite3.connect(self.server.data)) as database, database:
+            self.assertEqual(database.execute('SELECT expiry_version FROM key_commitment').fetchone()[0], 2)
+            self.assertEqual(database.execute('SELECT expires_on FROM encrypted_events').fetchone()[0], current_expiry)
 
     def test_report_pairing_error_points_mac_users_to_local_network_access(self):
         from unittest.mock import patch
@@ -418,25 +487,31 @@ class ParentAppTests(unittest.TestCase):
         from unittest.mock import patch
         from family_activity.local_share import decode_code, fetch_public_key
         self.login(); password='638204'
-        self.assertEqual(self.request('GET','/api/public-key-share')[0],403)
+        self.assertEqual(self.request('GET','/api/public-key-share')[0],404)
         self.create_parent_key(password)
+        self.assertEqual(self.request('GET','/api/public-key-share')[0],404)
+        self.assertIsNone(self.server._key_share_server)
+        self.assertEqual(self.request('POST','/api/public-key-share',{},
+                                      {'Origin':'https://evil.example'})[0],403)
+        self.assertIsNone(self.server._key_share_server)
         with patch('family_activity.local_share.local_ipv4_address', return_value='127.0.0.1'):
-            status, _, first = self.request('GET','/api/public-key-share')
+            status, _, first = self.request('POST','/api/public-key-share',{})
             self.assertEqual(status,200)
             code = json.loads(first)['code']
             self.assertRegex(code, r'^[0-9]{2}$')
             first_token = decode_code(self.server._key_share_server.code)['token']
-            second = json.loads(self.request('GET','/api/public-key-share')[2])['code']
+            second = json.loads(self.request('POST','/api/public-key-share',{})[2])['code']
             self.assertEqual(code,second)
             with patch('family_activity.local_share.DISCOVERY_BROADCAST', '127.0.0.1'):
                 data = fetch_public_key(code)
             self.assertEqual(decode(data), decode(self.request('GET','/api/public')[2]))
-            self.assertEqual(self.request('GET','/api/public-key-share')[0],200)
-            restarted = json.loads(self.request('GET','/api/public-key-share')[2])['code']
+            self.assertEqual(self.request('GET','/api/public-key-share')[0],404)
+            self.assertEqual(self.request('POST','/api/public-key-share',{})[0],200)
+            restarted = json.loads(self.request('POST','/api/public-key-share',{})[2])['code']
             self.assertNotEqual(decode_code(self.server._key_share_server.code)['token'],first_token)
-            self.assertEqual(self.request('POST','/api/public-key-share/stop',{})[0],200)
-            self.assertEqual(self.request('GET','/api/public-key-share')[0],200)
             active = self.server._key_share_server
+            self.assertEqual(self.request('POST','/api/public-key-share/stop',{})[0],200)
+            self.assertEqual(self.request('GET','/api/public-key-share')[0],404)
             self.assertEqual(self.request('POST','/api/lock',{})[0],200)
             if self.server._key_share_thread:
                 self.server._key_share_thread.join(timeout=3)

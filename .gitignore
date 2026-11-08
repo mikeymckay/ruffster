@@ -23,6 +23,7 @@ dist/
 build/
 *.egg-info/
 artifacts/
+node_modules/
 native/windows/bin/
 native/windows/obj/
 native/windows/**/bin/

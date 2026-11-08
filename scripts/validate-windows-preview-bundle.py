@@ -201,7 +201,7 @@ def validate(package_path):
                 connection.request('GET', '/')
                 page = connection.getresponse()
                 body = page.read()
-                if page.status != 200 or b'Family Activity' not in body:
+                if page.status != 200 or b'Ruffster' not in body:
                     raise RuntimeError('the frozen parent dashboard did not serve its local page')
                 connection.request('GET', '/api/status')
                 status = connection.getresponse()

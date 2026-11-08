@@ -137,7 +137,7 @@ def validate(app_path):
                 connection.request('GET', '/')
                 page = connection.getresponse()
                 page_body = page.read()
-                if page.status != 200 or b'Family Activity' not in page_body:
+                if page.status != 200 or b'Ruffster' not in page_body:
                     raise RuntimeError('the frozen parent dashboard did not serve its local page')
                 connection.request('GET', '/api/status')
                 status = connection.getresponse()
@@ -167,5 +167,5 @@ def validate(app_path):
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        raise SystemExit('Usage: validate-macos-preview-bundle.py /path/to/Family Activity Preview.app')
+        raise SystemExit('Usage: validate-macos-preview-bundle.py /path/to/Ruffster Preview.app')
     print(validate(sys.argv[1]))

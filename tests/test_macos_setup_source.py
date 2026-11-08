@@ -84,7 +84,7 @@ class MacSetupSourceTests(unittest.TestCase):
         self.assertIn('Choose connection file…', source)
         self.assertIn('Choose the connection file from your parent', source)
         self.assertIn('Do not select the encrypted recovery copy', source)
-        self.assertIn("That doesn't look like a Family Activity connection file", source)
+        self.assertIn("That doesn't look like a Ruffster connection file", source)
 
     def test_mac_child_disclosure_explains_reports_without_key_terms(self):
         root = Path(__file__).parents[1]
@@ -118,7 +118,10 @@ class MacSetupSourceTests(unittest.TestCase):
         source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text()
         runner = source[source.index('private func runWithProgress'):source.index('private func failureText')]
         self.assertIn('runWithProgress(arguments, title: "Setting up this Mac…"', source)
-        self.assertIn('runWithProgress(arguments, title: "Removing Family Activity…"', source)
+        self.assertIn('runWithProgress(arguments, title: "Removing Ruffster…"', source)
+        self.assertIn('runWithProgress(arguments, title: "Restarting monitoring…"', source)
+        self.assertIn('mac-restart', source)
+        self.assertIn('Restart after app update…', source)
         self.assertIn('reviewAndInstall(key, temporaryDirectory: temporaryDirectory)', source)
         self.assertIn('if let temporaryDirectory { try? FileManager.default.removeItem(at: temporaryDirectory) }', source)
         background = runner.index('DispatchQueue.global(qos: .userInitiated).async')

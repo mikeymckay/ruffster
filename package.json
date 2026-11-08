@@ -1,0 +1,11 @@
+{
+  "name": "family-activity-pages-checks",
+  "private": true,
+  "scripts": {
+    "check:pages-a11y": "node scripts/validate-pages-accessibility.mjs"
+  },
+  "devDependencies": {
+    "axe-core": "4.14.0",
+    "ws": "8.22.2"
+  }
+}

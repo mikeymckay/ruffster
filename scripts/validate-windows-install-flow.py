@@ -148,6 +148,32 @@ def validate(package):
         if restarted['networks'] or restarted['settings']:
             raise RuntimeError('the restarted synthetic check unexpectedly collected network data')
 
+        # Exercise the same managed-task replacement used by the downloaded
+        # app updater: stop the verified task, retain encrypted data and keys,
+        # then register/start the bundled agent again with its saved options.
+        saved_parent_key = (data_root / 'parent.pub').read_bytes()
+        before_update = restarted
+        windows_install.uninstall(profile)
+        if windows_install._agent_running(database) or _run_task('/Query', '/TN', windows_install.TASK_NAME).returncode == 0:
+            raise RuntimeError('the old synthetic task remained active during the update check')
+        if not database.is_file() or (data_root / 'parent.pub').read_bytes() != saved_parent_key:
+            raise RuntimeError('pausing for update did not preserve the encrypted report and parent key')
+        windows_install.install(
+            public_key, core, package, companion, profile, user=user,
+            retention_days=30, packaged=True, foreground_helper=synthetic_helper,
+            monitor_network=False, inspect_network_settings=False)
+        updated, updated_pids = _wait_for(
+            database, private_key, core, timeout=60, minimum_samples=len(before_update['samples']) + 1,
+            minimum_sessions=3, old_pid=restarted_pids[0])
+        if not updated_pids or any(sample != SYNTHETIC_APP for sample in updated['samples']):
+            raise RuntimeError('the updated synthetic agent did not resume encrypted foreground sampling')
+        if updated['networks'] or updated['settings']:
+            raise RuntimeError('the update did not preserve disabled network collection settings')
+        if (data_root / 'parent.pub').read_bytes() != saved_parent_key:
+            raise RuntimeError('the update changed the saved parent connection key')
+        if SYNTHETIC_APP[0].encode() in database.read_bytes() or SYNTHETIC_APP[1].encode() in database.read_bytes():
+            raise RuntimeError('the updated report contains synthetic foreground plaintext')
+
         removed = windows_install.uninstall(profile)
         if removed['data_deleted'] or not database.is_file() or not (data_root / 'parent.pub').is_file():
             raise RuntimeError('normal removal did not retain the synthetic encrypted report and public key')
@@ -156,12 +182,12 @@ def validate(package):
         if windows_install._agent_running(database):
             raise RuntimeError('normal removal left the disposable agent running')
         final = _report(database, private_key)
-        if len(final['sessions']) != 2 or final['sessions'][-1][2] is None:
-            raise RuntimeError('removal did not close the final synthetic session')
+        if len(final['sessions']) != 3 or final['sessions'][-1][2] is None:
+            raise RuntimeError('the update/removal check did not close the final synthetic session')
         return ('Real Windows Task Scheduler install/start/restart/uninstall passed: '
-                'synthetic foreground samples were encrypted, network collection stayed off, '
-                'a forced exit produced a second session and gap, and removal stopped the task '
-                'while retaining the report by default.')
+                'synthetic foreground samples stayed encrypted, a forced exit produced a second '
+                'session and gap, a same-data reinstall after update preserved the report and '
+                'parent key, and removal stopped the task while retaining the report by default.')
     finally:
         if metadata.exists():
             try:

@@ -362,9 +362,9 @@ def dashboard(path, port, private_key_path=None, key_vault_path=None, label_path
             def summary_rows(items):
                 return rows([(name, f"{seconds / 60:.1f} min") for name, seconds in items])
             notice = ("<p>Some session starts are unavailable, possibly because older records expired; coverage may be incomplete.</p>" if incomplete else "")
-            body = ("<!doctype html><html lang='en'><meta charset='utf-8'><meta name='viewport' content='width=device-width'><title>Family Activity</title>"
+            body = ("<!doctype html><html lang='en'><meta charset='utf-8'><meta name='viewport' content='width=device-width'><title>Ruffster</title>"
                     "<style>body{font:16px system-ui;max-width:900px;margin:3rem auto;padding:0 1rem;color:#24323a}table{border-collapse:collapse;width:100%}td,th{text-align:left;padding:.6rem;border-bottom:1px solid #ddd}small{color:#555}</style>"
-                    "<h1>Family Activity</h1><p>Local prototype · timestamps in UTC</p>" + notice +
+                    "<h1>Ruffster</h1><p>Local prototype · timestamps in UTC</p>" + notice +
                     "<p>Heartbeats indicate that the agent ran; they do not prove monitoring coverage. An open session may have stopped unexpectedly. Refresh for updates.</p>"
                     "<h2>Estimated foreground app time</h2><p>UTC calendar days; estimates count only short intervals between matching samples. App switches between samples, locked or idle time, and missing data can make these estimates inaccurate. They are not proof of active use.</p>"
                     "<h3>Today</h3><table><tr><th>Application</th><th>Estimated time</th></tr>" + summary_rows(summaries['today']) + "</table>"
@@ -402,6 +402,8 @@ def main():
     win_install.add_argument("--source-directory", required=True, help="Absolute directory containing the app runtime")
     win_install.add_argument("--status-helper", required=True, help="Absolute path to the visible tray companion executable")
     win_install.add_argument("--packaged", action="store_true", help="Register the bundled FamilyActivityCore.exe as the agent")
+    win_install.add_argument("--no-network", action="store_true", help="Do not collect interface traffic or network-setting indicators")
+    win_install.add_argument("--no-network-settings", action="store_true", help="Do not inspect DNS or proxy configuration")
     win_install.add_argument("--retention-days", type=int, choices=(7,30,90,180,365), default=30)
     win_install.add_argument("--disclosed", action="store_true", required=True, help="Confirm that monitoring has been explained to the child")
     win_uninstall = sub.add_parser("windows-uninstall", help="Stop and remove the experimental Windows agent; retain encrypted data by default")
@@ -416,6 +418,10 @@ def main():
     install_mac.add_argument("--disclosed", action="store_true", required=True, help="Confirm that monitoring has been explained to the child")
     mac_uninstall = sub.add_parser("mac-uninstall", help="Stop and remove the Mac agent; retain encrypted data by default")
     mac_uninstall.add_argument("--delete-data", action="store_true", help="Also delete the local encrypted database and parent public key")
+    mac_restart = sub.add_parser("mac-restart", help="Restart the installed Mac agent after replacing the app in place")
+    mac_restart.add_argument("--source-directory", required=True)
+    mac_restart.add_argument("--foreground-helper", required=True)
+    mac_restart.add_argument("--status-helper", required=True)
     share = sub.add_parser("share", help="Temporarily share one encrypted snapshot on a chosen local interface")
     share.add_argument("--db", required=True)
     share.add_argument("--host", default="127.0.0.1", help="Local IPv4 address to listen on; default loopback only")
@@ -480,13 +486,15 @@ def main():
         from . import windows_install
         if args.command == 'windows-install':
             result = windows_install.install(args.public_key, args.python, args.source_directory, args.status_helper,
-                                             retention_days=args.retention_days, packaged=args.packaged)
+                                             retention_days=args.retention_days, packaged=args.packaged,
+                                             monitor_network=not args.no_network,
+                                             inspect_network_settings=not args.no_network_settings)
             print("Windows monitoring started and the visible status companion is ready. Confirm its tray icon is visible.", flush=True)
             print("Encrypted data directory:", result['data_directory'], flush=True)
         else:
             result = windows_install.uninstall(delete_data=args.delete_data)
             print("Agent removed.", "Local encrypted data deleted." if result['data_deleted'] else "Encrypted data retained at " + result['data_retained'], flush=True)
-    elif args.command in ("mac-install", "mac-uninstall"):
+    elif args.command in ("mac-install", "mac-uninstall", "mac-restart"):
         if sys.platform != "darwin":
             parser.error("Mac installation is available only on macOS")
         from . import macos_install
@@ -501,6 +509,14 @@ def main():
                 parser.error(str(error))
             print("Experimental agent registered. Verify that the status indicator is visible before use.", flush=True)
             print("Data directory:", result['data_directory'], flush=True)
+        elif args.command == "mac-restart":
+            try:
+                macos_install.restart_after_update(Path.home(), os.getuid(), sys.executable,
+                                                   args.source_directory, args.foreground_helper,
+                                                   args.status_helper)
+            except (OSError, ValueError, RuntimeError, sqlite3.Error) as error:
+                parser.error(str(error))
+            print("Monitoring restarted with the updated app. Confirm the visible status indicator returns to on.", flush=True)
         else:
             try:
                 result = macos_install.uninstall(Path.home(), os.getuid(), delete_data=args.delete_data)

@@ -11,6 +11,7 @@ import plistlib
 import re
 import sqlite3
 import subprocess
+import time
 from . import macos_launchd, parent_settings, public_key_file
 from .key_vault import create_new
 
@@ -125,6 +126,89 @@ def install(public_key, python, source, foreground, status, home, uid, *, label=
         if created_key: key_path.unlink(missing_ok=True)
         raise
     return {'label':label, 'data_directory':str(data), 'plist':str(plist)}
+
+
+def _running_pid(domain, label, runner):
+    result = runner(['/bin/launchctl', 'print', f'{domain}/{label}'])
+    output = getattr(result, 'stdout', '') or ''
+    if result.returncode != 0 or 'state = running' not in output:
+        return None
+    match = re.search(r'^\s*pid = (\d+)$', output, re.MULTILINE)
+    return int(match.group(1)) if match else None
+
+
+def restart_after_update(home, uid, python, source, foreground, status, *,
+                         label=DEFAULT_LABEL, runner=_run, timeout=20):
+    """Restart an unchanged managed agent so it loads the replaced app runtime.
+
+    The current app must be in the same location used by the installed agent.
+    Existing collection arguments, parent key, encrypted report, and retention
+    settings are left untouched.
+    """
+    if not 1 <= timeout <= 60:
+        raise ValueError('restart timeout must be 1 to 60 seconds')
+    data, key_path, network_key_path, database, metadata, plist = _paths(home, label)
+    canonical_home = Path(home).resolve(strict=True)
+    if (_has_symlink_component(data, canonical_home) or
+            _has_symlink_component(plist, canonical_home) or
+            metadata.is_symlink() or key_path.is_symlink() or network_key_path.is_symlink() or
+            database.is_symlink()):
+        raise ValueError('installation paths must not contain symbolic links')
+    try:
+        info = json.loads(metadata.read_text('utf-8'))
+        definition_bytes = plist.read_bytes()
+        definition = plistlib.loads(definition_bytes)
+        public = key_path.read_bytes()
+        public_key_file.decode(public, allow_legacy=True)
+    except (OSError, ValueError, TypeError, json.JSONDecodeError, plistlib.InvalidFileException):
+        raise ValueError('managed installation files are missing or invalid') from None
+    if (not isinstance(info, dict) or not isinstance(definition, dict) or
+            info.get('version') != 1 or info.get('label') != label or
+            info.get('plist_sha256') != hashlib.sha256(definition_bytes).hexdigest() or
+            info.get('public_sha256') != hashlib.sha256(public).hexdigest() or
+            definition.get('Label') != label):
+        raise ValueError('installation changed; refusing to restart it automatically')
+    source = str(source)
+    python = str(python)
+    foreground = str(foreground)
+    status = str(status)
+    arguments = definition.get('ProgramArguments')
+    if (not isinstance(arguments, list) or not arguments or arguments[0] != python or
+            definition.get('WorkingDirectory') != source):
+        raise ValueError('open the updated app from the same location as the existing installation')
+
+    def value_after(option):
+        try:
+            return arguments[arguments.index(option) + 1]
+        except (ValueError, IndexError):
+            return None
+
+    if (value_after('--db') != str(database) or value_after('--experimental-public-key') != str(key_path) or
+            value_after('--experimental-foreground-helper') != foreground or
+            value_after('--experimental-status-helper') != status):
+        raise ValueError('the installed agent does not match this app location')
+    for executable in (python, foreground, status):
+        if not Path(executable).is_file() or not os.access(executable, os.X_OK):
+            raise ValueError('the updated app or a required helper is unavailable')
+    if not Path(source).is_dir():
+        raise ValueError('the updated app runtime is unavailable')
+
+    domain = f'gui/{uid}'
+    if not _check_process(domain, label, runner):
+        raise ValueError('the managed agent is not registered for this account')
+    previous_pid = _running_pid(domain, label, runner)
+    result = runner(['/bin/launchctl', 'kickstart', '-k', f'{domain}/{label}'])
+    if result.returncode:
+        raise RuntimeError('launchd could not restart the agent; the encrypted report was left untouched')
+    deadline = time.monotonic() + timeout
+    current_pid = None
+    while time.monotonic() < deadline:
+        current_pid = _running_pid(domain, label, runner)
+        if current_pid is not None and current_pid != previous_pid:
+            return {'label': label, 'previous_pid': previous_pid, 'pid': current_pid,
+                    'data_directory': str(data)}
+        time.sleep(0.1)
+    raise RuntimeError('the updated agent did not report a new running process; its data was retained')
 
 
 def uninstall(home, uid, *, label=DEFAULT_LABEL, runner=_run, delete_data=False):

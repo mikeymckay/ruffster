@@ -342,7 +342,7 @@ class WindowsTaskTests(unittest.TestCase):
                 start_call = next(call for call in calls if '/Run' in call)
                 self.assertEqual(start_call[-3:], ['/Run', '/TN', windows_install.TASK_NAME])
                 self.assertNotIn('/F', next(call for call in calls if '/Create' in call))
-                self.assertIn('Family Activity', registered[0])
+                self.assertIn('Ruffster', registered[0])
                 self.assertIn('--experimental-network-key', registered[0])
                 writer=EncryptedAgentStore(database, parent.public_key, 30)
                 writer.event('start'); writer.event('stop'); writer.close()

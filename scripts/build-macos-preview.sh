@@ -15,7 +15,7 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 mkdir -p "$OUTPUT"
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/family-build.XXXXXXXX")
 trap 'rm -rf -- "$WORK"' EXIT HUP INT TERM
-APP="$OUTPUT/Family Activity Preview.app"
+APP="$OUTPUT/Ruffster Preview.app"
 if [ -e "$APP" ]; then
   printf '%s\n' 'The output app already exists; choose a new output directory.' >&2; exit 1
 fi
@@ -32,11 +32,11 @@ swiftc "$ROOT/native/macos/status.swift" -o "$APP/Contents/Resources/helpers/sta
 "$PYTHON" - "$APP/Contents/Info.plist" <<'PY'
 import plistlib, sys
 with open(sys.argv[1], 'wb') as file:
-    plistlib.dump({'CFBundleName':'Family Activity Preview', 'CFBundleDisplayName':'Family Activity Preview',
+    plistlib.dump({'CFBundleName':'Ruffster Preview', 'CFBundleDisplayName':'Ruffster Preview',
                    'CFBundleIdentifier':'org.familyactivity.preview', 'CFBundleExecutable':'FamilyActivitySetup',
                    'CFBundlePackageType':'APPL', 'CFBundleShortVersionString':'0.1.0',
                    'CFBundleVersion':'1', 'NSHighResolutionCapable':True,
-                   'NSLocalNetworkUsageDescription': 'Family Activity uses your local network when you connect a parent computer or send an encrypted report.'}, file)
+                   'NSLocalNetworkUsageDescription': 'Ruffster uses your local network when you connect a parent computer or send an encrypted report.'}, file)
 PY
 "$APP/Contents/MacOS/FamilyActivitySetup" --check-bundle
 "$APP/Contents/MacOS/FamilyActivitySetup" --self-test-ui \

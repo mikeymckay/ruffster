@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import tempfile
 import unittest
 from nacl.public import PrivateKey
-from family_activity.macos_install import install, uninstall
+from family_activity.macos_install import install, restart_after_update, uninstall
 
 class FakeLaunchctl:
     def __init__(self, fail_bootstrap=False, fail_bootout=False):
@@ -52,6 +52,46 @@ class MacInstallTests(unittest.TestCase):
         self.assertEqual(len(network_key), 32)
         self.perform(); self.assertTrue(self.launch.loaded)
         self.assertEqual((data / 'network.key').read_bytes(), network_key)
+
+    def test_restart_after_update_preserves_install_and_requires_same_app_location(self):
+        from family_activity.macos_install import DEFAULT_LABEL
+
+        installed = self.perform()
+        data = Path(installed['data_directory'])
+        public_before = (data / 'parent.pub').read_bytes()
+        network_before = (data / 'network.key').read_bytes()
+        plist_before = Path(installed['plist']).read_bytes()
+        metadata_before = (data / 'install.json').read_bytes()
+
+        class RunningLaunchctl:
+            def __init__(self): self.pid = 1001; self.restarts = 0
+            def __call__(self, args):
+                action = args[1]
+                if action == 'print':
+                    return SimpleNamespace(returncode=0,
+                                           stdout=f'state = running\n\tpid = {self.pid}\n')
+                if action == 'kickstart':
+                    self.restarts += 1
+                    self.pid += 1
+                    return SimpleNamespace(returncode=0, stdout='')
+                raise AssertionError(args)
+
+        live = RunningLaunchctl()
+        result = restart_after_update(self.home, 123, str(self.exe), str(self.source),
+                                      str(self.exe), str(self.exe), runner=live)
+        self.assertEqual(result['label'], DEFAULT_LABEL)
+        self.assertEqual(result['previous_pid'], 1001)
+        self.assertEqual(result['pid'], 1002)
+        self.assertEqual(live.restarts, 1)
+        self.assertEqual((data / 'parent.pub').read_bytes(), public_before)
+        self.assertEqual((data / 'network.key').read_bytes(), network_before)
+        self.assertEqual(Path(installed['plist']).read_bytes(), plist_before)
+        self.assertEqual((data / 'install.json').read_bytes(), metadata_before)
+
+        with self.assertRaisesRegex(ValueError, 'same location'):
+            restart_after_update(self.home, 123, str(self.exe), str(self.root / 'moved-app'),
+                                 str(self.exe), str(self.exe), runner=live)
+        self.assertEqual(live.restarts, 1)
 
     def test_installed_agent_receives_private_device_network_key(self):
         result = self.perform()
@@ -214,3 +254,11 @@ class MacInstallTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn('No such file', result.stderr)
         self.assertNotIn('Traceback', result.stderr)
+
+    def test_mac_restart_cli_requires_the_current_runtime_helpers(self):
+        result = subprocess.run([sys.executable, '-m', 'family_activity', 'mac-restart', '--help'],
+                                capture_output=True, text=True, timeout=5)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('--source-directory', result.stdout)
+        self.assertIn('--foreground-helper', result.stdout)
+        self.assertIn('--status-helper', result.stdout)

@@ -25,7 +25,7 @@ internal sealed class ParentDashboardLauncher : Form
     private ParentDashboardLauncher(string appFolder)
     {
         corePath = Path.Combine(appFolder, "FamilyActivityCore", "FamilyActivityCore.exe");
-        Text = "Family Activity for parents";
+        Text = "Ruffster for parents";
         StartPosition = FormStartPosition.CenterParent;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false; MinimizeBox = false;
@@ -56,7 +56,7 @@ internal sealed class ParentDashboardLauncher : Form
     {
         if (!File.Exists(corePath))
         {
-            status.Text = "The dashboard app is missing from this preview folder. Re-extract the complete Family Activity ZIP and open this setup app again.";
+            status.Text = "The dashboard app is missing from this preview folder. Re-extract the complete Ruffster ZIP and open this setup app again.";
             return;
         }
         try

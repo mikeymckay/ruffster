@@ -75,7 +75,7 @@ final class StatusController: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         let status = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         let menu = NSMenu()
-        let heading = NSMenuItem(title: "Family Activity is starting…", action: nil, keyEquivalent: "")
+        let heading = NSMenuItem(title: "Ruffster is starting…", action: nil, keyEquivalent: "")
         heading.isEnabled = false
         menu.addItem(heading)
         self.heading = heading
@@ -95,6 +95,10 @@ final class StatusController: NSObject, NSApplicationDelegate {
             menu.addItem(stop)
         }
         status.menu = menu
+        if let button = status.button {
+            button.image = NSImage(systemSymbolName: "pawprint.fill", accessibilityDescription: "Ruffster status")
+            button.imagePosition = .imageLeading
+        }
         item = status
         startHeartbeatListener()
         refreshIndicator()
@@ -148,20 +152,20 @@ final class StatusController: NSObject, NSApplicationDelegate {
         if shareProcess?.isRunning == true {
             heading?.title = "Sharing a report · \(state.menuText.lowercased())"
             button?.title = state.buttonText
-            button?.toolTip = "Family Activity: \(state.menuText). An encrypted report is being shared."
-            button?.setAccessibilityLabel("Family Activity. Sharing an encrypted report. \(state.accessibilityLabel).")
+            button?.toolTip = "Ruffster: \(state.menuText). An encrypted report is being shared."
+            button?.setAccessibilityLabel("Ruffster. Sharing an encrypted report. \(state.accessibilityLabel).")
         } else {
-            heading?.title = "Family Activity · \(state.menuText)"
+            heading?.title = "Ruffster · \(state.menuText)"
             button?.title = state.buttonText
-            button?.toolTip = "Family Activity: \(state.menuText). If the indicator disappears, the agent may have stopped."
-            button?.setAccessibilityLabel("Family Activity. \(state.accessibilityLabel).")
+            button?.toolTip = "Ruffster: \(state.menuText). If the indicator disappears, the agent may have stopped."
+            button?.setAccessibilityLabel("Ruffster. \(state.accessibilityLabel).")
         }
         button?.setAccessibilityHelp(state.accessibilityHelp)
     }
 
     @objc private func showDetails() {
         let alert = NSAlert()
-        alert.messageText = "Family Activity experimental monitoring"
+        alert.messageText = "Ruffster experimental monitoring"
         let processNetwork = ProcessInfo.processInfo.environment["FAMILY_ACTIVITY_PROCESS_NETWORK"] == "1"
             ? " Optional process-associated sent and received byte totals are enabled. Some traffic may appear under helper services; websites are not identified."
             : " Optional process-associated network totals are off."
@@ -292,7 +296,7 @@ final class StatusController: NSObject, NSApplicationDelegate {
 
         let panel = NSSavePanel()
         panel.title = "Save an encrypted report for your parent"
-        panel.nameFieldStringValue = "family-activity-report.sqlite3"
+        panel.nameFieldStringValue = "ruffster-report.sqlite3"
         panel.prompt = "Save encrypted report"
         panel.canCreateDirectories = true
         guard panel.runModal() == .OK, let destination = panel.url else { return }
@@ -338,7 +342,7 @@ final class StatusController: NSObject, NSApplicationDelegate {
         content.edgeInsets = NSEdgeInsets(top: 22, left: 24, bottom: 20, right: 24)
         let title = NSTextField(labelWithString: "Saving an encrypted report copy")
         title.font = .boldSystemFont(ofSize: 15)
-        let detail = NSTextField(wrappingLabelWithString: "This can take a little while for a larger report. Keep Family Activity open.")
+        let detail = NSTextField(wrappingLabelWithString: "This can take a little while for a larger report. Keep Ruffster open.")
         detail.setAccessibilityLabel("Preparing the encrypted report file")
         let progress = NSProgressIndicator()
         progress.style = .spinning
@@ -349,7 +353,7 @@ final class StatusController: NSObject, NSApplicationDelegate {
         content.addArrangedSubview(progress)
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 430, height: 150),
                               styleMask: [.titled], backing: .buffered, defer: false)
-        window.title = "Family Activity"
+        window.title = "Ruffster"
         window.contentView = content
         window.center()
         window.makeKeyAndOrderFront(nil)

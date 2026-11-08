@@ -236,7 +236,7 @@ def install(public_key, python_exe, source_directory, status_exe, local_app_data
     if _has_linklike_component(folder, Path(local_app_data)):
         raise ValueError('application data folder must not use symbolic links or reparse points')
     if metadata.exists():
-        raise FileExistsError('a Family Activity installation already exists')
+        raise FileExistsError('a Ruffster installation already exists')
     if key_path.exists() and key_path.read_bytes() != public:
         raise ValueError('existing data belongs to a different parent key')
     if database.exists():
@@ -269,7 +269,7 @@ def install(public_key, python_exe, source_directory, status_exe, local_app_data
     task_path = Path(_task_exe())
     query = runner([str(task_path), '/Query', '/TN', TASK_NAME])
     if query.returncode == 0:
-        raise FileExistsError('a task with the Family Activity name already exists')
+        raise FileExistsError('a task with the Ruffster name already exists')
 
     created_key = False
     created_network_key = False
@@ -305,11 +305,11 @@ def install(public_key, python_exe, source_directory, status_exe, local_app_data
         registration_uncertain = True
         started = runner([str(task_path), '/Run', '/TN', TASK_NAME])
         if started.returncode:
-            raise RuntimeError('monitoring was registered, but Windows could not start it now; open Family Activity settings to check or remove the setup')
+            raise RuntimeError('monitoring was registered, but Windows could not start it now; open Ruffster settings to check or remove the setup')
         ready = (readiness_check(database, previous_event_count) if readiness_check is not None
                  else _wait_for_ready_session(database, previous_event_count))
         if not ready:
-            raise RuntimeError('monitoring was registered, but the tray indicator and encrypted agent session did not become ready in time; open Family Activity settings to check or remove the setup')
+            raise RuntimeError('monitoring was registered, but the tray indicator and encrypted agent session did not become ready in time; open Ruffster settings to check or remove the setup')
     except BaseException:
         # Keep metadata and keys whenever Task Scheduler may still own a task.
         if not registration_uncertain:

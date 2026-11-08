@@ -67,14 +67,14 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         stack.spacing = 13
         stack.translatesAutoresizingMaskIntoConstraints = false
 
-        let eyebrow = NSTextField(labelWithString: "FAMILY ACTIVITY  ·  EARLY PREVIEW")
+        let eyebrow = NSTextField(labelWithString: "🐾 RUFFSTER  ·  EARLY PREVIEW")
         eyebrow.font = .systemFont(ofSize: 11, weight: .bold)
         eyebrow.textColor = .secondaryLabelColor
         let title = NSTextField(wrappingLabelWithString: "A clearer picture, shared together.")
         title.font = .systemFont(ofSize: 27, weight: .bold)
         title.maximumNumberOfLines = 2
         title.usesSingleLineMode = false
-        let introduction = paragraph("Family Activity helps parents and children review how this computer is being used. Set it up together, and keep the monitoring indicator visible.", size: 15)
+        let introduction = paragraph("Ruffster helps parents and children review how this computer is being used. Set it up together, and keep the monitoring indicator visible.", size: 15)
 
         let readiness = NSBox()
         readiness.boxType = .primary
@@ -129,7 +129,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 680, height: 650),
                               styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
-        window.title = "Family Activity"
+        window.title = "Ruffster"
         window.contentView = content
         window.isReleasedWhenClosed = false
         if visible {
@@ -192,11 +192,14 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func showMoreOptions() {
         let options = NSAlert()
-        options.messageText = "More Family Activity options"
-        options.informativeText = "Remove a previously installed agent or quit setup."
+        options.messageText = "More Ruffster options"
+        options.informativeText = "After replacing the app in the same location, restart monitoring to load its updated code. You can also remove the agent."
+        options.addButton(withTitle: "Restart after app update…")
         options.addButton(withTitle: "Remove existing agent…")
         options.addButton(withTitle: "Quit")
-        if options.runModal() == .alertFirstButtonReturn { removeAgent() }
+        let response = options.runModal()
+        if response == .alertFirstButtonReturn { restartAgentAfterUpdate() }
+        else if response == .alertSecondButtonReturn { removeAgent() }
     }
 
     private func showParentDashboardWindow() {
@@ -235,7 +238,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         ])
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 560, height: 260),
                               styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
-        window.title = "Family Activity for parents"
+        window.title = "Ruffster for parents"
         window.contentView = content
         window.delegate = self
         window.isReleasedWhenClosed = false
@@ -326,14 +329,14 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         guard operationProcess != nil else { return .terminateNow }
-        message("Family Activity is finishing a setup action", "Wait for the current setup or removal action to finish before closing the app.")
+        message("Ruffster is finishing a setup action", "Wait for the current setup or removal action to finish before closing the app.")
         return .terminateCancel
     }
 
     private func choosePublicKey() {
         let choice = NSAlert()
         choice.messageText = "Connect this Mac to the parent computer"
-        choice.informativeText = "The parent can show two digits in their Family Activity dashboard while both computers are on the same Wi-Fi. You can also choose a connection file. The parent's private access stays on their computer."
+        choice.informativeText = "The parent can show two digits in their Ruffster dashboard while both computers are on the same Wi-Fi. You can also choose a connection file. The parent's private access stays on their computer."
         choice.addButton(withTitle: "Enter two digits")
         choice.addButton(withTitle: "Choose connection file…")
         choice.addButton(withTitle: "Cancel")
@@ -347,7 +350,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private func choosePublicKeyFile() {
         let panel = NSOpenPanel()
         panel.title = "Choose the connection file from your parent"
-        panel.message = "Select the Family Activity connection file your parent downloaded. Do not select the encrypted recovery copy."
+        panel.message = "Select the Ruffster connection file your parent downloaded. Do not select the encrypted recovery copy."
         panel.canChooseFiles = true; panel.canChooseDirectories = false; panel.allowsMultipleSelection = false
         guard panel.runModal() == .OK, let key = panel.url else { return }
         reviewAndInstall(key)
@@ -455,7 +458,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let size = (try? FileManager.default.attributesOfItem(atPath: key.path)[.size] as? NSNumber)?.intValue
         guard size == marker.count + 32,
               let data = try? Data(contentsOf: key), data.starts(with: marker) else {
-                message("That doesn't look like a Family Activity connection file", "Choose the file downloaded from the parent's dashboard, or enter the two digits shown there. Do not select the encrypted recovery copy.")
+                message("That doesn't look like a Ruffster connection file", "Choose the file downloaded from the parent's dashboard, or enter the two digits shown there. Do not select the encrypted recovery copy.")
             return
         }
         let review = NSAlert()
@@ -472,15 +475,15 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         disclosureText.textContainer?.containerSize = NSSize(width: 430, height: CGFloat.greatestFiniteMagnitude)
         disclosureText.textContainerInset = NSSize(width: 6, height: 6)
         disclosureText.string = """
-        While this account is signed in, Family Activity samples foreground app names, network-interface traffic totals, a pseudonymous hint when the default router changes, and basic DNS, proxy, and VPN settings. Network-interface totals are not attributed to apps or websites. You can separately opt into experimental process-level totals below; these may list helper services, miss brief connections, and do not identify websites. The router hint is not a location, and the raw router address is not saved.
+        While this account is signed in, Ruffster samples foreground app names, network-interface traffic totals, a pseudonymous hint when the default router changes, and basic DNS, proxy, and VPN settings. Network-interface totals are not attributed to apps or websites. You can separately opt into experimental process-level totals below; these may list helper services, miss brief connections, and do not identify websites. The router hint is not a location, and the raw router address is not saved.
 
         It does not record screenshots, keystrokes, message contents, microphone, camera, or full website addresses. Website domains are not included in this Mac setup. If selected below, experimental network totals are grouped by the process that owns a connection. Some traffic may appear under a helper service, brief connections may be missed, and this does not identify websites.
 
         The menu-bar status icon must stay visible to the child. Reports are locked on this Mac and can be opened on the parent's computer. Keep this app in its current location; moving it may stop monitoring.
 
-        Choose the maximum time to keep detailed records here. Records are removed while monitoring runs; calendar-day rounding may remove them up to a day before that limit. Removing monitoring keeps the encrypted report and Family Activity connection details unless you choose to delete them. Reports already shared elsewhere and other copies are not affected.
+        Choose the maximum time to keep detailed records here. Records are removed while monitoring runs; calendar-day rounding may remove them up to a day before that limit. Removing monitoring keeps the encrypted report and Ruffster connection details unless you choose to delete them. Reports already shared elsewhere and other copies are not affected.
         """
-        disclosureText.setAccessibilityLabel("Family Activity collection and retention details")
+        disclosureText.setAccessibilityLabel("Ruffster collection and retention details")
         let disclosureScroll = NSScrollView(frame: NSRect(x: 0, y: 0, width: 460, height: 190))
         disclosureScroll.hasVerticalScroller = true
         disclosureScroll.hasHorizontalScroller = false
@@ -532,11 +535,11 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if processNetwork.state == .on { arguments.append("--process-network") }
         cleanupWhenComplete = temporaryDirectory != nil
         runWithProgress(arguments, title: "Setting up this Mac…",
-                        detail: "Registering monitoring for this account. Keep Family Activity open.") { [weak self] succeeded, detail in
+                        detail: "Registering monitoring for this account. Keep Ruffster open.") { [weak self] succeeded, detail in
             if let temporaryDirectory { try? FileManager.default.removeItem(at: temporaryDirectory) }
             guard let self else { return }
             if succeeded {
-                self.message("Agent registered", "Check that the Family Activity menu-bar indicator is visible. If it is not, remove the agent and do not use the preview.")
+                self.message("Agent registered", "Check that the Ruffster menu-bar indicator is visible. If it is not, remove the agent and do not use the preview.")
             } else {
                 self.message("Installation did not complete", self.failureText(detail, fallback: "Check the selected connection file and try again. No existing report was intentionally removed."))
             }
@@ -547,10 +550,32 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         installConfirmationButton?.isEnabled = sender.state == .on
     }
 
+    private func restartAgentAfterUpdate() {
+        let confirm = NSAlert()
+        confirm.messageText = "Restart monitoring with the updated app?"
+        confirm.informativeText = "Use this after replacing Ruffster in the same location. Monitoring will pause briefly, then restart with the same parent connection, collection choices, report, and retention setting. Keep the visible status indicator in view and confirm it returns to on."
+        confirm.addButton(withTitle: "Restart monitoring")
+        confirm.addButton(withTitle: "Cancel")
+        guard confirm.runModal() == .alertFirstButtonReturn else { return }
+        let arguments = ["-m", "family_activity", "mac-restart",
+                         "--source-directory", runtime.source,
+                         "--foreground-helper", runtime.foreground,
+                         "--status-helper", runtime.status]
+        runWithProgress(arguments, title: "Restarting monitoring…",
+                        detail: "Checking this installation, then starting its updated agent.") { [weak self] succeeded, detail in
+            guard let self else { return }
+            if succeeded {
+                self.message("Monitoring restarted", "The updated agent is running. Confirm the Ruffster status indicator returns to on.")
+            } else {
+                self.message("Could not restart monitoring", self.failureText(detail, fallback: "The encrypted report and collection settings were left in place. Open the app from its installed location or remove the agent if this app was moved."))
+            }
+        }
+    }
+
     private func removeAgent() {
         let confirm = NSAlert()
-        confirm.messageText = "Remove the Family Activity agent?"
-        confirm.informativeText = "Monitoring will stop and won't start at sign-in. The encrypted report and Family Activity connection details will stay on this computer. Removing the app does not delete backups or copies."
+        confirm.messageText = "Remove the Ruffster agent?"
+        confirm.informativeText = "Monitoring will stop and won't start at sign-in. The encrypted report and Ruffster connection details will stay on this computer. Removing the app does not delete backups or copies."
         confirm.addButton(withTitle: "Remove agent and keep report")
         confirm.addButton(withTitle: "Delete agent and local report…")
         confirm.addButton(withTitle: "Cancel")
@@ -561,19 +586,19 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
             let final = NSAlert()
             final.alertStyle = .critical
             final.messageText = "Permanently delete this computer's local report?"
-        final.informativeText = "This removes the encrypted activity report and Family Activity connection details from this account. The report on this computer will no longer be available. Reports already imported to a parent computer, backups, and other copies are not affected."
+        final.informativeText = "This removes the encrypted activity report and Ruffster connection details from this account. The report on this computer will no longer be available. Reports already imported to a parent computer, backups, and other copies are not affected."
             final.addButton(withTitle: "Delete local report")
             final.addButton(withTitle: "Cancel")
             guard final.runModal() == .alertFirstButtonReturn else { return }
         }
         let arguments = deleteData ? ["-m", "family_activity", "mac-uninstall", "--delete-data"] : ["-m", "family_activity", "mac-uninstall"]
-        runWithProgress(arguments, title: "Removing Family Activity…",
+        runWithProgress(arguments, title: "Removing Ruffster…",
                         detail: "Stopping this account's monitoring agent. Reports are kept unless you chose to delete this Mac's local copy.") { [weak self] succeeded, detail in
             guard let self else { return }
             if succeeded {
-                self.message("Monitoring removed", deleteData ? "The local encrypted report and connection details were deleted." : "The encrypted report and connection details remain in this account's Family Activity folder.")
+                self.message("Monitoring removed", deleteData ? "The local encrypted report and connection details were deleted." : "The encrypted report and connection details remain in this account's app data folder.")
             } else {
-                let fallback = deleteData ? "The agent may have stopped, but the local report could not be fully deleted. Check the Family Activity data folder." : "The installation may have changed or the agent may not be installed. No report was deleted."
+                let fallback = deleteData ? "The agent may have stopped, but the local report could not be fully deleted. Check the Ruffster data folder." : "The installation may have changed or the agent may not be installed. No report was deleted."
                 self.message("Could not remove the agent", self.failureText(detail, fallback: fallback))
             }
         }
@@ -628,7 +653,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         ])
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 460, height: 190),
                               styleMask: [.titled], backing: .buffered, defer: false)
-        window.title = "Family Activity"
+        window.title = "Ruffster"
         window.contentView = content
         window.center()
         window.makeKeyAndOrderFront(nil)

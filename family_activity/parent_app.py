@@ -1,6 +1,7 @@
 """Experimental local parent setup and report UI; no cloud or remote listener."""
 from datetime import date, datetime, timedelta, timezone
 import base64
+import hashlib
 from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import hmac
@@ -18,7 +19,7 @@ import webbrowser
 from zoneinfo import ZoneInfo
 from nacl.public import PrivateKey
 from . import encrypted_store, encrypted_view, key_vault, network_labels, parent_settings, public_key_file, reports, school_schedule, website_categories
-from .encrypted_agent_store import EncryptedAgentStore
+from .encrypted_agent_store import EncryptedAgentStore, EXPIRY_VERSION, LEGACY_EXPIRY_VERSION
 from .encrypted_store import CIPHERTEXT_SIZES
 from .limits import MAX_SNAPSHOT_BYTES
 
@@ -185,7 +186,8 @@ class Handler(BaseHTTPRequestHandler):
             self._json({'error': 'Forbidden'}, 403); return
         assets = {'/': ('index.html', 'text/html; charset=utf-8'),
                   '/app.js': ('app.js', 'text/javascript; charset=utf-8'),
-                  '/app.css': ('app.css', 'text/css; charset=utf-8')}
+                  '/app.css': ('app.css', 'text/css; charset=utf-8'),
+                  '/ruffster-mascot.webp': ('ruffster-mascot.webp', 'image/webp')}
         if self.path in assets:
             file, kind = assets[self.path]
             self._headers(content_type=kind); self.wfile.write((ASSETS / file).read_bytes()); return
@@ -199,19 +201,6 @@ class Handler(BaseHTTPRequestHandler):
             if self.server.private_key is None:
                 self._json({'error': 'Unlock the parent key first.'}, 403); return
             self._json({'retention_days': self.server.retention_days}); return
-        if self.path == '/api/public-key-share':
-            if self.server.private_key is None:
-                self._json({'error': 'Unlock the parent key first.'}, 403); return
-            if not self.server.backup_confirmed:
-                self._json({'error': 'Save and confirm the encrypted parent key backup before setting up a child computer.'}, 403); return
-            try:
-                code = self.server.start_public_key_share()
-                transfer = self.server._key_share_server
-                remaining = max(0, int(transfer.deadline - time.monotonic())) if transfer else 0
-                self._json({'code': code, 'expires_in': remaining})
-            except Exception:
-                self._json({'error': 'Could not show the digits. Check that both computers are on the same Wi-Fi, then try again.'}, 400)
-            return
         if self.path in ('/api/public', '/api/backup'):
             if self.server.private_key is None:
                 self._json({'error': 'Unlock the parent key first.'}, 403); return
@@ -222,7 +211,7 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 content = self.server.vault.read_bytes()
                 self.server.backup_downloaded = True
-            name = 'family-public.key' if self.path.endswith('public') else 'family-parent-backup.vault'
+            name = 'ruffster-public.key' if self.path.endswith('public') else 'ruffster-parent-backup.vault'
             self._headers(content_type='application/octet-stream', extra=(('Content-Disposition', f'attachment; filename="{name}"'),))
             self.wfile.write(content); return
         if self.path == '/api/schedule':
@@ -249,7 +238,7 @@ class Handler(BaseHTTPRequestHandler):
                 from .local_share import encrypted_snapshot
                 content = encrypted_snapshot(self.server.data)
                 self._headers(content_type='application/octet-stream', extra=(
-                    ('Content-Disposition', 'attachment; filename="family-activity-report.sqlite3"'),
+                    ('Content-Disposition', 'attachment; filename="ruffster-report.sqlite3"'),
                     ('Cache-Control', 'no-store')))
                 self.wfile.write(content)
             except Exception:
@@ -274,6 +263,19 @@ class Handler(BaseHTTPRequestHandler):
             self._json({'ok': True}, extra=(('Set-Cookie', cookie),)); return
         if not self._authorized():
             self._json({'error': 'Open the app from its local launcher.'}, 403); return
+        if self.path == '/api/public-key-share':
+            if self.server.private_key is None:
+                self._json({'error': 'Unlock the parent key first.'}, 403); return
+            if not self.server.backup_confirmed:
+                self._json({'error': 'Save and confirm the encrypted parent key backup before setting up a child computer.'}, 403); return
+            try:
+                code = self.server.start_public_key_share()
+                transfer = self.server._key_share_server
+                remaining = max(0, int(transfer.deadline - time.monotonic())) if transfer else 0
+                self._json({'code': code, 'expires_in': remaining})
+            except Exception:
+                self._json({'error': 'Could not show the digits. Check that both computers are on the same Wi-Fi, then try again.'}, 400)
+            return
         if self.path == '/api/public-key-share/stop':
             self.server.stop_public_key_share()
             self._json({'stopped': True}); return
@@ -400,7 +402,7 @@ class Handler(BaseHTTPRequestHandler):
                 _install_report(self.server, data)
                 self._json({'ok': True})
             except Exception:
-                self._json({'error': 'Could not receive the report. Check the two digits and Wi-Fi. On a Mac, allow Family Activity in System Settings > Privacy & Security > Local Network.'}, 400)
+                self._json({'error': 'Could not receive the report. Check the two digits and Wi-Fi. On a Mac, allow Ruffster in System Settings > Privacy & Security > Local Network.'}, 400)
             return
         if self.path == '/api/import':
             if self.server.private_key is None:
@@ -422,42 +424,91 @@ class Handler(BaseHTTPRequestHandler):
 def _install_report(server, data):
     projection, _ = encrypted_view.open_projection_bytes(data, server.private_key)
     projection.close()
+    existing = None
+    if server.data.is_file():
+        current, _ = encrypted_view.open_projection(server.data, server.private_key)
+        current.close()
+        existing = server.data
     temp_path = None
     try:
         fd, temp_path = tempfile.mkstemp(prefix='.report-', dir=server.folder)
         os.close(fd)
-        _copy_validated_ciphertext(data, temp_path, server.private_key, server.retention_days)
+        _copy_validated_ciphertext(data, temp_path, server.private_key, server.retention_days,
+                                   existing_path=existing)
+        if os.path.getsize(temp_path) > MAX_UPLOAD:
+            raise ValueError('merged encrypted report is too large')
         os.replace(temp_path, server.data)
         temp_path = None
     finally:
         if temp_path and os.path.exists(temp_path): os.unlink(temp_path)
 
 
-def _copy_validated_ciphertext(data, destination, private_key, retention_days=30):
-    """Copy validated, unexpired ciphertext within the parent retention window."""
+def _copy_validated_ciphertext(data, destination, private_key, retention_days=30, *, existing_path=None):
+    """Merge unique validated ciphertext within the parent retention window."""
     source = sqlite3.connect(':memory:')
+    existing = None
     target = None
     try:
         source.deserialize(data)
+        if existing_path is not None:
+            uri = Path(existing_path).resolve().as_uri() + '?mode=ro'
+            existing = sqlite3.connect(uri, uri=True, timeout=5)
         target = EncryptedAgentStore(destination, private_key.public_key, retention_days)
+        versions = {id(source): _snapshot_expiry_version(source)}
+        if existing is not None:
+            versions[id(existing)] = _snapshot_expiry_version(existing)
         cutoff = datetime.now(timezone.utc) - timedelta(days=retention_days)
         today = datetime.now(timezone.utc).date().isoformat()
+        total_size = 0
+        target.db.execute('CREATE TEMP TABLE seen_ciphertexts (digest BLOB PRIMARY KEY) WITHOUT ROWID')
         with target.db:
-            for expires, ciphertext in source.execute('SELECT expires_on, ciphertext FROM encrypted_events ORDER BY id'):
-                if not isinstance(expires, str) or date.fromisoformat(expires).isoformat() != expires:
-                    raise ValueError('invalid expiration day')
-                if not isinstance(ciphertext, bytes) or len(ciphertext) not in CIPHERTEXT_SIZES:
-                    raise ValueError('invalid encrypted record size')
-                if expires <= today:
+            for database in (existing, source):
+                if database is None:
                     continue
-                event = encrypted_store.open_event(private_key, ciphertext)
-                at = datetime.fromisoformat(event['at'])
-                if at.tzinfo is None or at.astimezone(timezone.utc) < cutoff:
-                    continue
-                target.db.execute('INSERT INTO encrypted_events(expires_on, ciphertext) VALUES (?, ?)', (expires, ciphertext))
+                for expires, ciphertext in database.execute('SELECT expires_on, ciphertext FROM encrypted_events ORDER BY id'):
+                    if not isinstance(expires, str) or date.fromisoformat(expires).isoformat() != expires:
+                        raise ValueError('invalid expiration day')
+                    if not isinstance(ciphertext, bytes) or len(ciphertext) not in CIPHERTEXT_SIZES:
+                        raise ValueError('invalid encrypted record size')
+                    if expires <= today:
+                        continue
+                    if versions[id(database)] == LEGACY_EXPIRY_VERSION:
+                        try:
+                            expires = (date.fromisoformat(expires) - timedelta(days=1)).isoformat()
+                        except OverflowError:
+                            raise ValueError('invalid expiration day') from None
+                        if expires <= today:
+                            continue
+                    event = encrypted_store.open_event(private_key, ciphertext)
+                    at = datetime.fromisoformat(event['at'])
+                    if at.tzinfo is None or at.astimezone(timezone.utc) < cutoff:
+                        continue
+                    identity = hashlib.sha256(ciphertext).digest()
+                    inserted = target.db.execute('INSERT OR IGNORE INTO seen_ciphertexts(digest) VALUES (?)',
+                                                 (identity,)).rowcount
+                    if not inserted:
+                        continue
+                    total_size += len(ciphertext)
+                    if total_size > MAX_UPLOAD:
+                        raise ValueError('merged encrypted report is too large')
+                    target.db.execute('INSERT INTO encrypted_events(expires_on, ciphertext) VALUES (?, ?)', (expires, ciphertext))
+        target.db.execute('DROP TABLE seen_ciphertexts')
     finally:
+        if existing is not None: existing.close()
         if target is not None: target.close()
         source.close()
+
+
+def _snapshot_expiry_version(database):
+    columns = {row[1] for row in database.execute('PRAGMA table_info(key_commitment)')}
+    if 'expiry_version' not in columns:
+        return LEGACY_EXPIRY_VERSION
+    versions = database.execute('SELECT expiry_version FROM key_commitment').fetchall()
+    if versions == [(LEGACY_EXPIRY_VERSION,)]:
+        return LEGACY_EXPIRY_VERSION
+    if versions == [(EXPIRY_VERSION,)]:
+        return EXPIRY_VERSION
+    raise ValueError('unsupported encrypted record expiry version')
 
 
 def _prune_report_file(path, private_key, retention_days):

@@ -1,4 +1,5 @@
 from html.parser import HTMLParser
+import json
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 import unittest
@@ -94,7 +95,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('macOS family-ready product (first platform priority)', plan)
         self.assertIn('Windows family-ready product (second platform priority)', plan)
         self.assertIn('Public README, onboarding, and GitHub Pages', plan)
-        self.assertIn('real browser', plan)
+        self.assertIn('published project-subpath URL', plan)
         self.assertIn('rejects wildcards', plan)
         self.assertIn('browser-specific host-manifest locations', plan)
 
@@ -112,6 +113,21 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('<TargetFramework>net10.0-windows</TargetFramework>', project)
         self.assertNotIn('actions/upload-artifact', workflow)
         self.assertIn('CI does not publish install downloads', readme)
+
+    def test_accessibility_scan_is_pinned_and_runs_in_ci_without_site_runtime_deps(self):
+        package = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))
+        workflow = (ROOT / '.github/workflows/ci.yml').read_text(encoding='utf-8')
+        script = (ROOT / 'scripts/validate-pages-accessibility.mjs').read_text(encoding='utf-8')
+        self.assertEqual(set(package), {'name', 'private', 'scripts', 'devDependencies'})
+        self.assertEqual(package['devDependencies'], {'axe-core': '4.14.0', 'ws': '8.22.2'})
+        self.assertEqual(package['scripts']['check:pages-a11y'], 'node scripts/validate-pages-accessibility.mjs')
+        self.assertIn('pages-accessibility', workflow)
+        self.assertIn('npm ci', workflow)
+        self.assertIn('npm run check:pages-a11y', workflow)
+        for page in ('index.html', 'install.html', 'faq.html'):
+            self.assertIn(f"'{page}'", script)
+        self.assertIn('wcag21aa', script)
+        self.assertIn('horizontal overflow', script)
 
     def test_github_pages_guide_warns_about_public_commit_author_metadata(self):
         guide = (ROOT / 'GITHUB-PAGES.md').read_text(encoding='utf-8')
@@ -187,7 +203,7 @@ class DocumentationSiteTests(unittest.TestCase):
         home = (SITE / 'index.html').read_text(encoding='utf-8')
         footer_brand = css.split('.footer .brand small {', 1)[1].split('}', 1)[0]
         self.assertIn('color:#c0d1c7', footer_brand)
-        self.assertNotIn('aria-label="Family Activity home"', home)
+        self.assertNotIn('aria-label="Ruffster home"', home)
         self.assertNotIn('aria-label="Open the full parent dashboard screenshot"', home)
 
     def test_mac_router_hint_is_disclosed_as_pseudonymous_not_location(self):
@@ -281,6 +297,8 @@ class DocumentationSiteTests(unittest.TestCase):
         windows_status = (root / 'native/windows/Program.cs').read_text(encoding='utf-8')
         faq = (SITE / 'faq.html').read_text(encoding='utf-8')
         self.assertIn('the computer sending something shows two digits, and the receiving computer enters them', faq)
+        self.assertIn('exact repeats of encrypted records are ignored', faq)
+        self.assertIn('their observations would be combined without identifying the source', faq)
         self.assertIn('Enter the two digits shown here on the child\'s setup screen', dashboard)
         self.assertIn('It will show two digits. Enter them here.', dashboard)
         self.assertIn('Show these two digits to your parent', mac_status)
@@ -293,11 +311,21 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('self-contained installer', windows)
         self.assertIn('changes to “Monitoring is paused” when samples are overdue', windows)
         self.assertIn('If the tray helper or its heartbeat channel stops, the agent exits', windows)
-        self.assertIn('FamilyActivityInstaller.exe', windows)
+        self.assertIn('RuffsterSetup.exe', windows)
         self.assertIn('Save an encrypted report file', windows)
         self.assertIn('does not use the local network', windows)
         self.assertIn('copies it into the signed-in user’s Local AppData folder', windows)
         self.assertNotIn("five-minute one-use setup code", windows)
+
+    def test_pages_deployment_is_main_only_and_uploads_docs(self):
+        workflow = (ROOT / '.github/workflows/pages.yml').read_text(encoding='utf-8')
+        self.assertIn("branches: [main]", workflow)
+        self.assertIn("path: docs", workflow)
+        self.assertIn('actions/checkout@v4', workflow)
+        self.assertIn('contents: read', workflow)
+        self.assertIn("uses: actions/deploy-pages@v4", workflow)
+        self.assertIn("uses: actions/upload-pages-artifact@v3", workflow)
+        self.assertNotIn('pull_request:', workflow)
 
     def test_mac_status_state_self_check_runs_during_native_bundle_build(self):
         native_status = (ROOT / 'native/macos/status.swift').read_text(encoding='utf-8')
@@ -381,8 +409,8 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('exec /bin/sleep 60', lifecycle_check)
         self.assertIn('validate-macos-install-flow.py', guide)
         self.assertIn('zero valid identities', status)
-        self.assertIn('<b>255</b><span>Linux development tests passed · 5 PowerShell checks skipped (260 run)</span>', status)
-        self.assertIn('<b>253</b><span>Mac tests passed · 2 Node.js and 5 PowerShell checks skipped (260 run)</span>', status)
+        self.assertIn('<b>269</b><span>Linux development tests passed · PowerShell Core 7.6.6 checks enabled</span>', status)
+        self.assertIn('<b>256</b><span>Mac tests passed · 2 Node.js and 5 PowerShell checks skipped (263 run)</span>', status)
         self.assertIn('Device connection decision', status)
         self.assertIn('cloud rendezvous service', status)
         self.assertIn('process traffic', status)

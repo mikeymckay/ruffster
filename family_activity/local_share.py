@@ -180,7 +180,7 @@ def discover_code(pin, *, timeout=2.0, target=None):
     if not matches:
         raise ValueError(
             'No nearby computer matched that code. Check the digits and Wi-Fi. '
-            'On a Mac, allow Family Activity under System Settings > Privacy & Security > Local Network.')
+            'On a Mac, allow Ruffster under System Settings > Privacy & Security > Local Network.')
     if len(matches) > 1:
         raise ValueError('More than one nearby computer matched. Ask the sender to start a new share and try again.')
     return next(iter(matches.values()))
@@ -195,7 +195,7 @@ def _connection_code(value):
 
 def _certificate():
     key = ec.generate_private_key(ec.SECP256R1())
-    subject = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'Family Activity temporary transfer')])
+    subject = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'Ruffster temporary transfer')])
     now = datetime.now(timezone.utc)
     certificate = (x509.CertificateBuilder().subject_name(subject).issuer_name(subject)
                    .public_key(key.public_key()).serial_number(x509.random_serial_number())

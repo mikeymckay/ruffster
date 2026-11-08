@@ -79,7 +79,7 @@ class DashboardTests(unittest.TestCase):
         html = (assets / 'index.html').read_text()
         script = (assets / 'app.js').read_text()
         self.assertIn('id="child-setup"', html)
-        self.assertIn("On the child's computer, open Family Activity", html)
+        self.assertIn("On the child's computer, open Ruffster", html)
         self.assertIn('Windows setup and dashboard pairing are also experimental', html)
         self.assertIn('child computer', script)
         self.assertIn('operating-system settings the agent can inspect', script)
