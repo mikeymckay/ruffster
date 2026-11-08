@@ -15,10 +15,11 @@ from socketserver import TCPServer
 import tempfile
 import threading
 import time
+from urllib.parse import parse_qs, urlsplit
 import webbrowser
 from zoneinfo import ZoneInfo
 from nacl.public import PrivateKey
-from . import encrypted_store, encrypted_view, key_vault, network_labels, parent_settings, public_key_file, reports, school_schedule, website_categories
+from . import device_labels, encrypted_store, encrypted_view, key_vault, network_labels, parent_settings, public_key_file, reports, school_schedule, website_categories
 from .encrypted_agent_store import EncryptedAgentStore, EXPIRY_VERSION, LEGACY_EXPIRY_VERSION
 from .encrypted_store import CIPHERTEXT_SIZES
 from .limits import MAX_SNAPSHOT_BYTES
@@ -60,6 +61,9 @@ class ParentServer(HTTPServer):
 
     @property
     def labels(self): return self.folder / 'network-labels.sealed'
+
+    @property
+    def device_labels(self): return self.folder / 'computer-labels.sealed'
 
     @property
     def schedule(self): return self.folder / 'school-schedule.sealed'
@@ -192,12 +196,13 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self._valid_host():
             self._json({'error': 'Forbidden'}, 403); return
+        request_path = urlsplit(self.path).path
         assets = {'/': ('index.html', 'text/html; charset=utf-8'),
                   '/app.js': ('app.js', 'text/javascript; charset=utf-8'),
                   '/app.css': ('app.css', 'text/css; charset=utf-8'),
                   '/ruffster-mascot.webp': ('ruffster-mascot.webp', 'image/webp')}
-        if self.path in assets:
-            file, kind = assets[self.path]
+        if request_path in assets and not urlsplit(self.path).query:
+            file, kind = assets[request_path]
             self._headers(content_type=kind); self.wfile.write((ASSETS / file).read_bytes()); return
         if self.path.startswith('/api/') and not self._valid_api_read_context():
             self._json({'error': 'Forbidden'}, 403); return
@@ -232,12 +237,17 @@ class Handler(BaseHTTPRequestHandler):
             except Exception:
                 self._json({'error': 'The school schedule could not be opened.'}, 400)
             return
-        if self.path == '/api/report':
+        if request_path == '/api/report':
             if self.server.private_key is None or not self.server.data.is_file():
                 self._json({'error': 'Unlock the key and import a report first.'}, 403); return
             try:
                 _prune_report_file(self.server.data, self.server.private_key, self.server.retention_days)
-                self._json(_report(self.server.data, self.server.private_key, self.server.labels, self.server.schedule))
+                query = parse_qs(urlsplit(self.path).query, strict_parsing=True, keep_blank_values=True)
+                if set(query) - {'device'} or any(len(values) != 1 for values in query.values()):
+                    raise ValueError('invalid report selection')
+                selected_device = query.get('device', [None])[0]
+                self._json(_report(self.server.data, self.server.private_key, self.server.labels,
+                                   self.server.schedule, self.server.device_labels, selected_device))
             except Exception:
                 self._json({'error': 'The report could not be opened with this key.'}, 400)
             return
@@ -401,6 +411,27 @@ class Handler(BaseHTTPRequestHandler):
                 self._json({'ok': True})
             except Exception:
                 self._json({'error': 'The network label could not be saved.'}, 400)
+            return
+        if self.path == '/api/device-label':
+            if self.server.private_key is None:
+                self._json({'error': 'Unlock the parent key first.'}, 403); return
+            try:
+                body = json.loads(self._body())
+                if not self.server.data.is_file():
+                    raise ValueError('no computer report is available')
+                projection, _ = encrypted_view.open_projection(self.server.data, self.server.private_key)
+                try:
+                    known_devices = {row[0] for row in projection.execute(
+                        'SELECT DISTINCT device_id FROM sessions')}
+                finally:
+                    projection.close()
+                if body.get('device_id') not in known_devices:
+                    raise ValueError('computer is not in this report')
+                device_labels.set_label(self.server.device_labels, self.server.private_key,
+                                        body['device_id'], body['label'])
+                self._json({'ok': True})
+            except Exception:
+                self._json({'error': 'The computer name could not be saved.'}, 400)
             return
         if self.path == '/api/sync':
             if self.server.private_key is None:
@@ -568,10 +599,36 @@ def _prune_report_file(path, private_key, retention_days):
             os.unlink(temp_path)
 
 
-def _report(path, private_key, labels_path, schedule_path):
+def _report(path, private_key, labels_path, schedule_path, device_labels_path=None, selected_device=None):
     db, incomplete = encrypted_view.open_projection(path, private_key)
     try:
         now = datetime.now(timezone.utc)
+        device_rows = db.execute(
+            'SELECT device_id, MAX(heartbeat_at) FROM sessions GROUP BY device_id '
+            'ORDER BY MAX(heartbeat_at) DESC, device_id').fetchall()
+        saved_device_labels = device_labels.load(device_labels_path, private_key) if device_labels_path else {}
+        devices = []
+        for identifier, last_seen in device_rows:
+            default_label = ('Older untagged records' if identifier == 'legacy'
+                             else f'Computer ending {identifier[-4:].upper()}')
+            devices.append({'device_id': identifier,
+                            'label': saved_device_labels.get(identifier, default_label),
+                            'last_seen': last_seen})
+        incomplete_devices = {row[0] for row in db.execute(
+            "SELECT device_id FROM sessions WHERE started_at = 'Start unavailable'")}
+        if selected_device is not None:
+            if not isinstance(selected_device, str) or selected_device not in {row[0] for row in device_rows}:
+                raise ValueError('unknown computer selection')
+            # The projection is memory-only. Remove other devices there so every
+            # report query, including coverage and network context, stays scoped.
+            for table in ('foreground_samples', 'network_intervals', 'website_samples',
+                          'network_settings', 'network_changes', 'gaps',
+                          'process_network_samples', 'process_network_status'):
+                db.execute(f'DELETE FROM {table} WHERE session_id NOT IN '
+                           '(SELECT id FROM sessions WHERE device_id = ?)', (selected_device,))
+            db.execute('DELETE FROM sessions WHERE device_id != ?', (selected_device,))
+            incomplete = selected_device in incomplete_devices
+        db.commit()
         cutoff = (now - timedelta(days=8)).isoformat()
         apps = db.execute("SELECT session_id, sampled_at, app_name, bundle_id FROM foreground_samples WHERE sampled_at >= ? ORDER BY session_id, sampled_at, id", (cutoff,)).fetchall()
         sites = db.execute("SELECT session_id, sampled_at, domain, '' FROM website_samples WHERE sampled_at >= ? ORDER BY session_id, sampled_at, id", (cutoff,)).fetchall()
@@ -635,7 +692,8 @@ def _report(path, private_key, labels_path, schedule_path):
         site_categories = {period: website_categories.aggregate(rows) for period, rows in site_estimates.items()}
         category_contexts = {period: website_categories.aggregate(contexts['sites'][period])
                              for period in ('school', 'home', 'school_network', 'other_network')}
-        result = {'incomplete': incomplete, 'apps': app_estimates, 'sites': site_estimates,
+        result = {'incomplete': incomplete, 'devices': devices,
+                  'selected_device': selected_device, 'apps': app_estimates, 'sites': site_estimates,
                   'website_observations': {'count': website_observations[0],
                                            'latest_at': website_observations[1]},
                   'site_categories': site_categories, 'category_contexts': category_contexts,

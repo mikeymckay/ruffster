@@ -20,7 +20,7 @@ ROOT = Path(__file__).parents[1]
 sys.path.insert(0, str(ROOT))
 
 from family_activity.encrypted_agent_store import EncryptedAgentStore
-from family_activity import key_vault, network_labels, parent_settings, school_schedule
+from family_activity import device_identity, device_labels, key_vault, network_labels, parent_settings, school_schedule
 from family_activity.parent_app import ParentServer
 
 
@@ -108,6 +108,8 @@ def prepare_profile(folder, with_report):
         server.backup_confirmed = True
         parent_settings.save_backup_confirmation(server.settings, True)
         synthetic_report(server.data, parent, datetime.now(UTC))
+        device_labels.set_label(server.device_labels, parent,
+                                device_identity.load_or_create(server.data), 'Sample student MacBook')
         network_labels.set_label(server.labels, parent, SCHOOL_ROUTER, 'school')
         network_labels.set_label(server.labels, parent, HOME_ROUTER, 'home')
         school_schedule.save(server.schedule, parent, {

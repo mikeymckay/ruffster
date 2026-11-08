@@ -84,7 +84,9 @@ class ParentAppTests(unittest.TestCase):
         self.assertIn(b'id="backup-confirm-check"', page)
         self.assertIn(b'id="confirm-backup"', page)
         self.assertIn(b'id="report-transfer" hidden', page)
-        self.assertIn(b'using several would combine their observations without showing which computer produced them', page)
+        self.assertIn(b'add more computers later and review each one separately', page)
+        self.assertIn(b'id="report-device"', page)
+        self.assertIn(b'id="device-label-form"', page)
         self.assertIn(b'New observations are added to the report already saved here.', page)
         self.assertIn(b'exact copies of the same records are ignored', page)
         self.assertIn(b'I already set up parent access', page)
@@ -485,6 +487,53 @@ class ParentAppTests(unittest.TestCase):
         with closing(sqlite3.connect(self.server.data)) as database:
             self.assertEqual({row[0] for row in database.execute(
                 "SELECT name FROM sqlite_master WHERE type='table'")}, {'key_commitment', 'encrypted_events'})
+
+    def test_parent_report_separates_computers_and_saves_encrypted_names(self):
+        from datetime import datetime, timedelta, timezone
+        from family_activity import encrypted_view
+        self.login(); self.create_parent_key('638204')
+        public = decode(self.request('GET', '/api/public')[2])
+        snapshots = []
+        for filename, app in (('child-one.db', 'SyntheticAnnikaApp'),
+                              ('child-two.db', 'SyntheticSiblingApp')):
+            path = Path(self.tmp.name) / filename
+            writer = EncryptedAgentStore(path, public, 30)
+            start = datetime.now(timezone.utc) - timedelta(minutes=2)
+            writer.event('start', at=start.isoformat())
+            writer.event('foreground', at=start.isoformat(), application=[app, 'synthetic'])
+            writer.event('foreground', at=(start + timedelta(seconds=30)).isoformat(),
+                         application=[app, 'synthetic'])
+            writer.event('stop', at=(start + timedelta(seconds=31)).isoformat())
+            device_id = writer.device_id
+            writer.close()
+            snapshots.append((device_id, app, path.read_bytes()))
+        for _, _, snapshot in snapshots:
+            self.assertEqual(self.request('POST', '/api/import', snapshot)[0], 200)
+
+        combined = json.loads(self.request('GET', '/api/report')[2])
+        self.assertEqual(len(combined['devices']), 2)
+        self.assertEqual({device['device_id'] for device in combined['devices']},
+                         {device_id for device_id, _, _ in snapshots})
+        for device_id, own_app, other_snapshot in (
+                (snapshots[0][0], snapshots[0][1], snapshots[1]),
+                (snapshots[1][0], snapshots[1][1], snapshots[0])):
+            status, _, content = self.request('GET', f'/api/report?device={device_id}')
+            self.assertEqual(status, 200)
+            report = json.loads(content)
+            self.assertEqual(report['selected_device'], device_id)
+            self.assertEqual(len(report['sessions']), 1)
+            app_names = {entry[0] for entry in report['apps']['today']}
+            self.assertIn(own_app, app_names)
+            self.assertNotIn(other_snapshot[1], app_names)
+        self.assertEqual(self.request('GET', '/api/report?device=not-a-device')[0], 400)
+
+        device_id = snapshots[0][0]
+        self.assertEqual(self.request('POST', '/api/device-label',
+                                      {'device_id': device_id, 'label': "Annika's MacBook"})[0], 200)
+        named = json.loads(self.request('GET', f'/api/report?device={device_id}')[2])
+        self.assertEqual(next(device['label'] for device in named['devices']
+                              if device['device_id'] == device_id), "Annika's MacBook")
+        self.assertNotIn(b"Annika's MacBook", self.server.device_labels.read_bytes())
 
     def test_import_normalizes_legacy_expiry_before_marking_records_current(self):
         import sqlite3

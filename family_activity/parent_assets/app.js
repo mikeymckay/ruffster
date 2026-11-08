@@ -3,6 +3,8 @@ const $ = id => document.getElementById(id);
 let status;
 let keyShareTimer;
 let backupDownloadedThisSession = false;
+let selectedDeviceId;
+let reportDeviceInitialized = false;
 function show(message) { $('message').textContent = message; }
 async function api(path, options = {}) {
   const response = await fetch(path, {credentials:'same-origin', ...options});
@@ -210,7 +212,28 @@ function list(id, entries, formatter, emptyMessage = 'No observations available.
   for (const entry of entries) { const item=document.createElement('li'); item.textContent=formatter(entry); container.appendChild(item); }
 }
 async function render() {
-  const data = await api('/api/report');
+  let data = await api('/api/report');
+  const deviceIds = (data.devices || []).map(device => device.device_id);
+  if (!reportDeviceInitialized || !deviceIds.includes(selectedDeviceId)) {
+    selectedDeviceId = deviceIds[0] || '';
+    reportDeviceInitialized = true;
+  }
+  if (selectedDeviceId && data.selected_device !== selectedDeviceId) {
+    data = await api(`/api/report?device=${encodeURIComponent(selectedDeviceId)}`);
+  }
+  const picker = $('report-device'); picker.replaceChildren();
+  for (const device of data.devices || []) {
+    const option = document.createElement('option');
+    option.value = device.device_id; option.textContent = device.label;
+    picker.appendChild(option);
+  }
+  picker.value = selectedDeviceId;
+  const selected = (data.devices || []).find(device => device.device_id === selectedDeviceId);
+  $('device-label-form').hidden = !selected;
+  $('device-label').value = selected ? selected.label : '';
+  $('device-last-seen').textContent = selected
+    ? `Most recent recorded session: ${formatUtcTimestamp(selected.last_seen)}. The report updates when you bring back another encrypted snapshot.`
+    : 'No computer sessions were found in this report.';
   list('conversation-prompts', data.conversation_prompts || [], value => value);
   const freshness = data.recorded_through
     ? `Data in this imported snapshot was recorded through ${formatUtcTimestamp(data.recorded_through)}. The snapshot does not update automatically; its age does not tell you why data is missing.`
@@ -312,6 +335,20 @@ async function render() {
   }
   list('gaps', data.gaps, ([start,end]) => `${formatUtcTimestamp(start)} to ${formatUtcTimestamp(end)} — cause unknown`, 'No gaps were recorded in this report. This does not prove monitoring was continuous.');
 }
+$('report-device').addEventListener('change', async () => {
+  selectedDeviceId = $('report-device').value;
+  try { await render(); }
+  catch (error) { show(error.message); }
+});
+$('device-label-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!selectedDeviceId) return;
+  try {
+    await post('/api/device-label', {device_id:selectedDeviceId, label:$('device-label').value});
+    show('Computer name saved encrypted on this device.');
+    await render();
+  } catch (error) { show(error.message); }
+});
 $('schedule-form').addEventListener('submit', async e => {
   e.preventDefault();
   const days = [...document.querySelectorAll('[name=school-day]:checked')].map(box => Number(box.value));
