@@ -319,7 +319,9 @@ class DocumentationSiteTests(unittest.TestCase):
 
     def test_pages_deployment_is_main_only_and_uploads_docs(self):
         workflow = (ROOT / '.github/workflows/pages.yml').read_text(encoding='utf-8')
-        self.assertIn("branches: [main]", workflow)
+        self.assertIn('workflow_run:', workflow)
+        self.assertIn('branches: [main]', workflow)
+        self.assertIn("conclusion == 'success'", workflow)
         self.assertIn("path: docs", workflow)
         self.assertIn('actions/checkout@v4', workflow)
         self.assertIn('contents: read', workflow)

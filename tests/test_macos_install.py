@@ -244,7 +244,7 @@ class MacInstallTests(unittest.TestCase):
 
     def test_mac_install_cli_reports_actionable_error_without_traceback(self):
         missing_key = self.root / 'missing-parent.pub'
-        bootstrap = "import sys; sys.platform='darwin'; from family_activity.__main__ import main; main()"
+        bootstrap = "import sys; from family_activity.__main__ import main; sys.platform='darwin'; main()"
         result = subprocess.run([sys.executable, '-c', bootstrap, 'mac-install',
                                  '--public-key', str(missing_key),
                                  '--source-directory', str(self.source),

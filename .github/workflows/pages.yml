@@ -1,11 +1,10 @@
 name: Deploy Ruffster Pages
 
 on:
-  push:
+  workflow_run:
+    workflows: [Build and test]
+    types: [completed]
     branches: [main]
-    paths:
-      - 'docs/**'
-      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -17,6 +16,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -28,8 +28,19 @@ jobs:
     steps:
       - name: Check out Ruffster
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: Configure Pages
         uses: actions/configure-pages@v5
+      - name: Set up Node.js for the Pages quality check
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install pinned site-check dependencies
+        run: npm ci
+      - name: Check accessibility before publishing
+        run: npm run check:pages-a11y
       - name: Upload the static website
         uses: actions/upload-pages-artifact@v3
         with:

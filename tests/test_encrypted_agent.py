@@ -181,8 +181,8 @@ class EncryptedAgentTests(unittest.TestCase):
             public = folder / 'parent.pub'
             public.write_bytes(bytes(parent.public_key))
             database = folder / 'activity.sqlite3'
-            bootstrap = ("import sys; sys.platform='darwin'; "
-                         "from family_activity.__main__ import main; main()")
+            bootstrap = ("import sys; from family_activity.__main__ import main; "
+                         "sys.platform='darwin'; main()")
             result = subprocess.run(
                 [sys.executable, '-c', bootstrap, 'agent', '--db', str(database),
                  '--experimental-public-key', str(public), '--experimental-process-network'],
@@ -234,11 +234,11 @@ class EncryptedAgentTests(unittest.TestCase):
             helper.write_text('#!/usr/bin/env python3\nfrom pathlib import Path\nimport time\nPath(' + repr(str(marker)) + ').touch()\nprint("READY", flush=True)\ntime.sleep(60)\n')
             helper.chmod(0o700)
             database=Path(tmp)/'activity.sqlite3'
-            bootstrap=("import sys; sys.platform='darwin'; "
-                       "from family_activity import network_settings; "
+            bootstrap=("import sys; from family_activity.__main__ import main; "
+                       "from family_activity import network_settings; sys.platform='darwin'; "
                        "network_settings.observe_macos=lambda: "
                        "{'dns_observed': None, 'proxy_indicator': None, 'vpn_indicator': None}; "
-                       "from family_activity.__main__ import main; main()")
+                       "main()")
             proc=subprocess.Popen([sys.executable,'-c',bootstrap,'agent','--db',str(database),
                                    '--interval','.1','--experimental-public-key',str(public),
                                    '--experimental-network','--experimental-network-settings',
@@ -265,9 +265,10 @@ class EncryptedAgentTests(unittest.TestCase):
             helper.write_text('#!/usr/bin/env python3\nimport time\nprint("READY", flush=True)\ntime.sleep(60)\n')
             helper.chmod(0o700)
             database = folder / 'activity.sqlite3'
-            bootstrap = ("import sys; sys.platform='darwin'; from family_activity import network_identity; "
+            bootstrap = ("import sys; from family_activity.__main__ import main; "
+                         "from family_activity import network_identity; "
                          "network_identity.macos_identifier=lambda key: 'a'*64; "
-                         "from family_activity.__main__ import main; main()")
+                         "sys.platform='darwin'; main()")
             process = subprocess.Popen([sys.executable, '-c', bootstrap, 'agent', '--db', str(database),
                                         '--interval', '.1', '--experimental-public-key', str(public),
                                         '--experimental-network', '--experimental-network-key', str(network_key),
