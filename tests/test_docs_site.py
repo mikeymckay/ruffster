@@ -118,6 +118,11 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertNotIn('actions/upload-artifact', workflow)
         self.assertIn('CI does not publish install downloads', readme)
 
+    def test_test_runner_exposes_stall_diagnostics_in_github_summary(self):
+        runner = (ROOT / 'scripts/run-tests.py').read_text(encoding='utf-8')
+        self.assertIn('GITHUB_STEP_SUMMARY', runner)
+        self.assertIn('dump_traceback_later(300, repeat=True', runner)
+
     def test_accessibility_scan_is_pinned_and_runs_in_ci_without_site_runtime_deps(self):
         package = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))
         workflow = (ROOT / '.github/workflows/ci.yml').read_text(encoding='utf-8')
