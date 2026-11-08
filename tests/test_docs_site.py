@@ -429,10 +429,17 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('exec /bin/sleep 60', lifecycle_check)
         self.assertIn('validate-macos-install-flow.py', guide)
         self.assertIn('zero valid identities', status)
-        self.assertIn('<b>278</b><span>Linux tests run · 273 passed · 5 platform/tool checks skipped', status)
+        self.assertIn('<b>279</b><span>Linux tests run · 274 passed · 5 platform/tool checks skipped', status)
         self.assertIn('Parent reports can merge several computers', status)
         self.assertIn('remove one computer from the current parent copy', status)
         self.assertIn('Device connection decision', status)
         self.assertIn('cloud rendezvous service', status)
         self.assertIn('process traffic', status)
         self.assertIn('Two-digit report pairing over home Wi-Fi', status)
+
+    def test_project_status_page_reports_latest_ci_and_release_gates(self):
+        status = (ROOT / 'PROJECT-STATUS.html').read_text(encoding='utf-8')
+        self.assertIn('two of three platform test jobs are complete', status)
+        self.assertIn('periodic stack traces', status)
+        self.assertIn('Pages accessibility check passed', status)
+        self.assertIn('Pages is not configured at repository level', status)
