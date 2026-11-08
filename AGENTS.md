@@ -15,3 +15,4 @@
 - Parent-facing conversation prompts must be tied to an observed fact or missing observation, describe what the data cannot establish, and avoid classifying a child's behavior or inferring intent.
 - Public README and website copy must distinguish implemented behavior from plans, use synthetic-only screenshots, state preview readiness plainly, and avoid download links until a supported signed release exists.
 - Keep signing identities, notarization credentials, private keys, and keychain exports out of source control, logs, screenshots, and validation artifacts. Signing and notarization claims require a successful native macOS run; a packaging script or CI build alone is not evidence of acceptance.
+- Keep real device names, account names, home-directory paths, public or tailnet addresses, and family-network subnets out of tracked documentation and validation artifacts. Use generic test-device labels and documentation-only network ranges.
