@@ -172,6 +172,24 @@ class EncryptedAgentTests(unittest.TestCase):
                     self.assertIn('finite positive number', result.stderr)
                     self.assertFalse(database.exists())
 
+    def test_process_network_mode_requires_visible_status_helper_before_database_creation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            parent = PrivateKey.generate()
+            public = folder / 'parent.pub'
+            public.write_bytes(bytes(parent.public_key))
+            database = folder / 'activity.sqlite3'
+            bootstrap = ("import sys; sys.platform='darwin'; "
+                         "from family_activity.__main__ import main; main()")
+            result = subprocess.run(
+                [sys.executable, '-c', bootstrap, 'agent', '--db', str(database),
+                 '--experimental-public-key', str(public), '--experimental-process-network'],
+                capture_output=True, text=True, timeout=5)
+            self.assertEqual(result.returncode, 2)
+            self.assertIn('process traffic', result.stderr)
+            self.assertIn('--experimental-status-helper', result.stderr)
+            self.assertFalse(database.exists())
+
     def test_agent_help_states_parent_key_encryption_requirement(self):
         result=subprocess.run([sys.executable,'-m','family_activity','--help'],
                               capture_output=True,text=True,timeout=5)

@@ -445,7 +445,7 @@ def main():
     a.add_argument("--experimental-browser-socket", help="Opt in to domain-only browser observations via a private Unix socket (encrypted mode only).")
     a.add_argument("--experimental-network-key", help="Opt in to a pseudonymous default-router hint with a 32-byte device key; encrypted macOS or Windows mode only.")
     a.add_argument("--experimental-public-key", help="Path to a 32-byte parent public key; use a new database. The private key must stay on the parent device.")
-    a.add_argument("--experimental-status-helper", help="Path to compiled macOS status companion, required for app or network sampling.")
+    a.add_argument("--experimental-status-helper", help="Path to compiled macOS status companion, required for app, process traffic, or network sampling.")
     a.add_argument("--experimental-windows-foreground", action="store_true", help="Opt in to experimental Windows foreground application snapshots.")
     a.add_argument("--experimental-network", action="store_true", help="Opt in to experimental macOS interface counter sampling.")
     a.add_argument("--experimental-foreground-helper", help="Developer-only helper that emits a JSON application identity; disclose sampling to the computer user.")
@@ -569,8 +569,8 @@ def main():
             parser.error("Windows foreground sampling requires Windows")
         if args.experimental_windows_foreground and args.experimental_foreground_helper:
             parser.error("choose only one foreground adapter")
-        if (args.experimental_foreground_helper or args.experimental_network or args.experimental_windows_foreground or args.experimental_browser_socket) and not args.experimental_status_helper:
-            parser.error("app or network sampling requires --experimental-status-helper")
+        if (args.experimental_foreground_helper or args.experimental_network or args.experimental_process_network or args.experimental_windows_foreground or args.experimental_browser_socket) and not args.experimental_status_helper:
+            parser.error("app, process traffic, or network sampling requires --experimental-status-helper")
         if args.experimental_foreground_helper or args.experimental_network or args.experimental_windows_foreground or args.experimental_browser_socket:
             print("Experimental sampling enabled; use only for disclosed testing.", flush=True)
         agent(args.db, args.interval, args.experimental_foreground_helper, args.experimental_status_helper, args.retention_days, args.experimental_network, args.experimental_public_key, args.experimental_windows_foreground, args.experimental_network_key, args.experimental_browser_socket, args.experimental_network_settings, args.experimental_process_network)
