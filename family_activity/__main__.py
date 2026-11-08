@@ -17,6 +17,13 @@ from datetime import datetime, timedelta, timezone
 from . import browser_channel, locking, macos, network, network_identity, network_settings, reports, store, windows
 
 
+def sampling_interval_argument(value):
+    try:
+        return network.validate_sampling_interval(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(str(exc)) from None
+
+
 def start_status(helper, share_database=None, *, retention_days=30, interval=15):
     """Require the status process to initialize before collecting snapshots."""
     if sys.platform == 'win32':
@@ -152,6 +159,7 @@ def status_heartbeat(process):
 
 
 def agent(path, interval, foreground_helper=None, status_helper=None, retention_days=30, monitor_network=False, public_key_path=None, windows_foreground=False, network_key_path=None, browser_socket=None, inspect_network_settings=False):
+    interval = network.validate_sampling_interval(interval)
     if not public_key_path:
         raise SystemExit("A parent public key is required; plaintext activity collection is disabled.")
     lock_path = os.path.abspath(os.path.expanduser(path)) + ".lock"
@@ -406,7 +414,7 @@ def main():
     parent.add_argument("--stop-file", help="Stop the local parent server when this file appears")
     a = sub.add_parser("agent", help="Run disclosed monitoring with mandatory parent-key encryption")
     a.add_argument("--db", default="activity.sqlite3")
-    a.add_argument("--interval", type=float, default=15)
+    a.add_argument("--interval", type=sampling_interval_argument, default=15)
     a.add_argument("--retention-days", type=int, default=30, help="Delete records older than this many days (default: 30).")
     a.add_argument("--experimental-network-settings", action="store_true", help="Observe minimized DNS and proxy indicators on macOS or Windows; VPN detection is incomplete.")
     a.add_argument("--experimental-browser-socket", help="Opt in to domain-only browser observations via a private Unix socket (encrypted mode only).")

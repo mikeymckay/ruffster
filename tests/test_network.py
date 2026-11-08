@@ -2,10 +2,16 @@ import tempfile
 import unittest
 from pathlib import Path
 from datetime import datetime, timezone
+from family_activity import network, store
 from family_activity.network import NetworkSampler, coverage_gap, sampling_gap_limit
-from family_activity import store
 
 class NetworkTests(unittest.TestCase):
+    def test_sampling_interval_must_be_finite_and_positive(self):
+        for value in (0, -1, float('nan'), float('inf'), float('-inf'), 'not-a-number'):
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'finite positive'):
+                network.validate_sampling_interval(value)
+        self.assertEqual(network.validate_sampling_interval('0.5'), 0.5)
+
     def test_coverage_gap_detects_suspend_and_ignores_short_or_backwards_intervals(self):
         start = '2026-11-07T10:00:00+00:00'
         short = '2026-11-07T10:00:20+00:00'

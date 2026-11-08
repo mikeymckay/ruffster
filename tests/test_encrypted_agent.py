@@ -110,6 +110,23 @@ class EncryptedAgentTests(unittest.TestCase):
             self.assertIn('plaintext activity collection is disabled',result.stderr)
             self.assertFalse(path.exists())
 
+    def test_agent_rejects_invalid_intervals_before_creating_activity_database(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            parent = PrivateKey.generate()
+            public = folder / 'parent.pub'
+            public.write_bytes(bytes(parent.public_key))
+            for value in ('0', '-0.1', 'nan', 'inf', '-inf'):
+                with self.subTest(interval=value):
+                    database = folder / f'{value.replace("-", "negative-")}.sqlite3'
+                    result = subprocess.run(
+                        [sys.executable, '-m', 'family_activity', 'agent', '--db', str(database),
+                         f'--interval={value}', '--experimental-public-key', str(public)],
+                        capture_output=True, text=True, timeout=5)
+                    self.assertEqual(result.returncode, 2)
+                    self.assertIn('finite positive number', result.stderr)
+                    self.assertFalse(database.exists())
+
     def test_agent_help_states_parent_key_encryption_requirement(self):
         result=subprocess.run([sys.executable,'-m','family_activity','--help'],
                               capture_output=True,text=True,timeout=5)

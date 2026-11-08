@@ -1,12 +1,23 @@
 """Compute bounded per-interface counter intervals, without summing interfaces."""
 from datetime import datetime
+import math
 from .macos import traffic_delta
+
+
+def validate_sampling_interval(interval):
+    """Return a finite positive sample interval or reject unsafe loop timing."""
+    try:
+        interval = float(interval)
+    except (TypeError, ValueError, OverflowError):
+        raise ValueError('sampling interval must be a finite positive number') from None
+    if not math.isfinite(interval) or interval <= 0:
+        raise ValueError('sampling interval must be a finite positive number')
+    return interval
 
 
 def sampling_gap_limit(interval):
     """Longest interval considered continuous for sample-based observations."""
-    if interval <= 0:
-        raise ValueError('sampling interval must be positive')
+    interval = validate_sampling_interval(interval)
     return max(interval * 2, interval + 5)
 
 

@@ -727,3 +727,8 @@ Initialized a local `main` branch because the project checkout previously had no
 ## 2026-11-08 — Simplify and fit the optional browser popup
 
 Rewrote the child's browser popup copy to remove the implementation term “temporary reset flag,” state the domain-only example and privacy exclusions directly, explain browser-switch/pause gaps, and make the saved pause/gap state optional detail. The initial connected and paused views each render at 340×598px in a 340×600px Chrome viewport without horizontal overflow. axe-core found zero WCAG 2.1 A/AA or best-practice violations in both mocked states and with the saved-data detail expanded. The expanded document is 722px tall in the 600px viewport, scrolls vertically without horizontal overflow, and was visually reviewed. All seven browser-channel tests passed, followed by the complete Linux suite (222 tests, no skips). Chrome and native-messaging APIs were mocked; this did not install or run the extension or validate the Mac/Windows bridge.
+
+
+## 2026-11-08 — Reject invalid sampling intervals
+
+The agent now validates its sampling interval both when parsing the CLI option and at the agent function boundary. Zero, negative, NaN, infinity, and malformed values fail with an actionable “finite positive number” error before acquiring the agent lock, starting the status helper, or creating the activity database. Added unit checks for the validator and subprocess tests proving each invalid CLI value exits with an error and leaves no database. Focused network and agent tests passed; the complete Linux suite passed 224 tests with no skips. PowerShell Core 7.6.6 was present for the Windows script parsing and mocked route-selection checks included in that suite.
