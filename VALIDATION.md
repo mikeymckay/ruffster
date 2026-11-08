@@ -778,3 +778,8 @@ Sampling intervals are now limited to finite values from greater than zero throu
 ## 2026-11-08 — Simplify browser add-on FAQ
 
 Rewrote the answer to lead with the parent-facing basics: no add-on is required, it runs on the child's computer, it can be switched off or bypassed, and missing website details cannot explain why. It also states that website domains are only extra context and that the add-on is not part of the supported setup. Updated the documentation regression checks; all 24 documentation-site tests pass. No screenshots or product behavior changed.
+
+
+## 2026-11-08 — Explain optional browser add-on consistently
+
+Updated the README, project home page, and family installation guide to say the main app works without a browser add-on, parents do not install one, and the optional experiment runs on the child's computer in selected browsers. The copy notes that it can be bypassed and missing website names cannot explain why. Added regression assertions for all three pages. All 24 documentation-site tests pass and `git diff --check` is clean. No screenshot or application behavior changed.
