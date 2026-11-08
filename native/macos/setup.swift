@@ -438,7 +438,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         disclosureText.isVerticallyResizable = true
         disclosureText.isHorizontallyResizable = false
         disclosureText.textContainer?.widthTracksTextView = true
-        disclosureText.textContainer?.containerSize = NSSize(width: 430, height: .greatestFiniteMagnitude)
+        disclosureText.textContainer?.containerSize = NSSize(width: 430, height: CGFloat.greatestFiniteMagnitude)
         disclosureText.textContainerInset = NSSize(width: 6, height: 6)
         disclosureText.string = """
         While this account is signed in, Family Activity samples foreground app names, network-interface traffic totals, a pseudonymous hint when the default router changes, and basic DNS, proxy, and VPN settings. Network bytes are not attributed to apps or websites. The router hint is not a location, and the raw router address is not saved.

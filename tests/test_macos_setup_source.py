@@ -31,6 +31,10 @@ class MacSetupSourceTests(unittest.TestCase):
         self.assertIn('Choose the maximum time to keep detailed records', source)
         self.assertIn('calendar-day rounding may remove them up to a day before that limit', source)
 
+    def test_scrollable_disclosure_uses_explicit_cgfloat_height(self):
+        source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')
+        self.assertIn('NSSize(width: 430, height: CGFloat.greatestFiniteMagnitude)', source)
+
     def test_mac_install_requires_child_acknowledgment_after_scrollable_disclosure(self):
         source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')
         start = source.index('private func reviewAndInstall')

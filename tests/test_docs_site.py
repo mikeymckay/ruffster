@@ -350,5 +350,5 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('exec /bin/sleep 60', lifecycle_check)
         self.assertIn('validate-macos-install-flow.py', guide)
         self.assertIn('zero valid identities', status)
-        self.assertIn('<b>234</b><span>Linux development tests passing · no skips</span>', status)
-        self.assertIn('<b>228</b><span>Mac tests passed · 2 Node.js and 4 PowerShell checks skipped (234 run)</span>', status)
+        self.assertIn('<b>235</b><span>Linux development tests passing · no skips</span>', status)
+        self.assertIn('<b>229</b><span>Mac tests passed · 2 Node.js and 4 PowerShell checks skipped (235 run)</span>', status)
