@@ -322,6 +322,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('workflow_run:', workflow)
         self.assertIn('branches: [main]', workflow)
         self.assertIn("conclusion == 'success'", workflow)
+        self.assertIn("github.ref == 'refs/heads/main'", workflow)
         self.assertIn("path: docs", workflow)
         self.assertIn('actions/checkout@v4', workflow)
         self.assertIn('contents: read', workflow)
