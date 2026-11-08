@@ -877,3 +877,8 @@ Ran `scripts/validate-macos-agent-runtime.py` on the test Mac’s macOS 26.6 / A
 ## 2026-11-08 — Check live macOS interface counters
 
 Ran the current `family_activity.macos.network_counters()` adapter on the test Mac’s Mac against `/usr/sbin/netstat -ibn`. It parsed 25 link-layer interfaces, then a synthetic HTTPS request to `example.com` was followed by increased interface counters. The validation printed only the count of parsed interfaces and whether counters increased; it did not retain addresses, cumulative totals, or a report. This checks adapter output and direction of change on the current macOS build; it does not attribute bytes to the request, prove all interfaces are independent, or validate counter behavior across sleep, interface changes, or VPN tunnels.
+
+
+## 2026-11-08 — Verify encrypted interface sampling end to end
+
+Ran the frozen macOS agent directly (no LaunchAgent installation) with interface sampling enabled, the native visible status helper, a temporary parent public key, and a short burst of synthetic HTTPS requests. After clean shutdown, decrypted the temporary SQLite database with the corresponding private key on the development host. The parent projection reconstructed interface intervals for two interfaces; the stored database had no plaintext `example.com` string. The temporary database, public key, and private key were removed after inspection. No agent or persistent service remained active. Interface counters include all system traffic while sampling and can overlap, so the test verifies encrypted recording and projection only; it does not assign the recorded bytes to the synthetic requests, a specific app, or a website.
