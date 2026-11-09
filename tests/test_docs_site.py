@@ -579,7 +579,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('zero Axe violations and no horizontal overflow', status)
         self.assertIn('<h2>Current automated test results</h2>', status)
         self.assertIn('306 tests ran on the Linux development host: 301 passed and five platform/tool checks were skipped', status)
-        self.assertIn('42653085751', status)
+        self.assertIn('42660055923', status)
         self.assertIn('42660052908', status)
         self.assertIn('GitHub Pages deploys this guide after the desktop and phone accessibility scan passes', status)
         self.assertIn('first-run parent dashboard, PIN-change form, and populated parent reports with and without website details', status)
