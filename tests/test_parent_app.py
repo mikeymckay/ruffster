@@ -505,7 +505,7 @@ class ParentAppTests(unittest.TestCase):
         })[0], 200)
         public = decode(self.request('GET', '/api/public')[2])
         snapshots = []
-        for filename, app in (('child-one.db', 'SyntheticAnnikaApp'),
+        for filename, app in (('child-one.db', 'SyntheticChildApp'),
                               ('child-two.db', 'SyntheticSiblingApp')):
             path = Path(self.tmp.name) / filename
             writer = EncryptedAgentStore(path, public, 30)
@@ -540,11 +540,11 @@ class ParentAppTests(unittest.TestCase):
 
         device_id = snapshots[0][0]
         self.assertEqual(self.request('POST', '/api/device-label',
-                                      {'device_id': device_id, 'label': "Annika's MacBook"})[0], 200)
+                                      {'device_id': device_id, 'label': "Child's MacBook"})[0], 200)
         named = json.loads(self.request('GET', f'/api/report?device={device_id}')[2])
         self.assertEqual(next(device['label'] for device in named['devices']
-                              if device['device_id'] == device_id), "Annika's MacBook")
-        self.assertNotIn(b"Annika's MacBook", self.server.data.read_bytes())
+                              if device['device_id'] == device_id), "Child's MacBook")
+        self.assertNotIn(b"Child's MacBook", self.server.data.read_bytes())
         previously_exported = self.request('GET', '/api/report-backup')[2]
 
         before_invalid_delete = self.server.data.read_bytes()
@@ -567,7 +567,7 @@ class ParentAppTests(unittest.TestCase):
                 'SELECT DISTINCT device_id FROM sessions')},
                 {snapshots[0][0], snapshots[1][0]})
             self.assertEqual(old_backup.execute('SELECT label FROM device_labels WHERE device_id=?',
-                                                (device_id,)).fetchone(), ("Annika's MacBook",))
+                                                (device_id,)).fetchone(), ("Child's MacBook",))
         finally:
             old_backup.close()
         self.assertTrue((Path(self.tmp.name) / 'child-one.db').exists())

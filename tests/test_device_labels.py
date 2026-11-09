@@ -23,7 +23,7 @@ class DeviceLabelTests(unittest.TestCase):
             writer.event('stop')
             writer.close()
 
-            device_labels.set_label(path, key, identifier, "Annika's Mac")
+            device_labels.set_label(path, key, identifier, "Child's Mac")
             # The child has the parent's public key and can seal events, but
             # it cannot create an authenticated parent rename.
             forged = encrypted_store.seal_event(key.public_key, {
@@ -45,7 +45,7 @@ class DeviceLabelTests(unittest.TestCase):
                 database.execute('INSERT INTO encrypted_events(expires_on,ciphertext) VALUES (?,?)',
                                  (expiry, tampered))
             stored = path.read_bytes()
-            self.assertNotIn(b"Annika's Mac", stored)
+            self.assertNotIn(b"Child's Mac", stored)
             with closing(sqlite3.connect(path)) as database:
                 self.assertEqual({row[0] for row in database.execute(
                     "SELECT name FROM sqlite_master WHERE type='table'")},
@@ -55,7 +55,7 @@ class DeviceLabelTests(unittest.TestCase):
                 self.assertFalse(incomplete)
                 self.assertEqual(projected.execute(
                     'SELECT device_id, label FROM device_labels').fetchall(),
-                    [(identifier, "Annika's Mac")])
+                    [(identifier, "Child's Mac")])
             finally:
                 projected.close()
 
@@ -64,7 +64,7 @@ class DeviceLabelTests(unittest.TestCase):
             try:
                 self.assertEqual(restored.execute(
                     'SELECT device_id, label FROM device_labels').fetchall(),
-                    [(identifier, "Annika's Mac")])
+                    [(identifier, "Child's Mac")])
             finally:
                 restored.close()
             with self.assertRaises(Exception):
