@@ -372,12 +372,18 @@ async function main() {
           if (!ready) throw new Error('The parent setup screen did not reach its initial state.');
         }
         if (target.name === 'parent dashboard change parent PIN') {
-          const ready = await evaluate(send, `(() => {
-            const details = document.querySelector('#change-pin');
-            if (!details || details.hidden) return false;
-            details.open = true;
-            return true;
-          })()`);
+          const deadline = Date.now() + 5000;
+          let ready = false;
+          while (Date.now() < deadline) {
+            ready = await evaluate(send, `(() => {
+              const details = document.querySelector('#change-pin');
+              if (!details || details.hidden) return false;
+              details.open = true;
+              return details.open;
+            })()`);
+            if (ready) break;
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
           if (!ready) throw new Error('The unlocked parent PIN change screen did not render.');
         }
         if (target.name === 'parent dashboard report') {
