@@ -1,5 +1,9 @@
 # Real-machine validation
 
+## 2026-11-09: Publish Mac 0.1.22 with simpler setup prompts
+
+Version 0.1.22 includes the friendlier two-digit setup retry in the Mac setup screen and parent dashboard. The tagged Mac release workflow `42646563485` passed and published the Apple-silicon DMG. Downloaded 17,657,163 bytes and verified its SHA-256 against the release sidecar (`3e7d1c32d309c3f39a03c4aee56cefcedb3b03b9d72c7945c3e493e39410d4f0`). Main CI `42646563405` passed Linux, macOS, Windows test groups, and package builds. The full local suite ran 305 tests: 300 passed and five platform/tool checks were skipped. The public getting-started and progress pages are being updated to this release. The last confirmed version on the family Mac is 0.1.20; SSH timed out during this work, so 0.1.22 is not confirmed installed, and no child setup, monitoring, or family activity is verified.
+
 ## 2026-11-09: Simplify family setup and pairing prompts
 
 Reorganized the getting-started guide into three steps: parent access, child-account setup, and report sharing. It now explains that the monitor is installed for the signed-in account and that an SSH admin session does not configure the child's account. Mac setup and the parent dashboard now explain in plain language how to show another two-digit pair when time runs out; they no longer describe the digits as an expired or already-used code. The full local suite ran 305 tests: 300 passed and five platform/tool checks were skipped. All 16 desktop/mobile accessibility scans had zero Axe violations. Main CI `42641360222` passed Linux, macOS, Windows test groups, and package builds. Pages deployment `42641360119` passed, and the public guide was checked live. This change was validated with local and synthetic data only. SSH to the family Mac timed out, so no installation, child-account setup, monitoring, or family activity is verified.

@@ -13,7 +13,7 @@ macOS asks for a first-open confirmation because Ruffster is not signed with an 
 
 ## Publish a Mac family release
 
-The `Publish Mac family app` workflow runs on GitHub's Apple-silicon macOS runner when a `mac-family-*` tag is pushed. It runs the test suite, builds and smoke-checks the app, validates its bundle seal, and publishes a `.dmg` with the exact source commit and checksum. It needs no Apple signing credentials or secrets. Review the commit and successful workflow first; then create and push a version tag such as `mac-family-0.1.21`.
+The `Publish Mac family app` workflow runs on GitHub's Apple-silicon macOS runner when a `mac-family-*` tag is pushed. It runs the test suite, builds and smoke-checks the app, validates its bundle seal, and publishes a `.dmg` with the exact source commit and checksum. It needs no Apple signing credentials or secrets. Review the commit and successful workflow first; then create and push a version tag such as `mac-family-0.1.22`.
 
 Older `mac-preview-*` tags remain prereleases. New family downloads should use `mac-family-*` releases.
 
