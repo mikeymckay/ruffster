@@ -80,6 +80,7 @@ The setup explains what Ruffster records before monitoring begins. Read it
 together and choose the options that fit your family.
 EOF
 hdiutil create -volname "Ruffster" -srcfolder "$DMG_ROOT" -ov -format UDZO "$DMG" >/dev/null
+hdiutil verify "$DMG" >/dev/null
 (cd "$OUTPUT" && shasum -a 256 "$(basename "$DMG")" > "$(basename "$DMG").sha256")
 echo "Ruffster Mac family app created: $DMG"
 echo "SHA-256: $OUTPUT/$(basename "$DMG").sha256"
