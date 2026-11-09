@@ -198,7 +198,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('Open parent dashboard', guide)
         self.assertIn('Set up this Mac together', guide)
         self.assertIn('background monitoring, a visible menu-bar status', guide)
-        self.assertIn('https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.4', guide)
+        self.assertIn('https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.5', guide)
         self.assertIn('VoiceOver', guide)
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
         self.assertIn('explicit screen-reader labels and help', readme)

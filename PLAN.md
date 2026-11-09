@@ -16,9 +16,9 @@ Ruffster helps parents and children understand computer use together, especially
 
 The Apple-silicon app includes a native welcome/setup screen, visible menu-bar status, foreground-app sampling, network counters and settings, launchd restart, encrypted collection, parent dashboard, report sharing, retention, recovery, update restart, and removal.
 
-**Evidence:** on macOS 26.6, 277 of 285 current-source tests passed and 8 host-specific checks were skipped. Real LaunchAgent setup, crash restart, update restart, removal, encrypted synthetic sampling, and gap recording passed. The 0.1.4 disk image and checksum were verified.
+**Evidence:** on macOS 26.6, 278 of 286 current-source tests passed and 8 host-specific checks were skipped. Real LaunchAgent setup, crash restart, update restart, removal, encrypted synthetic sampling, and gap recording passed. Mac 0.1.5 built on the family Mac; its setup layout and frozen dashboard checks passed. The published disk image checksum and `hdiutil verify` passed, and the bundle reports version 0.1.5.
 
-**Next:** build and publish the current Mac app; walk through setup and report return together on family Macs; review sleep/wake, local-network prompts, VoiceOver, recovery, update, and removal.
+**Next:** walk through setup and report return together on family Macs; review sleep/wake, local-network prompts, VoiceOver, recovery, update, and removal.
 
 ### 2. Windows family app — implementation and automated checks in place
 
