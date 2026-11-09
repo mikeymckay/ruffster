@@ -2,7 +2,7 @@
 
 ## 2026-11-09: Clarify the unsigned Mac family release path
 
-Reworked `MACOS-DISTRIBUTION.md` so the first task is the real per-account family install and current unsigned GitHub release. The release steps explicitly require no Developer ID or signing secrets, describe Apple's per-app first-open approval, and keep family usability checks separate from automated package checks. Moved signing and notarization to an optional future note. Updated contributor conventions and the documentation test so they preserve this policy instead of requiring an unused Developer ID build path. The focused docs and Mac setup suites passed (47 tests); `git diff --check` passed. No app release was rebuilt, and no family Mac was available for interactive installation.
+Reworked `MACOS-DISTRIBUTION.md` so the first task is the real per-account family install and current unsigned GitHub release. The release steps explicitly require no Developer ID or signing secrets, describe Apple's per-app first-open approval, and keep family usability checks separate from automated package checks. Moved signing and notarization to an optional future note. Updated contributor conventions and documentation tests to preserve this policy instead of requiring an unused Developer ID build path. Focused docs and Mac setup/install checks pass (68 tests), and `git diff --check` passes. Initial hosted CI caught a stale expected phrase in the synthetic-agent instructions; restored the wording and included the validator's cleanup detail. No app release was rebuilt, and no family Mac was available for interactive installation.
 
 ## 2026-11-09: Hide empty optional website report sections
 

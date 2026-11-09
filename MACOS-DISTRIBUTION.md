@@ -44,7 +44,7 @@ To test the encrypted agent and visible menu-bar companion with fictional activi
 .venv/bin/python scripts/validate-macos-agent-runtime.py
 ```
 
-This uses a synthetic foreground helper, disables network sampling, briefly suspends a test process to check gap recording, then checks launchd restart and removal. It does not inspect real foreground apps or collect network, DNS, proxy, or browser observations. It may display a temporary Ruffster status item. The check is developer validation, not a family setup or sleep/wake review. If cleanup reports an unremoved validation job, remove that named job before deleting its preserved temporary directory.
+This uses a synthetic foreground helper with network collection disabled, briefly suspends a test process to check gap recording, then checks launchd restart and removal. It does not inspect real foreground apps or collect network, DNS, proxy, or browser observations. It may display a temporary Ruffster status item. The check is developer validation, not a family setup or sleep/wake review. If cleanup cannot remove a test LaunchAgent, the validator preserves the synthetic fixture directory and prints its path; remove that named job before deleting the directory.
 
 Ruffster does not yet update itself. After replacing the app in the same location, open it and choose **More options → Restart after app update**; confirm that the menu-bar status returns to on. If you moved Ruffster, remove its existing setup and set it up again from the new location. The restart has been checked with synthetic activity; family upgrade and rollback still need hands-on review.
 
