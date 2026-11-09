@@ -1,23 +1,23 @@
-# Mac app distribution
+# Ruffster for Mac: install and release
 
-Ruffster currently ships as an unsigned Apple-silicon Mac family app. GitHub Actions builds it from the tagged source, checks the Mac test suite and packaged dashboard, and publishes a drag-to-Applications disk image with its source commit and checksum. The app appears as **Ruffster** in Applications and includes the golden retriever icon.
+Ruffster is distributed as an unsigned Apple-silicon Mac app. Families can install it without an Apple Developer account. GitHub Actions builds the app from a reviewed source commit, checks its bundled files, and publishes a drag-to-Applications disk image with the source commit and SHA-256 checksum.
 
-## Opening Ruffster on Mac
+## Install Ruffster
 
-Because this project does not yet have an Apple Developer ID, macOS asks you to confirm the first time Ruffster opens. The app bundle has a local ad-hoc signature so macOS can verify its bundled files are consistent; this is not an Apple publisher signature and does not replace Gatekeeper approval. If macOS cannot verify Ruffster, choose Done, then open System Settings > Privacy & Security > Open Anyway for Ruffster, and open Ruffster again. This adds an exception for Ruffster only; the Mac's general app protections stay on. If macOS says the app will damage the computer or is damaged, stop and contact the project. See [Apple's current instructions](https://support.apple.com/en-us/102445). The release notes include the source commit and checksum so families can see which build they downloaded. A checksum checks that the file arrived unchanged; it is not a publisher signature.
+1. Download the current Mac disk image from the [Ruffster releases](https://github.com/mikeymckay/ruffster/releases).
+2. Open the `.dmg` and drag **Ruffster** to **Applications**.
+3. Open Ruffster. If macOS says it cannot verify the developer, choose **Done**, then go to **System Settings → Privacy & Security → Open Anyway** for Ruffster. Open it again and choose **Open**. This approves Ruffster only and leaves the Mac's general app protections on. Follow [Apple's current instructions](https://support.apple.com/en-us/102445). If macOS says the app will damage the computer, don't open it; contact the project.
+4. Open Ruffster while signed in to the account that should use it. On the parent's Mac, choose **Open parent dashboard**. On a child's Mac, sign in to the child's account and choose **Set up this Mac together…**. The app may stay in the shared Applications folder; background monitoring and its local report are set up only for the signed-in account.
 
-## How the family app is published
+macOS asks for a first-open confirmation because Ruffster is not signed with an Apple Developer ID. The app bundle has an ad-hoc signature so macOS can check that its files are intact; that is not an Apple publisher signature. The release page provides the source commit and a SHA-256 checksum to check that the download arrived unchanged. Neither one identifies the publisher. Keep macOS protections enabled and review the source and release before installing.
 
-The release workflow runs on the standard `macos-latest` Apple-silicon GitHub Actions runner when a `mac-family-*` or legacy `mac-preview-*` tag is pushed. It runs the Mac test suite, builds and smoke-checks the app, and makes a drag-to-Applications disk image. A `mac-family-*` tag publishes a regular family release; the older `mac-preview-*` path remains a prerelease. Both include:
+## Publish a Mac family release
 
-- a note inside the disk image that explains the unsigned first-open step and invites families to review setup together;
-- the exact source commit in the release workflow and inside the disk image;
-- a SHA-256 checksum sidecar (integrity check only, not a digital signature);
-- release notes linking Apple's current Gatekeeper guidance.
+The `Publish Mac family app` workflow runs on GitHub's Apple-silicon macOS runner when a `mac-family-*` tag is pushed. It runs the test suite, builds and smoke-checks the app, validates its bundle seal, and publishes a `.dmg` with the exact source commit and checksum. It needs no Apple signing credentials or secrets. Review the commit and successful workflow first; then create and push a version tag such as `mac-family-0.1.21`.
 
-The workflow needs no signing secret. To publish a family release, review the changes, run the Mac workflow, then tag the reviewed commit with a version such as `mac-family-0.1.9` and push that tag. Use `mac-preview-*` only for development prereleases.
+Older `mac-preview-*` tags remain prereleases. New family downloads should use `mac-family-*` releases.
 
-For a local package on the real Mac, install build dependencies, then run:
+To create the same unsigned package locally on an Apple-silicon Mac with the project's build dependencies installed:
 
 ```sh
 scripts/package-macos-unsigned-preview.sh \
@@ -26,64 +26,28 @@ scripts/package-macos-unsigned-preview.sh \
   "$(git rev-parse HEAD)"
 ```
 
-This creates a `.dmg` and adjacent `.sha256` file. It never installs the monitoring agent. The packaged note explains Apple's per-app Open Anyway step; it does not change your Mac's built-in security settings.
+This writes a `.dmg` and adjacent `.sha256` file. It packages the app only; it does not install or start monitoring.
 
-## Prerequisites
+## Validate startup and updates
 
-- Build on a supported Mac with Xcode command-line tools, Python, PyInstaller, and the app's Python dependencies.
-- Install a valid **Developer ID Application** signing identity in the build account's keychain. The script refuses missing or non-Developer-ID identities.
-- Create a `notarytool` keychain profile using Apple Developer credentials. The profile name is not a password; Apple credentials and API keys stay in Keychain and must not be placed in project files or logs.
-- Select a bundle identifier controlled by the distributing developer and a release candidate version.
-
-Apple requires a Developer ID signature, hardened runtime, and a secure timestamp for notarized software. Apple's `notarytool` submits the app and disk image, and `stapler` attaches the resulting tickets. See [Apple's notarization requirements](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution), [custom notarization workflow](https://developer.apple.com/documentation/security/customizing-the-notarization-workflow), and [Developer ID overview](https://developer.apple.com/developer-id/).
-
-## Build a private candidate
-
-After the notary profile and signing identity are installed, set the candidate metadata in the current shell:
+On a logged-in Mac, run the disposable launchd lifecycle check:
 
 ```sh
-export FAMILY_ACTIVITY_SIGNING_IDENTITY='Developer ID Application: Your Name (TEAMID)'
-export FAMILY_ACTIVITY_NOTARY_PROFILE='family-activity-notary'
-export FAMILY_ACTIVITY_BUNDLE_ID='org.yourdomain.familyactivity.preview'
-export FAMILY_ACTIVITY_VERSION='0.1.0'
+.venv/bin/python scripts/validate-macos-install-flow.py
 ```
 
-Then package the app:
+It installs a uniquely named temporary LaunchAgent that runs only a sleeping shell script, checks launchd restart after termination, and removes the job. It does not collect activity. GitHub's native Mac package job runs this check.
+
+To test the encrypted agent and visible menu-bar companion with fictional activity, use a logged-in Mac session:
 
 ```sh
-scripts/package-macos-candidate.sh \
-  "$(pwd)/.venv/bin/python" \
-  "$(pwd)/dist"
+.venv/bin/python scripts/validate-macos-agent-runtime.py
 ```
 
-The output file is a notarized `.dmg` for the architecture of the build Mac. Open it, drag the app into Applications, eject the disk image, then open the copied app. The setup introduces the app, explains what it records, and offers separate actions to open the parent dashboard or set up this Mac for a child.
+This uses a synthetic foreground helper, disables network sampling, briefly suspends a test process to check gap recording, then checks launchd restart and removal. It does not inspect real foreground apps or collect network, DNS, proxy, or browser observations. It may display a temporary Ruffster status item. The check is developer validation, not a family setup or sleep/wake review. If cleanup reports an unremoved validation job, remove that named job before deleting its preserved temporary directory.
 
-## Current validation state
+Ruffster does not yet update itself. After replacing the app in the same location, open it and choose **More options → Restart after app update**; confirm that the menu-bar status returns to on. If you moved Ruffster, remove its existing setup and set it up again from the new location. The restart has been checked with synthetic activity; family upgrade and rollback still need hands-on review.
 
-The Mac build machine currently has no valid code-signing identities. The script's signing, notarization, Gatekeeper, first-launch, and signed-package replacement paths therefore remain unvalidated. Only its source checks and missing-identity failure path can be exercised until a Developer ID identity and notary profile are available. A successful notarization is not a substitute for the app's separate family-release gates.
+## Future signing
 
-## Restart monitoring after a same-location app replacement
-
-The preview has no automatic updater. After replacing the app in the same location, open it and choose **More options → Restart after app update**. Confirm the restart, then verify the visible menu-bar status returns to on. This restarts only the existing LaunchAgent, preserving its parent connection, collection choices, retention setting, and encrypted report. If the app moved to another location, this action refuses to restart it; remove the agent and set it up again from the new location. The restart path was validated with the real Mac LaunchAgent and synthetic activity, but replacement of a signed, notarized app and rollback to an earlier release remain unverified.
-
-## Exercise install and removal without collecting activity
-
-On a logged-in Mac with the project installed in a Python environment, run:
-
-```sh
-python scripts/validate-macos-install-flow.py
-```
-
-This creates a temporary home directory, test key, and uniquely named LaunchAgent. The job runs only a shell wrapper that sleeps; it does not invoke the Ruffster collector or its native helpers. The script checks that the real installer registers and starts the job, that launchd restarts it after `SIGKILL`, and that uninstall stops it while retaining its local setup files by default. Temporary files are removed when the script finishes. The native macOS GitHub Actions package job now runs this disposable lifecycle check when CI is triggered. This is lifecycle validation, not a child-activity collection test or a physical sleep/wake test.
-
-## Validate the encrypted agent through the real installer
-
-On a logged-in Mac with the project dependencies installed, run:
-
-```sh
-python scripts/validate-macos-agent-runtime.py
-```
-
-This compiles the status companion, runs the agent with a synthetic foreground helper, and records encrypted samples without reading the real foreground app or collecting network, DNS, proxy, or browser observations. It suspends the direct test process briefly to check gap recording, then uses the real installer to create a uniquely named temporary LaunchAgent with network collection disabled, kills that agent to verify launchd restart, and uninstalls it while checking that the encrypted report is retained by default. The helper can display a temporary Ruffster menu-bar item in the signed-in Mac session. The test removes its synthetic data and temporary home when cleanup succeeds.
-
-If launchd refuses to boot out the temporary job, the validator preserves the synthetic fixture directory and prints its path. Boot out the `org.familyactivity.validation.<id>` job before deleting that directory. This is developer validation of installer-to-agent wiring, not an interactive setup review, real activity test, physical sleep/wake test, or family release check.
+The current release path intentionally works without an Apple Developer ID. If the project later obtains one, signing and notarization can be evaluated as an additional convenience for families. That can remove the manual first-open approval, but it is not needed to build or publish the current unsigned release and does not replace the family's choice to review Ruffster and its collection settings.

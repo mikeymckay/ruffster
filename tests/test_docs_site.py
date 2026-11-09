@@ -478,7 +478,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('temporarily registers the actual per-user task', guide)
         self.assertIn('do not install on a family computer or exercise the visible controls interactively', guide)
 
-    def test_macos_candidate_packaging_is_gated_and_documented(self):
+    def test_macos_unsigned_family_packaging_is_primary_and_future_signing_is_optional(self):
         script = (ROOT / 'scripts/package-macos-candidate.sh').read_text(encoding='utf-8')
         lifecycle_check = (ROOT / 'scripts/validate-macos-install-flow.py').read_text(encoding='utf-8')
         guide = (ROOT / 'MACOS-DISTRIBUTION.md').read_text(encoding='utf-8')
@@ -491,8 +491,11 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('stapler validate', script)
         self.assertIn('not approved for family deployment', script)
         self.assertIn('MACOS-DISTRIBUTION.md', readme)
-        self.assertIn('no valid code-signing identities', guide)
-        self.assertIn('FAMILY_ACTIVITY_VERSION=\'0.1.0\'', guide)
+        self.assertIn('unsigned Apple-silicon Mac app', guide)
+        self.assertIn('needs no Apple signing credentials or secrets', guide)
+        self.assertIn('## Future signing', guide)
+        self.assertNotIn('## Prerequisites', guide)
+        self.assertNotIn('no valid code-signing identities', guide)
         self.assertIn('macos_install.install', lifecycle_check)
         self.assertIn('readiness_check=lambda database, previous_count: True', lifecycle_check)
         self.assertIn('macos_install.uninstall', lifecycle_check)

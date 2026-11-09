@@ -1,5 +1,9 @@
 # Real-machine validation
 
+## 2026-11-09: Clarify the unsigned Mac family release path
+
+Reworked `MACOS-DISTRIBUTION.md` so the first task is the real per-account family install and current unsigned GitHub release. The release steps explicitly require no Developer ID or signing secrets, describe Apple's per-app first-open approval, and keep family usability checks separate from automated package checks. Moved signing and notarization to an optional future note. Updated contributor conventions and the documentation test so they preserve this policy instead of requiring an unused Developer ID build path. The focused docs and Mac setup suites passed (47 tests); `git diff --check` passed. No app release was rebuilt, and no family Mac was available for interactive installation.
+
 ## 2026-11-09: Hide empty optional website report sections
 
 The parent dashboard still shows whether website details were recorded and keeps the explanation available, but hides the empty website lists and category view when none were included. Extended the synthetic browser accessibility scan to check both website-data states at desktop and mobile widths; all sixteen page/dashboard scans had zero Axe violations or horizontal overflow. The full local suite passed 300 tests (295 passed, 5 host-specific skips). Main CI `42615708169` and Mac release workflow `42616282201` passed. The downloaded 0.1.20 DMG matches its published SHA-256 (`ebac956a8abae31e47dfe2f2ec318d8685623aa4ede507e7a063b8d2bb04553d`). The family Mac was offline, so this release has not been installed in Annika's account and no family activity was collected.
