@@ -395,7 +395,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
             progress.startAnimation(nil)
             let waiting = NSAlert()
             waiting.messageText = "Connecting to the parent's Mac…"
-                waiting.informativeText = "Connecting to the parent's computer and receiving the report-encryption setup. You can cancel at any time. If the code has expired or was already used, ask them to create another."
+                waiting.informativeText = "Connecting to the parent's Mac and getting Ruffster ready to send reports. You can cancel at any time. If it takes too long, ask the parent to show two digits again."
             waiting.accessoryView = progress
             waiting.addButton(withTitle: "Cancel")
             pairingResult = nil

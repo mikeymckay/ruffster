@@ -171,7 +171,7 @@ $('prepare-key-share').addEventListener('click', async () => {
     $('stop-key-share').hidden = false;
     if (keyShareTimer) clearInterval(keyShareTimer);
     let remaining = result.expires_in;
-    $('key-share-note').textContent = `Enter these two digits on the child's setup screen. They are available for about five minutes. Keep both computers on the same Wi-Fi.`;
+    $('key-share-note').textContent = `Use these two digits on the child's setup screen within about five minutes. Keep both computers on the same Wi-Fi. If time runs out, choose Show two digits again.`;
     keyShareTimer = setInterval(() => {
       remaining -= 1;
       if (remaining <= 0) {
@@ -180,9 +180,9 @@ $('prepare-key-share').addEventListener('click', async () => {
         $('public-key-code').hidden = true;
         $('copy-key-code').hidden = true;
         $('stop-key-share').hidden = true;
-        $('key-share-note').textContent = 'These digits expired. Show fresh digits if the child has not entered them yet.';
+        $('key-share-note').textContent = 'These digits are no longer active. If the child is still setting up, choose Show two digits again.';
       } else {
-        $('key-share-note').textContent = `Enter these two digits on the child's setup screen. They are available for about five minutes. Keep both computers on the same Wi-Fi.`;
+        $('key-share-note').textContent = `Use these two digits on the child's setup screen within about five minutes. Keep both computers on the same Wi-Fi. If time runs out, choose Show two digits again.`;
       }
     }, 1000);
     show('Two digits ready. Enter them on the child computer setup screen.');
