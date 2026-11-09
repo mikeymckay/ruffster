@@ -24,6 +24,25 @@ def sampling_interval_argument(value):
         raise argparse.ArgumentTypeError(str(exc)) from None
 
 
+def _write_private_text_file(path, value):
+    """Publish short-lived setup text only after the complete value is written."""
+    destination = Path(path)
+    temporary = destination.with_name(destination.name + "." + secrets.token_hex(8) + ".tmp")
+    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    try:
+        with os.fdopen(descriptor, "w", encoding="ascii") as stream:
+            stream.write(value)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, destination)
+    except BaseException:
+        try:
+            temporary.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
+
+
 def start_status(helper, share_database=None, *, retention_days=30, interval=15):
     """Require the status process to initialize before collecting snapshots."""
     if sys.platform == 'win32':
@@ -531,7 +550,7 @@ def main():
         old_termination = signal.signal(signal.SIGTERM, cancel_share)
         try:
             if args.code_file:
-                Path(args.code_file).write_text(service.short_code, encoding='ascii')
+                _write_private_text_file(args.code_file, service.short_code)
             else:
                 print("Temporary encrypted report transfer is ready. Show these two digits to your parent:", flush=True)
                 print(service.short_code, flush=True)
