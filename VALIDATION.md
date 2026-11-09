@@ -1,5 +1,9 @@
 # Real-machine validation
 
+## 2026-11-09: Publish Mac 0.1.24 with clearer filtering guidance
+
+The parent dashboard now explains content filtering as clues rather than proof, with plain guidance for home Wi-Fi, school Wi-Fi, hotspots, and school-managed settings. Updated the README and getting-started/progress pages. Release workflow `42657100301` published the Apple-silicon DMG. Downloaded 17,657,002 bytes and verified its SHA-256 against the GitHub sidecar (`6f25bbab21bdf19c2b1a4d5219f8d70c9d7e22e8d34a7013b4215a55f96ce3e2`). The local suite passed 305 tests: 300 passed and five platform/tool checks were skipped; all 16 desktop/mobile accessibility scans found zero Axe violations. The Pages update is pending deployment. SSH to `annikamac` timed out, so the 0.1.24 app has not been installed in the child's account; no monitoring or family activity is verified.
+
 ## 2026-11-09: Publish Mac 0.1.23 with simpler parent access
 
 The parent dashboard now describes its PIN as six numbers the child doesn't know and explains where to keep the recovery copy. Updated the README, getting-started guide, progress page, and synthetic setup/report screenshots. The 0.1.23 release workflow `42653085737` passed and published the Apple-silicon DMG; its 17,656,503 bytes match the release sidecar SHA-256 (`d203c788419426c7b177282f6cd3e62a29b5a28878780a1fdbee3c6368f1d4bc`). Tag CI `42653085751` passed all platform tests and package builds. The local suite ran 305 tests: 300 passed and five platform/tool checks were skipped; all 16 desktop/mobile accessibility scans found zero Axe violations. Pages deployment `42654859526` passed; the live install and progress pages show 0.1.23, the progress page checksum matches the release, and the live dashboard image matches the repository file. The family Mac remains offline; 0.1.23 is not confirmed installed in the child's account. No child setup, monitoring, or family activity is verified.
