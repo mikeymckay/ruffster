@@ -28,10 +28,10 @@ class ParentAppTests(unittest.TestCase):
         self.server.shutdown(); self.thread.join(timeout=5); self.server.server_close(); self.tmp.cleanup()
 
     def request(self, method, path, body=None, headers=None):
-        # Windows hosted runners can take several seconds to generate the
-        # parent key and unwind the nearby-share listener. Keep the request
-        # bounded, but leave enough time for those local setup operations.
-        conn = http.client.HTTPConnection('127.0.0.1', self.server.server_port, timeout=15)
+        # Windows hosted runners can take longer to run the memory-hard
+        # parent-key setup and unwind the nearby-share listener. Keep local
+        # requests bounded while allowing those UI-facing operations to finish.
+        conn = http.client.HTTPConnection('127.0.0.1', self.server.server_port, timeout=30)
         h = {'Origin': self.origin}
         if self.cookie: h['Cookie'] = self.cookie
         h.update(headers or {})
