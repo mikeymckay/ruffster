@@ -296,7 +296,7 @@ class DocumentationSiteTests(unittest.TestCase):
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
         plan = (ROOT / 'PLAN.md').read_text(encoding='utf-8')
         self.assertIn('[Privacy and children\'s rights](PRIVACY-AND-CHILDREN.md)', readme)
-        self.assertIn('qualified counsel is required before family release', readme)
+        self.assertIn('review by qualified counsel is needed before broader distribution', readme)
         self.assertIn('not legal advice, a DPIA, or a claim', privacy)
         self.assertIn('Child\'s agency and rights', privacy)
         self.assertIn('Do not assume a household exemption applies', privacy)
