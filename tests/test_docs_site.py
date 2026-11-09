@@ -316,7 +316,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('activity in other browsers isn’t included', home)
         self.assertIn('outside supported setup', home)
         self.assertIn('no add-on is needed on the parent\'s computer', readme)
-        self.assertIn('turn it off or use another browser', readme)
+        self.assertIn('other browsers aren\'t included', readme)
         self.assertIn('never private-window domains or full URLs', readme)
         self.assertIn('Missing website details do not tell us why', readme)
         install = (SITE / 'install.html').read_text(encoding='utf-8')
