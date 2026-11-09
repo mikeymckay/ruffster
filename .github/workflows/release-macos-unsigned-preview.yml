@@ -4,13 +4,14 @@ on:
   push:
     tags:
       - 'mac-preview-*'
+      - 'mac-family-*'
 
 permissions:
   contents: read
 
 jobs:
   build-and-publish:
-    name: Build and publish Apple silicon preview
+    name: Build and publish Apple silicon family app
     # Match the standard hosted Apple-silicon runner already used by CI.
     runs-on: macos-latest
     timeout-minutes: 30
@@ -27,23 +28,38 @@ jobs:
         run: python -m pip install -e '.[build]'
       - name: Run test suite
         run: python scripts/run-tests.py
-      - name: Build and package unsigned preview
+      - name: Build and package unsigned Mac app
         shell: bash
         run: |
-          output_directory="${RUNNER_TEMP}/RuffsterUnsignedPreview"
+          output_directory="${RUNNER_TEMP}/RuffsterMacFamilyApp"
           python_executable="$(python -c 'import sys; print(sys.executable)')"
           source_commit="$(git rev-parse HEAD)"
-          export RUFFSTER_VERSION="${GITHUB_REF_NAME#mac-preview-}"
+          if [[ "$GITHUB_REF_NAME" == mac-family-* ]]; then
+            export RUFFSTER_VERSION="${GITHUB_REF_NAME#mac-family-}"
+          else
+            export RUFFSTER_VERSION="${GITHUB_REF_NAME#mac-preview-}"
+          fi
           ./scripts/package-macos-unsigned-preview.sh "$python_executable" "$output_directory" "$source_commit"
-          echo "PREVIEW_OUTPUT=$output_directory" >> "$GITHUB_ENV"
-      - name: Publish GitHub family prerelease
+          echo "RUFFSTER_OUTPUT=$output_directory" >> "$GITHUB_ENV"
+      - name: Publish Mac family release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" \
-            "$PREVIEW_OUTPUT/Ruffster-Mac-Family-App-Apple-Silicon.dmg" \
-            "$PREVIEW_OUTPUT/Ruffster-Mac-Family-App-Apple-Silicon.dmg.sha256" \
-            --verify-tag \
-            --prerelease \
-            --title "Ruffster for Mac family app ${GITHUB_REF_NAME#mac-preview-}" \
-            --notes-file .github/UNSIGNED-MAC-PREVIEW-RELEASE-NOTES.md
+          if [[ "$GITHUB_REF_NAME" == mac-family-* ]]; then
+            version="${GITHUB_REF_NAME#mac-family-}"
+            gh release create "$GITHUB_REF_NAME" \
+              "$RUFFSTER_OUTPUT/Ruffster-Mac-Family-App-Apple-Silicon.dmg" \
+              "$RUFFSTER_OUTPUT/Ruffster-Mac-Family-App-Apple-Silicon.dmg.sha256" \
+              --verify-tag \
+              --title "Ruffster for Mac ${version}" \
+              --notes-file .github/MAC-FAMILY-RELEASE-NOTES.md
+          else
+            version="${GITHUB_REF_NAME#mac-preview-}"
+            gh release create "$GITHUB_REF_NAME" \
+              "$RUFFSTER_OUTPUT/Ruffster-Mac-Family-App-Apple-Silicon.dmg" \
+              "$RUFFSTER_OUTPUT/Ruffster-Mac-Family-App-Apple-Silicon.dmg.sha256" \
+              --verify-tag \
+              --prerelease \
+              --title "Ruffster for Mac family app ${version}" \
+              --notes-file .github/UNSIGNED-MAC-PREVIEW-RELEASE-NOTES.md
+          fi

@@ -63,9 +63,9 @@
    <div class="wrap prose">
     <div class="notice" id="status">
      <strong>
-      Ready for a first try together on Mac.
+      Ruffster for Mac is ready for families.
      </strong>
-     Ruffster is made for everyday family use at home and during the school day. The Mac setup and restart flow have been checked on an Apple-silicon Mac with made-up activity. macOS asks you to confirm before opening because the app has not yet been signed by Apple. Windows setup is being prepared for a family-computer try.
+     This is Ruffster's first Mac family release. Automated and synthetic checks are complete; the first family setup and report exchange are the next hands-on checks. macOS asks you to confirm before opening because the app has not yet been signed by Apple. Windows setup is being prepared for a family-computer try.
     </div>
     <h2>
      For parents
@@ -75,7 +75,7 @@
     </p>
     <div class="notice">
      <strong>Get the Mac app.</strong>
-     <a href="https://github.com/mikeymckay/ruffster/releases/download/mac-preview-0.1.8/Ruffster-Mac-Family-App-Apple-Silicon.dmg">Download Ruffster for Mac 0.1.8 (Apple silicon, .dmg)</a>. See the <a href="https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.8">release notes, source, and SHA-256 checksum</a>. On first open, macOS asks you to confirm because this open-source app has not yet been signed by Apple. Follow <a href="https://support.apple.com/en-us/102445">Apple’s steps to open an app you downloaded</a>, then continue with family setup. You do not need to change your Mac's security settings.
+     <a href="https://github.com/mikeymckay/ruffster/releases/download/mac-family-0.1.9/Ruffster-Mac-Family-App-Apple-Silicon.dmg">Download Ruffster for Mac 0.1.9 (Apple silicon, .dmg)</a>. See the <a href="https://github.com/mikeymckay/ruffster/releases/tag/mac-family-0.1.9">release notes, source, and SHA-256 checksum</a>. On first open, macOS asks you to confirm because this open-source app has not yet been signed by Apple. Follow <a href="https://support.apple.com/en-us/102445">Apple’s steps to open an app you downloaded</a>, then continue with family setup. You do not need to change your Mac's security settings.
     </div>
     <h3>Install it on each Mac</h3>
     <ol class="steps">
@@ -86,7 +86,7 @@
     </ol>
     <p>After setup, Ruffster starts automatically whenever the child signs in to that Mac. macOS restarts it if the background agent stops unexpectedly; the menu-bar paw shows when fresh samples are arriving or monitoring is paused.</p>
     <p>
-     Once both Macs are set up, connect them and share a report:
+     Once your parent Mac and both child Macs are set up, connect them one child Mac at a time and share each report:
     </p>
     <ol class="steps">
      <li>
@@ -95,7 +95,7 @@
      </li>
      <li>
       <strong>Set up each child's Mac together, one at a time.</strong>
-      Read the collection choices together, decide how long to keep detailed records, and check the visible status indicator. Pair each Mac with the parent Mac: one shows two digits and the other enters them. Keep both on the same Wi-Fi. Mac may ask to find nearby computers; allow Local Network access so Ruffster can connect the computers. If that Wi-Fi keeps devices separate, save an encrypted report file from the child's status menu and open it in the parent's dashboard. After each first report arrives, give that computer a name in the dashboard so you can tell the reports apart.
+      Read the collection choices together, decide how long to keep detailed records, and check the visible status indicator. Pair each Mac with the parent Mac: one shows two digits and the other enters them. Keep the parent Mac and the child Mac you are setting up on the same Wi-Fi. Mac may ask to find nearby computers; allow Local Network access so Ruffster can connect the computers. If that Wi-Fi keeps devices separate, save an encrypted report file from the child's status menu and open it in the parent's dashboard. After each first report arrives, give that computer a name in the dashboard so you can tell the reports apart.
      </li>
      <li>
       <strong>
@@ -117,7 +117,7 @@
      macOS
     </h3>
     <p>
-     Mac 0.1.8 includes background monitoring, a visible menu-bar status, parent-encrypted activity, and a local dashboard. Its setup guide explains how to add each child's Mac, name reports separately, and know when monitoring starts. On an Apple-silicon family Mac, 280 current-source tests passed and 8 platform/dependency checks were skipped. The real launchd setup, restart after a stop, update restart, removal, and encrypted sample reports were checked with made-up activity. Mac 0.1.6 built on macOS 26.6; its setup layout and frozen dashboard checks passed. The 0.1.8 app is built and checked by the hosted Mac release workflow. The next step is to walk through family setup and report sharing together; VoiceOver and physical sleep/wake still need review.
+     Mac 0.1.9 includes background monitoring, a visible menu-bar status, parent-encrypted activity, and a local dashboard. Its setup guide explains how to add each child's Mac, name reports separately, and know when monitoring starts. Automated checks and synthetic report flows passed; the first family setup and report exchange are the next hands-on checks. VoiceOver and physical sleep/wake still need review.
     </p>
     <h3>
      Windows
@@ -153,10 +153,10 @@ node --check family_activity/parent_assets/app.js</code></pre>
      in PowerShell. The Windows builder also creates a direct-download per-user installer that copies its files and then opens family setup; monitoring still requires family confirmation. Linux cross-compilation checks that executable can be built, but cannot run Windows extraction, setup, or tray behavior.
     </p>
     <h2>
-     When family releases are ready
+     Contributing to Ruffster
     </h2>
     <p>
-     The Mac app is ready for families to try together. We’re using those first family sessions to make setup, report sharing, and parent help even clearer. The same step-by-step experience will follow on Windows.
+     Ruffster for Mac is available for ongoing family use. We’re using first family sessions to make setup, report sharing, and parent help even clearer. The same step-by-step experience will follow on Windows.
     </p>
     <div class="notice">
      <strong>

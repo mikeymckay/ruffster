@@ -8,14 +8,14 @@ Because this project does not yet have an Apple Developer ID, macOS asks you to 
 
 ## How the family app is published
 
-The release workflow runs on the standard `macos-latest` Apple-silicon GitHub Actions runner when a `mac-preview-*` tag is pushed. It runs the Mac test suite, builds and smoke-checks the app, makes a drag-to-Applications disk image, and publishes a GitHub **prerelease** with:
+The release workflow runs on the standard `macos-latest` Apple-silicon GitHub Actions runner when a `mac-family-*` or legacy `mac-preview-*` tag is pushed. It runs the Mac test suite, builds and smoke-checks the app, and makes a drag-to-Applications disk image. A `mac-family-*` tag publishes a regular family release; the older `mac-preview-*` path remains a prerelease. Both include:
 
 - a note inside the disk image that explains the unsigned first-open step and invites families to review setup together;
 - the exact source commit in the release workflow and inside the disk image;
 - a SHA-256 checksum sidecar (integrity check only, not a digital signature);
 - release notes linking Apple's current Gatekeeper guidance.
 
-The workflow needs no signing secret. To publish a family app prerelease, review the changes, run the Mac workflow, then tag the reviewed commit with a version such as `mac-preview-0.1.6` and push that tag. The prerelease label keeps the app's current status clear while families begin using it.
+The workflow needs no signing secret. To publish a family release, review the changes, run the Mac workflow, then tag the reviewed commit with a version such as `mac-family-0.1.9` and push that tag. Use `mac-preview-*` only for development prereleases.
 
 For a local package on the real Mac, install build dependencies, then run:
 

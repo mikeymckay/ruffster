@@ -108,7 +108,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('family LAN', plan)
         self.assertNotIn('Pages source setting is still disabled', plan)
 
-    def test_github_ci_covers_platforms_and_unsigned_preview_is_separate_prerelease(self):
+    def test_github_ci_covers_platforms_and_family_release_has_regular_release_path(self):
         workflow = (ROOT / '.github/workflows/ci.yml').read_text(encoding='utf-8')
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
         project = (ROOT / 'native/windows/FamilyActivityStatus.csproj').read_text(encoding='utf-8')
@@ -139,9 +139,14 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertNotIn('actions/upload-artifact', workflow)
         release = (ROOT / '.github/workflows/release-macos-unsigned-preview.yml').read_text(encoding='utf-8')
         release_notes = (ROOT / '.github/UNSIGNED-MAC-PREVIEW-RELEASE-NOTES.md').read_text(encoding='utf-8')
+        family_release_notes = (ROOT / '.github/MAC-FAMILY-RELEASE-NOTES.md').read_text(encoding='utf-8')
         packager = (ROOT / 'scripts/package-macos-unsigned-preview.sh').read_text(encoding='utf-8')
         self.assertIn("'mac-preview-*'", release)
+        self.assertIn("'mac-family-*'", release)
         self.assertIn('--prerelease', release)
+        self.assertIn('.github/MAC-FAMILY-RELEASE-NOTES.md', release)
+        self.assertIn('Ruffster for Mac 0.1.9', family_release_notes)
+        self.assertIn('A real family setup and report exchange are the next validation step', family_release_notes)
         self.assertIn('scripts/run-tests.py', release)
         self.assertIn('shasum -a 256', packager)
         self.assertIn('Source commit:', packager)
@@ -151,6 +156,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('Ruffster helps parents and children understand everyday computer use together', release_notes)
         self.assertIn('Ruffster-Mac-Family-App-Apple-Silicon.dmg', release)
         self.assertIn('unsigned Apple-silicon family app', readme)
+        self.assertIn('Mac family release', release)
 
     def test_test_runner_exposes_stall_diagnostics_in_github_summary(self):
         runner = (ROOT / 'scripts/run-tests.py').read_text(encoding='utf-8')
@@ -196,16 +202,16 @@ class DocumentationSiteTests(unittest.TestCase):
         guide = (SITE / 'install.html').read_text(encoding='utf-8')
         self.assertIn('macOS comes first', home)
         self.assertIn('Linux is for development and testing', guide)
-        self.assertIn('Ready for a first try together on Mac', guide)
-        self.assertIn('made for everyday family use at home and during the school day', guide)
+        self.assertIn('Ruffster for Mac is ready for families', guide)
+        self.assertIn('This is Ruffster\'s first Mac family release', guide)
         self.assertIn('Drag Ruffster into the Applications folder', guide)
         self.assertIn('Ruffster starts automatically whenever the child signs in', guide)
         self.assertIn('When does Ruffster run?', (SITE / 'faq.html').read_text(encoding='utf-8'))
         self.assertIn('Open parent dashboard', guide)
         self.assertIn('Set up this Mac together', guide)
         self.assertIn('background monitoring, a visible menu-bar status', guide)
-        self.assertIn('https://github.com/mikeymckay/ruffster/releases/download/mac-preview-0.1.8/Ruffster-Mac-Family-App-Apple-Silicon.dmg', guide)
-        self.assertIn('https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.8', guide)
+        self.assertIn('https://github.com/mikeymckay/ruffster/releases/download/mac-family-0.1.9/Ruffster-Mac-Family-App-Apple-Silicon.dmg', guide)
+        self.assertIn('https://github.com/mikeymckay/ruffster/releases/tag/mac-family-0.1.9', guide)
         self.assertIn('VoiceOver', guide)
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
         self.assertIn('explicit screen-reader labels and help', readme)
@@ -456,10 +462,10 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('validate-macos-install-flow.py', guide)
         self.assertIn('https://mikeymckay.github.io/ruffster/progress.html', status)
 
-    def test_progress_page_reports_current_preview_and_family_validation_gates(self):
+    def test_progress_page_reports_current_family_release_and_validation_gates(self):
         status = (SITE / 'progress.html').read_text(encoding='utf-8')
-        self.assertIn('Ready for a first family try on Mac', status)
+        self.assertIn('Ruffster for Mac 0.1.9 is available as the first family release', status)
         self.assertIn('What we’re improving next', status)
-        self.assertIn('Download Ruffster for Mac 0.1.8', status)
+        self.assertIn('Download Ruffster for Mac 0.1.9', status)
         self.assertIn('all Windows test groups and the separately isolated parent key access tests', status)
         self.assertIn('cannot verify an interactive Task Scheduler session', status)

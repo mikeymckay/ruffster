@@ -4,9 +4,9 @@
 
 <p align="center"><img src="docs/assets/ruffster-mascot.webp" alt="Ruffster golden retriever mascot" width="190"></p>
 
-**Mac family app 0.1.8:** ready for a first try together. Install Ruffster on the parent Mac, then set up each child's Mac together and bring encrypted reports back to the parent dashboard. The visible status explains when Ruffster is running. The first-open guide explains macOS's confirmation for an app that has not yet been signed by Apple. On an Apple-silicon Mac, 280 tests passed and 8 platform/dependency checks were skipped; the real launchd setup, restart, update, report sampling, and removal flows passed with made-up activity. All Windows CI test groups and the native package build pass. Windows still needs its live Task Scheduler lifecycle and family setup reviewed on a logged-in Windows computer before a Windows download is offered.
+**Ruffster for Mac 0.1.9 is available for families.** Start on the parent Mac, then set up Marcus's and Annika's Macs together and bring encrypted reports back to the parent dashboard. The visible status explains when Ruffster is running. The first-open guide explains macOS's confirmation for an app that has not yet been signed by Apple. Automated and synthetic checks are complete; the first family setup and report exchange are the next hands-on checks. Windows setup and packaging pass automated checks, and still need review on a logged-in Windows computer before a Windows download is offered.
 
-[Download Ruffster for Mac 0.1.8 (.dmg)](https://github.com/mikeymckay/ruffster/releases/download/mac-preview-0.1.8/Ruffster-Mac-Family-App-Apple-Silicon.dmg) · [Release notes and checksum](https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.8) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
+[Download Ruffster for Mac 0.1.9 (.dmg)](https://github.com/mikeymckay/ruffster/releases/download/mac-family-0.1.9/Ruffster-Mac-Family-App-Apple-Silicon.dmg) · [Release notes and checksum](https://github.com/mikeymckay/ruffster/releases/tag/mac-family-0.1.9) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
 
 [Project website](https://mikeymckay.github.io/ruffster/) · [Install guide](https://mikeymckay.github.io/ruffster/install.html) · [Progress page](https://mikeymckay.github.io/ruffster/progress.html) · [FAQ](https://mikeymckay.github.io/ruffster/faq.html) · [Privacy and children's rights](PRIVACY-AND-CHILDREN.md) · [Implementation plan](PLAN.md)
 
@@ -67,13 +67,13 @@ The command applies retention to original event times and omits expired rows. Ve
 
 See [ENCRYPTION.md](ENCRYPTION.md) for the threat model and known limitations, and [AGENTS.md](AGENTS.md) for development rules.
 
-The engineering requirements and open European privacy and children's-rights questions are recorded in [PRIVACY-AND-CHILDREN.md](PRIVACY-AND-CHILDREN.md). This is not a legal compliance determination; review by qualified counsel is required before family release.
+The engineering requirements and open European privacy and children's-rights questions are recorded in [PRIVACY-AND-CHILDREN.md](PRIVACY-AND-CHILDREN.md). This is not a legal compliance determination; review by qualified counsel is needed before broader distribution.
 
 ## Delivery priorities
 
-1. **Make macOS dependable first.** Validate setup and removal, visible status, sleep/wake, permissions, user changes, restart recovery, encrypted reports, and key recovery on real Macs. Keep the unsigned preview easy to identify and include its source, checksum, and a short note about Apple's first-open prompt. Revisit signing and notarization as the project grows.
+1. **Make macOS dependable first.** Validate setup and removal, visible status, sleep/wake, permissions, user changes, restart recovery, encrypted reports, and key recovery on real Macs. Keep the unsigned download easy to identify and include its source, checksum, and a short note about Apple's first-open prompt. Revisit signing and notarization as the project grows.
 2. **Bring the family flow to Windows.** Test installation, startup and recovery, visible tray status, network and app observations, encrypted report handoff, parent dashboard, updates, and removal on real Windows computers.
-3. **Make the public project experience excellent.** Keep this README useful to a parent arriving for the first time and to a contributor; publish a polished GitHub Pages home page, family installation guide, progress page, and plain-language FAQ. Include current synthetic screenshots, clear readiness status, accessible responsive layouts, and clearly explain that the family app is an unsigned GitHub prerelease.
+3. **Make the public project experience excellent.** Keep this README useful to a parent arriving for the first time and to a contributor; publish a polished GitHub Pages home page, family installation guide, progress page, and plain-language FAQ. Include current synthetic screenshots, clear readiness status, accessible responsive layouts, and clearly explain that the Mac app is an unsigned GitHub release.
 4. **Validate with families and reviewers.** Observe nontechnical parents and children using the whole flow; complete accessibility, security, privacy, and European children's rights reviews.
 
 Linux remains a low-priority development and test host. It is not a student-facing platform target. The task list and release gates are in [PLAN.md](PLAN.md); the Pages design and launch checklist is in [GITHUB-PAGES.md](GITHUB-PAGES.md).
@@ -99,7 +99,7 @@ For local UI development, start the experimental parent app:
 
 It binds to loopback. The default CLI database and dashboard are developer tools, not a family installation path. Do not expose them to a network.
 
-GitHub Actions runs the test suite on Linux, macOS, and Windows and checks both native packages. A `mac-preview-*` release tag runs the Mac suite and publishes the unsigned Apple-silicon family app with its source commit and SHA-256 checksum. The repository is at [github.com/mikeymckay/ruffster](https://github.com/mikeymckay/ruffster); the family-friendly [Ruffster website and install guide](https://mikeymckay.github.io/ruffster/) are live.
+GitHub Actions runs the test suite on Linux, macOS, and Windows and checks both native packages. A `mac-family-*` release tag runs the Mac suite and publishes the unsigned Apple-silicon family app with its source commit and SHA-256 checksum. The repository is at [github.com/mikeymckay/ruffster](https://github.com/mikeymckay/ruffster); the family-friendly [Ruffster website and install guide](https://mikeymckay.github.io/ruffster/) are live.
 
 The test runner prints each test and emits Python stack traces every five minutes if a job stalls; CI also places those traces in the job summary and stops a test job after 20 minutes.
 
