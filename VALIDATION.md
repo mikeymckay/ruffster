@@ -1,5 +1,9 @@
 # Real-machine validation
 
+## 2026-11-09: Simplify family setup and pairing prompts
+
+Reorganized the getting-started guide into three steps: parent access, child-account setup, and report sharing. It now explains that the monitor is installed for the signed-in account and that an SSH admin session does not configure the child's account. Mac setup and the parent dashboard now explain in plain language how to show another two-digit pair when time runs out; they no longer describe the digits as an expired or already-used code. The full local suite ran 305 tests: 300 passed and five platform/tool checks were skipped. All 16 desktop/mobile accessibility scans had zero Axe violations. Main CI `42641360222` passed Linux, macOS, Windows test groups, and package builds. Pages deployment `42641360119` passed, and the public guide was checked live. This change was validated with local and synthetic data only. Annika's Mac timed out over SSH, so no installation, child-account setup, monitoring, or family activity is verified.
+
 ## 2026-11-09: Publish Ruffster for Mac 0.1.21
 
 The Mac setup confirmation now names the signed-in account and says to cancel if it is not the child's account. Main CI `42633412497` passed Linux, macOS, Windows test groups, both package checks, and the accessibility scan. Release workflow `42634245096` published `mac-family-0.1.21`. Downloaded its 17,656,636-byte DMG and verified it matches the published SHA-256 sidecar (`6368d168bef7864c33a15640cbf6075aa39d622f720f7cba4bb270ee71fcd7bf`). The local suite ran 302 tests (297 passed; five platform/tool checks skipped), and the 16 desktop/phone accessibility scans found zero Axe violations. The family Mac still has 0.1.20 in shared Applications. SSH uses its admin account and cannot open setup in the child's GUI account; 0.1.21 has not been installed there. No monitoring or family activity is verified.
