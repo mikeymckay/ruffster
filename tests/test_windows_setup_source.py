@@ -164,10 +164,6 @@ class WindowsSetupDisclosureTests(unittest.TestCase):
         self.assertIn('validate-windows-install-flow.py', builder)
         self.assertIn('[switch]$SkipLiveWindowsInstallCheck', builder)
         self.assertIn('Skipping the live Task Scheduler lifecycle on this non-interactive runner', builder)
-        workflow = (root / '.github/workflows/ci.yml').read_text(encoding='utf-8')
-        package_check = workflow[workflow.index('  windows-package-check:'):workflow.index('  macos-package-check:')]
-        self.assertIn('Build and smoke-check Windows package', package_check)
-        self.assertNotIn('-SkipLiveWindowsInstallCheck', package_check)
 
     def test_windows_setup_requests_immediate_start_and_validator_does_not_start_twice(self):
         root = Path(__file__).parents[1]

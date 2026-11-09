@@ -22,7 +22,7 @@ The Apple-silicon app includes a native welcome/setup screen, visible menu-bar s
 
 ### 2. Windows family app — implementation and automated checks in place
 
-The per-user installer, tray status, background startup, parent dashboard launcher, collection adapters, and report sharing are implemented. Hosted Windows CI now runs the packaged agent through synthetic Task Scheduler install, encrypted sampling, forced restart and gap recording, update, and removal, with network collection disabled. The latest hosted CI passed all Windows test groups and package checks.
+The per-user installer, tray status, background startup, parent dashboard launcher, collection adapters, and report sharing are implemented. The Windows package build and unit tests run in hosted CI; it intentionally skips the live Task Scheduler lifecycle because the runner lacks the interactive session required by the per-user task. An attempt to run that lifecycle on the hosted runner timed out; the synthetic lifecycle remains available for a logged-in Windows session. The actual setup, tray, and family report flow still need hands-on Windows review.
 
 **Next:** review the full setup, visible tray status, report handoff, recovery, and removal on a Windows computer; keep family usability marked unverified until then. Keep Windows marked as not yet family-validated until that is done.
 

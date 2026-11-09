@@ -142,7 +142,7 @@ jobs:
   windows-package-check:
     name: Build Windows preview (no artifact published)
     runs-on: windows-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
     needs: [tests, windows-tests, windows-key-vault-check, windows-bundle-extractor]
     steps:
       - uses: actions/checkout@v4
@@ -158,7 +158,7 @@ jobs:
         shell: pwsh
         run: |
           $preview = Join-Path $env:RUNNER_TEMP 'FamilyActivityPreview'
-          .\scripts\build-windows-preview.ps1 -OutputDirectory $preview
+          .\scripts\build-windows-preview.ps1 -OutputDirectory $preview -SkipLiveWindowsInstallCheck
           if (Test-Path $preview) { Remove-Item $preview -Recurse -Force }
           if (Test-Path "$preview.zip") { Remove-Item "$preview.zip" -Force }
 
