@@ -278,7 +278,11 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if not self._valid_host() or not self._valid_origin():
             self._json({'error': 'Forbidden'}, 403); return
-        self.connection.settimeout(15)
+        # Parent setup can perform key derivation, certificate generation,
+        # and encrypted database work on this local request. Keep the server's
+        # bound longer than the client's test/UI bound so a busy computer does
+        # not reset an otherwise valid localhost operation mid-response.
+        self.connection.settimeout(60)
         if self.path == '/api/login':
             try:
                 value = json.loads(self._body()).get('token', '')
