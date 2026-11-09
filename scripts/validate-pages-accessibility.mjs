@@ -9,6 +9,7 @@ import WebSocket from 'ws';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const site = path.join(root, 'docs');
+const parentAssets = path.join(root, 'family_activity', 'parent_assets');
 const pages = ['index.html', 'install.html', 'progress.html', 'faq.html'];
 const viewports = [
   { name: 'desktop', width: 1440, height: 1000, mobile: false },
@@ -100,6 +101,56 @@ function createStaticServer() {
   });
 }
 
+function createParentSetupServer() {
+  const assets = {
+    '/': 'index.html',
+    '/app.css': 'app.css',
+    '/app.js': 'app.js',
+    '/ruffster-mascot.webp': 'ruffster-mascot.webp',
+  };
+  return createServer(async (request, response) => {
+    if (!['GET', 'HEAD'].includes(request.method || '')) {
+      response.writeHead(405).end();
+      return;
+    }
+    let pathname;
+    try {
+      pathname = decodeURIComponent(new URL(request.url || '/', 'http://localhost').pathname);
+    } catch {
+      response.writeHead(400).end();
+      return;
+    }
+    if (pathname === '/api/status') {
+      const body = Buffer.from(JSON.stringify({
+        has_key: false, unlocked: false, has_report: false, backup_confirmed: false,
+      }));
+      response.writeHead(200, {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Content-Length': body.length,
+        'Cache-Control': 'no-store',
+      });
+      response.end(request.method === 'HEAD' ? undefined : body);
+      return;
+    }
+    const relative = assets[pathname];
+    if (!relative) {
+      response.writeHead(404).end();
+      return;
+    }
+    try {
+      const body = await readFile(path.join(parentAssets, relative));
+      response.writeHead(200, {
+        'Content-Type': mimeTypes[path.extname(relative).toLowerCase()] || 'application/octet-stream',
+        'Content-Length': body.length,
+        'Cache-Control': 'no-store',
+      });
+      response.end(request.method === 'HEAD' ? undefined : body);
+    } catch {
+      response.writeHead(404).end();
+    }
+  });
+}
+
 async function waitForDebugger(profile, browser) {
   const marker = path.join(profile, 'DevToolsActivePort');
   const deadline = Date.now() + 15000;
@@ -176,8 +227,7 @@ async function evaluate(send, expression) {
   return response.result?.value;
 }
 
-async function waitForPageReady(send, page) {
-  const expectedPath = `/${page}`;
+async function waitForPageReady(send, page, expectedPath = `/${page}`) {
   const deadline = Date.now() + 10000;
   await new Promise((resolve) => setTimeout(resolve, 150));
   while (Date.now() < deadline) {
@@ -195,6 +245,7 @@ async function main() {
   const chromeVersion = spawnSync(chrome, ['--version'], { encoding: 'utf8' }).stdout?.trim() || 'unknown';
   const profile = await mkdtemp(path.join(tmpdir(), 'family-pages-axe-'));
   const server = createStaticServer();
+  const parentServer = createParentSetupServer();
   let browser;
   let socket;
   try {
@@ -202,7 +253,12 @@ async function main() {
       server.once('error', reject);
       server.listen(0, '127.0.0.1', resolve);
     });
+    await new Promise((resolve, reject) => {
+      parentServer.once('error', reject);
+      parentServer.listen(0, '127.0.0.1', resolve);
+    });
     const address = server.address();
+    const parentAddress = parentServer.address();
     const browserArgs = [
       '--headless=new', '--disable-gpu', '--no-first-run', '--disable-background-networking',
       '--remote-debugging-port=0', '--remote-allow-origins=*', `--user-data-dir=${profile}`,
@@ -222,6 +278,10 @@ async function main() {
     await send('Runtime.enable');
 
     const failures = [];
+    const targets = [
+      ...pages.map((page) => ({ name: page, url: `http://127.0.0.1:${address.port}/${page}`, path: `/${page}` })),
+      { name: 'parent dashboard setup', url: `http://127.0.0.1:${parentAddress.port}/`, path: '/' },
+    ];
     for (const viewport of viewports) {
       await send('Emulation.setDeviceMetricsOverride', {
         width: viewport.width,
@@ -229,9 +289,20 @@ async function main() {
         deviceScaleFactor: 1,
         mobile: viewport.mobile,
       });
-      for (const page of pages) {
-        await send('Page.navigate', { url: `http://127.0.0.1:${address.port}/${page}` });
-        await waitForPageReady(send, page);
+      for (const target of targets) {
+        await send('Page.navigate', { url: target.url });
+        await waitForPageReady(send, target.name, target.path);
+        if (target.name === 'parent dashboard setup') {
+          const deadline = Date.now() + 5000;
+          let ready = false;
+          while (Date.now() < deadline) {
+            ready = await evaluate(send,
+              'document.querySelector("#setup-progress li[aria-current=step]") !== null');
+            if (ready) break;
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
+          if (!ready) throw new Error('The parent setup screen did not reach its initial state.');
+        }
         const axeSource = JSON.stringify(axe.source);
         const result = await evaluate(send, `(() => {
           const script = document.createElement('script');
@@ -251,9 +322,9 @@ async function main() {
           }));
         })()`);
         const overflow = result.documentWidth > result.viewportWidth;
-        console.log(`${page} @ ${viewport.name}: ${result.violations.length} Axe violations${overflow ? ', horizontal overflow' : ''}`);
+        console.log(`${target.name} @ ${viewport.name}: ${result.violations.length} Axe violations${overflow ? ', horizontal overflow' : ''}`);
         if (result.violations.length || overflow) {
-          failures.push({ page, viewport: viewport.name, ...result, overflow });
+          failures.push({ page: target.name, viewport: viewport.name, ...result, overflow });
         }
       }
     }
@@ -267,15 +338,15 @@ async function main() {
       process.exitCode = 1;
     }
     const summary = [
-      '## Ruffster Pages accessibility scan',
+      '## Ruffster website and parent dashboard accessibility scan',
       `Runtime: Node ${process.version}; ${chromeVersion}`,
       '',
       '| Page | Viewport | Axe violations | Horizontal overflow |',
       '| --- | --- | ---: | --- |',
-      ...pages.flatMap((page) => viewports.map((viewport) => {
-        const failure = failures.find((entry) => entry.page === page && entry.viewport === viewport.name);
+      ...targets.flatMap((target) => viewports.map((viewport) => {
+        const failure = failures.find((entry) => entry.page === target.name && entry.viewport === viewport.name);
         const count = failure?.violations.length ?? 0;
-        return `| ${page} | ${viewport.name} | ${count} | ${failure?.overflow ? 'Yes' : 'No'} |`;
+        return `| ${target.name} | ${viewport.name} | ${count} | ${failure?.overflow ? 'Yes' : 'No'} |`;
       })),
     ];
     if (failures.length) {
@@ -319,16 +390,17 @@ async function main() {
       }
     }
     await new Promise((resolve) => server.close(resolve));
+    await new Promise((resolve) => parentServer.close(resolve));
     await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   }
 }
 
 main().catch(async (error) => {
   console.error(error);
-  annotateGitHubFailure('Pages accessibility scan could not finish', error?.stack || error);
+  annotateGitHubFailure('Ruffster accessibility scan could not finish', error?.stack || error);
   try {
     await writeStepSummary([
-      '## Ruffster Pages accessibility scan failed before completion',
+      '## Ruffster accessibility scan failed before completion',
       `Runtime: Node ${process.version}`,
       '',
       `Error: ${error?.stack || error}`,

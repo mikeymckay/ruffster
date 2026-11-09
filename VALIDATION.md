@@ -1089,3 +1089,7 @@ Installed the published unsigned Apple-silicon app on a family Mac running macOS
 ## 2026-11-09 — Stabilize test sharding and hosted Chrome startup
 
 CI run `42584261364` caught a brittle test-shard count after adding one documentation test (42 selected tests instead of the hard-coded 41). The assertion now verifies that only the requested modules are present, so later test additions do not require editing the count. The Ubuntu Chrome dashboard check also exceeded its 20-second cold-start bound on that run; its subprocess remains bounded, with the allowance raised to 60 seconds for hosted-runner load. The full Linux suite passed 294 tests with five platform/tool checks skipped; hosted validation of these test-only changes is pending.
+
+## 2026-11-09 — Include the parent setup screen in accessibility checks
+
+Extended the existing Axe/Chrome accessibility scan to serve the bundled parent dashboard with a synthetic empty setup state, while keeping its API stub limited to reporting that no key or report exists. The first-run parent screen and each of the four public Pages were checked at desktop and phone widths: zero Axe violations and no horizontal overflow. The scan does not cover the unlocked report view or replace keyboard, screen-reader, or family usability review. The focused documentation suite passed 32 tests.
