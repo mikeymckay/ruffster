@@ -114,13 +114,16 @@ class DocumentationSiteTests(unittest.TestCase):
         project = (ROOT / 'native/windows/FamilyActivityStatus.csproj').read_text(encoding='utf-8')
         self.assertIn('os: [ubuntu-latest, macos-latest]', workflow)
         self.assertIn('windows-tests:', workflow)
+        self.assertIn('windows-key-vault-check:', workflow)
         self.assertIn('timeout-minutes: 12', workflow)
         self.assertIn('run: python scripts/run-tests.py --files ${{ matrix.files }}', workflow)
         sharded_files = set()
         for line in workflow.splitlines():
             if line.strip().startswith('files:'):
                 sharded_files.update(line.split(':', 1)[1].split())
-        self.assertEqual(sharded_files, {path.name for path in (ROOT / 'tests').glob('test_*.py')})
+        self.assertEqual(sharded_files | {'test_key_vault.py'},
+                         {path.name for path in (ROOT / 'tests').glob('test_*.py')})
+        self.assertIn('run: python scripts/run-tests.py --files test_key_vault.py', workflow)
         self.assertIn('windows-package-check', workflow)
         self.assertIn('windows-bundle-extractor', workflow)
         self.assertIn('native/windows/bundle-extractor-tests/FamilyActivity.BundleExtractor.Tests.csproj', workflow)
@@ -454,6 +457,6 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('Ready for a first family try on Mac', status)
         self.assertIn('What we’re improving next', status)
         self.assertIn('Get the Mac app and see the first-open steps', status)
-        self.assertIn('Six of seven Windows test groups passed in the latest run', status)
-        self.assertIn('dashboard and key access group reached GitHub\'s 12-minute limit', status)
-        self.assertIn('the Windows package check did not start', status)
+        self.assertIn('The Windows dashboard now passes as its own test group', status)
+        self.assertIn('parent key access is being checked separately', status)
+        self.assertIn('package check waits for these tests', status)
