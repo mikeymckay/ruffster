@@ -1077,3 +1077,7 @@ The local full-suite rerun exposed a second five-second timeout in a Mac network
 ## 2026-11-09 — Publish Mac family app 0.1.14
 
 Tagged source commit `89bcb1f` as `mac-family-0.1.14`. Release workflow `42578080858` passed the Mac test suite and packaged the unsigned Apple-silicon app. The published DMG is 17,531,807 bytes; its SHA-256 (`0c7fb2c80c796565a4724af23e880ec27c36efada1d5930926fad8b2ad7e97ac`) matches the release sidecar. Main CI run `42578080836` passed Linux and macOS suites, all Windows test groups, and both native package smoke builds. The account-scope welcome and setup confirmation are included in this release. This release has not yet been installed on a family Mac; the target Mac was unreachable and no monitoring agent or family activity was used.
+
+## 2026-11-09 — Give Windows local pairing requests room to finish
+
+The hosted Windows test for starting and stopping the one-time public-key share failed while the test client was reading a local parent-dashboard response (`WinError 10053`). The public job annotation did not identify which request failed, and the focused test passes on Linux, so the exact Windows failure has not been reproduced. Increased the parent-app test client's bounded local HTTP timeout from five to fifteen seconds to allow for key generation and share-listener shutdown on a busy Windows runner. The focused pairing test and `git diff --check` pass locally; hosted Windows validation is pending.
