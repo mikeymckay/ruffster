@@ -85,4 +85,4 @@ hdiutil verify "$DMG" >/dev/null
 echo "Ruffster Mac family app created: $DMG"
 echo "SHA-256: $OUTPUT/$(basename "$DMG").sha256"
 echo "Source commit: $SOURCE_COMMIT"
-echo "No signing, notarization, quarantine removal, or monitoring installation was performed."
+echo "No Apple Developer ID signing, notarization, quarantine removal, or monitoring installation was performed."

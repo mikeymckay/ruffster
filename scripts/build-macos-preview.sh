@@ -63,6 +63,8 @@ PY
   "$APP/Contents/Resources/runtime/FamilyActivityCore" "$APP/Contents/Resources/runtime" \
   "$APP/Contents/Resources/helpers/foreground" "$APP/Contents/Resources/helpers/status"
 test -s "$APP/Contents/Resources/LICENSE"
+"/usr/bin/codesign" --force --deep --sign - "$APP"
+"/usr/bin/codesign" --verify --deep --strict --verbose=2 "$APP"
 "$APP/Contents/Resources/runtime/FamilyActivityCore" --help >/dev/null
 "$PYTHON" "$ROOT/scripts/validate-macos-preview-bundle.py" "$APP"
 printf 'Unsigned Ruffster app created: %s\n' "$APP"

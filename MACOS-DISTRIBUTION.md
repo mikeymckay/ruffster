@@ -4,7 +4,7 @@ Ruffster currently ships as an unsigned Apple-silicon Mac family app. GitHub Act
 
 ## Opening Ruffster on Mac
 
-Because this project does not yet have an Apple Developer ID, macOS asks you to confirm the first time Ruffster opens. If macOS cannot verify Ruffster, choose Done, then open System Settings > Privacy & Security > Open Anyway for Ruffster, and open Ruffster again. This adds an exception for Ruffster only; the Mac's general app protections stay on. If macOS says the app will damage the computer or is damaged, stop and contact the project. See [Apple's current instructions](https://support.apple.com/en-us/102445). The release notes include the source commit and checksum so families can see which build they downloaded. A checksum checks that the file arrived unchanged; it is not a publisher signature.
+Because this project does not yet have an Apple Developer ID, macOS asks you to confirm the first time Ruffster opens. The app bundle has a local ad-hoc signature so macOS can verify its bundled files are consistent; this is not an Apple publisher signature and does not replace Gatekeeper approval. If macOS cannot verify Ruffster, choose Done, then open System Settings > Privacy & Security > Open Anyway for Ruffster, and open Ruffster again. This adds an exception for Ruffster only; the Mac's general app protections stay on. If macOS says the app will damage the computer or is damaged, stop and contact the project. See [Apple's current instructions](https://support.apple.com/en-us/102445). The release notes include the source commit and checksum so families can see which build they downloaded. A checksum checks that the file arrived unchanged; it is not a publisher signature.
 
 ## How the family app is published
 

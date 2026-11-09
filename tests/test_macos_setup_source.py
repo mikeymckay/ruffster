@@ -13,6 +13,8 @@ class MacSetupSourceTests(unittest.TestCase):
         self.assertIn('Set up this Mac together…', source)
         self.assertIn('"--self-test-ui"', source)
         self.assertIn('"$APP/Contents/MacOS/FamilyActivitySetup" --self-test-ui', builder)
+        self.assertIn('"/usr/bin/codesign" --force --deep --sign - "$APP"', builder)
+        self.assertIn('"/usr/bin/codesign" --verify --deep --strict --verbose=2 "$APP"', builder)
 
     def test_mac_release_bundle_uses_its_release_tag_as_the_bundle_version(self):
         root = Path(__file__).parents[1]
