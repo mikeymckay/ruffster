@@ -14,6 +14,15 @@ class MacSetupSourceTests(unittest.TestCase):
         self.assertIn('"--self-test-ui"', source)
         self.assertIn('"$APP/Contents/MacOS/FamilyActivitySetup" --self-test-ui', builder)
 
+    def test_mac_release_bundle_uses_its_release_tag_as_the_bundle_version(self):
+        root = Path(__file__).parents[1]
+        builder = (root / 'scripts' / 'build-macos-preview.sh').read_text(encoding='utf-8')
+        workflow = (root / '.github' / 'workflows' / 'release-macos-unsigned-preview.yml').read_text(encoding='utf-8')
+        self.assertIn('VERSION=${RUFFSTER_VERSION:-0.1.5}', builder)
+        self.assertIn("'CFBundleShortVersionString':sys.argv[2]", builder)
+        self.assertIn("'CFBundleVersion':sys.argv[2]", builder)
+        self.assertIn('export RUFFSTER_VERSION="${GITHUB_REF_NAME#mac-preview-}"', workflow)
+
     def test_status_menu_can_save_encrypted_report_for_offline_transfer(self):
         source = (Path(__file__).parents[1] / 'native' / 'macos' / 'status.swift').read_text()
         self.assertIn('Save an encrypted report file…', source)
@@ -29,10 +38,11 @@ class MacSetupSourceTests(unittest.TestCase):
 
         self.assertIn('showWelcomeWindow()', launch)
         self.assertNotIn('runModal()', welcome)
-        self.assertIn('Ruffster helps your family get a clearer picture', welcome)
+        self.assertIn('Ruffster helps parents and children understand computer use', welcome)
+        self.assertIn('Choose the parent dashboard on your computer', welcome)
         self.assertIn('What Ruffster records', welcome)
         self.assertIn('What stays private', welcome)
-        self.assertIn('Network-interface bytes are not attributed to apps or websites', welcome)
+        self.assertIn('Network traffic totals do not identify websites', welcome)
         self.assertIn('Open parent dashboard', welcome)
         self.assertIn('Set up this Mac together…', welcome)
         self.assertIn('More options…', welcome)

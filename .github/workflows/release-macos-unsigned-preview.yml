@@ -33,6 +33,7 @@ jobs:
           output_directory="${RUNNER_TEMP}/RuffsterUnsignedPreview"
           python_executable="$(python -c 'import sys; print(sys.executable)')"
           source_commit="$(git rev-parse HEAD)"
+          export RUFFSTER_VERSION="${GITHUB_REF_NAME#mac-preview-}"
           ./scripts/package-macos-unsigned-preview.sh "$python_executable" "$output_directory" "$source_commit"
           echo "PREVIEW_OUTPUT=$output_directory" >> "$GITHUB_ENV"
       - name: Publish GitHub family prerelease

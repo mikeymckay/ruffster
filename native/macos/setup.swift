@@ -1,5 +1,4 @@
-// Experimental developer setup shell. It does not bundle a Python runtime.
-// A future signed app must supply verified, self-contained runtime paths.
+// Ruffster's native welcome, parent dashboard launcher, and family setup app.
 import AppKit
 import Foundation
 
@@ -67,25 +66,25 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         stack.spacing = 13
         stack.translatesAutoresizingMaskIntoConstraints = false
 
-        let eyebrow = NSTextField(labelWithString: "🐾 RUFFSTER  ·  FAMILY PREVIEW")
+        let eyebrow = NSTextField(labelWithString: "🐾 RUFFSTER  ·  FOR FAMILIES")
         eyebrow.font = .systemFont(ofSize: 11, weight: .bold)
         eyebrow.textColor = .secondaryLabelColor
         let title = NSTextField(wrappingLabelWithString: "A clearer picture, shared together.")
         title.font = .systemFont(ofSize: 27, weight: .bold)
         title.maximumNumberOfLines = 2
         title.usesSingleLineMode = false
-        let introduction = paragraph("Ruffster helps parents and children review how this computer is being used. Set it up together, and keep the monitoring indicator visible.", size: 15)
+        let introduction = paragraph("Ruffster helps parents and children understand computer use, especially during the school day. Set it up together and keep the menu-bar status visible.", size: 15)
 
         let readiness = NSBox()
         readiness.boxType = .primary
         readiness.title = "Getting started"
         readiness.titlePosition = .atTop
         readiness.contentViewMargins = NSSize(width: 12, height: 10)
-        readiness.contentView = paragraph("Ruffster helps your family get a clearer picture of computer use. Read the collection choices together, keep the menu-bar status visible, and use the report as a starting point for conversation. We’re continuing to improve setup and accessibility.")
+        readiness.contentView = paragraph("Choose the parent dashboard on your computer, or set up this Mac with your child. Review the collection choices together and use the report as a starting point for conversation.")
 
-        let collected = paragraph("Foreground app names and identifiers; total network-interface bytes; reduced DNS, proxy, and system VPN indicators; and a pseudonymous hint when the default router changes. Network-interface bytes are not attributed to apps or websites. Setup also offers an optional experimental process-byte summary.")
-        let excluded = paragraph("No screenshots, keystrokes, message contents, microphone, camera, or full website URLs. The optional browser experiment is not included in this Mac setup.")
-        let disclosure = paragraph("A visible menu-bar indicator shows monitoring status. Activity records are encrypted to a key held by the parent. Router hints do not identify a location, and unknown or missing observations do not explain why they occurred.")
+        let collected = paragraph("Ruffster records the app in front, total traffic for each network connection, a private hint when the default router changes, and a few summarized DNS, proxy, and VPN settings. An optional Mac setting estimates traffic by app or helper service. Network traffic totals do not identify websites.")
+        let excluded = paragraph("Ruffster never records screenshots, keystrokes, messages, audio, or camera. Website names and full web addresses are not part of this Mac setup.")
+        let disclosure = paragraph("The menu-bar status stays visible while Ruffster runs. Activity is encrypted for the parent dashboard; the parent keeps the access PIN and recovery copy. A router hint does not show a location. When observations are missing, the report marks a gap without guessing why.")
 
         stack.addArrangedSubview(eyebrow)
         stack.addArrangedSubview(title)

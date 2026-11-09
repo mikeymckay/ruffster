@@ -9,8 +9,14 @@ if [ "$#" -ne 2 ]; then
 fi
 PYTHON=$1
 OUTPUT=$2
+VERSION=${RUFFSTER_VERSION:-0.1.5}
 case "$PYTHON:$OUTPUT" in /*:/*) ;; *) printf '%s\n' 'Use absolute paths.' >&2; exit 1;; esac
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+"$PYTHON" - "$VERSION" <<'PY'
+import re, sys
+if not re.fullmatch(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)", sys.argv[1]):
+    raise SystemExit('Ruffster version must use three numeric components, such as 0.1.5.')
+PY
 "$PYTHON" -c 'import PyInstaller, nacl, cryptography'
 mkdir -p "$OUTPUT"
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/family-build.XXXXXXXX")
@@ -29,13 +35,13 @@ swiftc "$ROOT/native/macos/setup.swift" -o "$APP/Contents/MacOS/FamilyActivitySe
 swiftc "$ROOT/native/macos/foreground.swift" -o "$APP/Contents/Resources/helpers/foreground"
 swiftc "$ROOT/native/macos/status.swift" -o "$APP/Contents/Resources/helpers/status"
 "$APP/Contents/Resources/helpers/status" --self-test-state
-"$PYTHON" - "$APP/Contents/Info.plist" <<'PY'
+"$PYTHON" - "$APP/Contents/Info.plist" "$VERSION" <<'PY'
 import plistlib, sys
 with open(sys.argv[1], 'wb') as file:
     plistlib.dump({'CFBundleName':'Ruffster Preview', 'CFBundleDisplayName':'Ruffster Preview',
                    'CFBundleIdentifier':'org.familyactivity.preview', 'CFBundleExecutable':'FamilyActivitySetup',
-                   'CFBundlePackageType':'APPL', 'CFBundleShortVersionString':'0.1.0',
-                   'CFBundleVersion':'1', 'NSHighResolutionCapable':True,
+                   'CFBundlePackageType':'APPL', 'CFBundleShortVersionString':sys.argv[2],
+                   'CFBundleVersion':sys.argv[2], 'NSHighResolutionCapable':True,
                    'NSLocalNetworkUsageDescription': 'Ruffster uses your local network when you connect a parent computer or send an encrypted report.'}, file)
 PY
 "$APP/Contents/MacOS/FamilyActivitySetup" --check-bundle

@@ -100,12 +100,13 @@ class DocumentationSiteTests(unittest.TestCase):
 
     def test_plan_prioritizes_mac_then_windows_and_public_parent_experience(self):
         plan = (ROOT / 'PLAN.md').read_text(encoding='utf-8')
-        self.assertIn('macOS family-ready product (first platform priority)', plan)
-        self.assertIn('Windows family-ready product (second platform priority)', plan)
-        self.assertIn('Public README, onboarding, and GitHub Pages', plan)
-        self.assertIn('published project-subpath URL', plan)
-        self.assertIn('rejects wildcards', plan)
-        self.assertIn('browser-specific host-manifest locations', plan)
+        self.assertIn('### 1. Mac family app', plan)
+        self.assertIn('### 2. Windows family app', plan)
+        self.assertLess(plan.index('### 1. Mac family app'), plan.index('### 2. Windows family app'))
+        self.assertIn('### 4. Public project and installation guide — live', plan)
+        self.assertIn('source commit and checksum', plan)
+        self.assertIn('family LAN', plan)
+        self.assertNotIn('Pages source setting is still disabled', plan)
 
     def test_github_ci_covers_platforms_and_unsigned_preview_is_separate_prerelease(self):
         workflow = (ROOT / '.github/workflows/ci.yml').read_text(encoding='utf-8')
@@ -191,7 +192,7 @@ class DocumentationSiteTests(unittest.TestCase):
         guide = (SITE / 'install.html').read_text(encoding='utf-8')
         self.assertIn('macOS comes first', home)
         self.assertIn('Linux is for development and testing', guide)
-        self.assertIn('The Mac family preview is ready for you to try together', guide)
+        self.assertIn('Ready for a first try together on Mac', guide)
         self.assertIn('made for everyday family use at home and during the school day', guide)
         self.assertIn('Drag Ruffster into the Applications folder', guide)
         self.assertIn('Open parent dashboard', guide)
@@ -450,7 +451,7 @@ class DocumentationSiteTests(unittest.TestCase):
 
     def test_progress_page_reports_current_preview_and_family_validation_gates(self):
         status = (SITE / 'progress.html').read_text(encoding='utf-8')
-        self.assertIn('The Mac family preview is ready to try together', status)
+        self.assertIn('Ready for a first family try on Mac', status)
         self.assertIn('What we’re improving next', status)
-        self.assertIn('Get the Mac app and see the simple first-open steps', status)
-        self.assertIn('family testing is next', status)
+        self.assertIn('Get the Mac app and see the first-open steps', status)
+        self.assertIn('all four Windows test groups passed', status)
