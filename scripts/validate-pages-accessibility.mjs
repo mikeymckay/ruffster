@@ -209,7 +209,10 @@ async function main() {
       'about:blank',
     ];
     if (process.platform === 'linux') browserArgs.unshift('--no-sandbox');
-    browser = spawn(chrome, browserArgs, { stdio: 'ignore' });
+    browser = spawn(chrome, browserArgs, {
+      detached: process.platform !== 'win32',
+      stdio: 'ignore',
+    });
     const target = await waitForDebugger(profile, browser);
     const debuggerConnection = connectDebugger(target.webSocketDebuggerUrl);
     socket = debuggerConnection.socket;
@@ -291,15 +294,32 @@ async function main() {
   } finally {
     socket?.close();
     if (browser && browser.exitCode === null) {
-      browser.kill('SIGTERM');
+      const signalBrowser = (signal) => {
+        if (process.platform !== 'win32' && browser.pid) {
+          try {
+            process.kill(-browser.pid, signal);
+            return;
+          } catch (error) {
+            if (error.code !== 'ESRCH') throw error;
+          }
+        }
+        browser.kill(signal);
+      };
+      signalBrowser('SIGTERM');
       await Promise.race([
         new Promise((resolve) => browser.once('exit', resolve)),
         new Promise((resolve) => setTimeout(resolve, 3000)),
       ]);
-      if (browser.exitCode === null) browser.kill('SIGKILL');
+      if (browser.exitCode === null) {
+        signalBrowser('SIGKILL');
+        await Promise.race([
+          new Promise((resolve) => browser.once('exit', resolve)),
+          new Promise((resolve) => setTimeout(resolve, 3000)),
+        ]);
+      }
     }
     await new Promise((resolve) => server.close(resolve));
-    await rm(profile, { recursive: true, force: true });
+    await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   }
 }
 
