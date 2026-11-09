@@ -1,4 +1,4 @@
-## Ruffster for Mac 0.1.19
+## Ruffster for Mac 0.1.20
 
 Ruffster helps parents and children understand everyday computer use together, including during the school day. This Mac family app keeps its monitoring status visible, encrypts activity reports for the parent, and includes a local dashboard. Setup now explains before monitoring starts that it applies only to the signed-in Mac account.
 
@@ -9,6 +9,8 @@ Download `Ruffster-Mac-Family-App-Apple-Silicon.dmg`, open it, and drag Ruffster
 During child setup, Ruffster explains the small amount of day-level metadata it keeps so older records can be removed automatically while activity details stay encrypted for the parent.
 
 The child setup disclosure has been shortened to remove repeated technical wording while still explaining what Ruffster records, what stays private, optional app network totals, and monitoring interruptions.
+
+The parent report now keeps optional website estimates out of the way when there are no website observations. It still clearly says when no website details were recorded and keeps the explanation available.
 
 ### Set up together
 

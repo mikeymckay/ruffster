@@ -263,6 +263,10 @@ async function render() {
   $('snapshot-note').textContent = freshness;
   $('report-timezone-note').textContent = `Daily and weekly calendar days use ${data.report_timezone || 'UTC'}. Observation timestamps remain in UTC.`;
   const websiteObservations = data.website_observations || {count: 0, latest_at: null};
+  const hasWebsiteDetails = websiteObservations.count > 0;
+  for (const section of document.querySelectorAll('.website-observation-section')) {
+    section.hidden = !hasWebsiteDetails;
+  }
   $('website-status').textContent = websiteObservations.count > 0
     ? `Website details from the optional add-on: ${websiteObservations.count}. Most recent: ${formatUtcTimestamp(websiteObservations.latest_at)}.`
     : 'No website details were recorded in this report. Website sharing is optional; see “How website information works” for details.';

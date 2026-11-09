@@ -101,10 +101,11 @@ function createStaticServer() {
   });
 }
 
-function sampleReport() {
+function sampleReport({ includeWebsiteDetails = true } = {}) {
   const now = new Date().toISOString();
   const appRows = [['Safari', 3540], ['Pages', 1080]];
-  const siteRows = [['example.edu', 1800], ['wikipedia.org', 900]];
+  const siteRows = includeWebsiteDetails ? [['example.edu', 1800], ['wikipedia.org', 900]] : [];
+  const categoryRows = includeWebsiteDetails ? [['Learning', 1800], ['Reference', 900]] : [];
   const trafficRows = [['en0', 125000000, 14000000]];
   const empty = [];
   const byContext = rows => ({ school: rows, home: rows, school_network: rows, other_network: empty, schedule_uncertain: false });
@@ -114,9 +115,9 @@ function sampleReport() {
     devices: [{ device_id: 'sample1234', label: 'Sample computer', last_seen: now }],
     selected_device: 'sample1234',
     apps: byPeriod(appRows), sites: byPeriod(siteRows),
-    website_observations: { count: 12, latest_at: now },
-    site_categories: byPeriod([['Learning', 1800], ['Reference', 900]]),
-    category_contexts: { school: appRows, home: appRows, school_network: appRows, other_network: empty },
+    website_observations: { count: includeWebsiteDetails ? 12 : 0, latest_at: includeWebsiteDetails ? now : null },
+    site_categories: byPeriod(categoryRows),
+    category_contexts: { school: categoryRows, home: categoryRows, school_network: categoryRows, other_network: empty },
     gaps: [[now, now]], sessions: [[now, now, null]],
     agent_runtime: { seconds: 21600, sessions: 3, gaps: 1, restarts: 1, days: 7 },
     traffic: [[now, 'en0', 125000000, 14000000]],
@@ -131,7 +132,7 @@ function sampleReport() {
 }
 
 function createParentServer({ populated = false, unlocked = populated, hasReport = populated,
-                              backupConfirmed = populated } = {}) {
+                              backupConfirmed = populated, includeWebsiteDetails = true } = {}) {
   const assets = {
     '/': 'index.html',
     '/app.css': 'app.css',
@@ -174,7 +175,7 @@ function createParentServer({ populated = false, unlocked = populated, hasReport
     }
     if (hasReport && new URL(request.url || '/', 'http://localhost').pathname === '/api/report') {
       response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
-      response.end(JSON.stringify(sampleReport()));
+      response.end(JSON.stringify(sampleReport({ includeWebsiteDetails })));
       return;
     }
     const relative = assets[pathname];
@@ -294,6 +295,7 @@ async function main() {
   const parentServer = createParentServer();
   const parentPinChangeServer = createParentServer({ unlocked: true, backupConfirmed: true });
   const parentReportServer = createParentServer({ populated: true });
+  const parentNoWebsitesServer = createParentServer({ populated: true, includeWebsiteDetails: false });
   let browser;
   let socket;
   try {
@@ -313,10 +315,15 @@ async function main() {
       parentReportServer.once('error', reject);
       parentReportServer.listen(0, '127.0.0.1', resolve);
     });
+    await new Promise((resolve, reject) => {
+      parentNoWebsitesServer.once('error', reject);
+      parentNoWebsitesServer.listen(0, '127.0.0.1', resolve);
+    });
     const address = server.address();
     const parentAddress = parentServer.address();
     const parentPinAddress = parentPinChangeServer.address();
     const reportAddress = parentReportServer.address();
+    const noWebsitesAddress = parentNoWebsitesServer.address();
     const browserArgs = [
       '--headless=new', '--disable-gpu', '--no-first-run', '--disable-background-networking',
       '--remote-debugging-port=0', '--remote-allow-origins=*', `--user-data-dir=${profile}`,
@@ -341,6 +348,7 @@ async function main() {
       { name: 'parent dashboard setup', url: `http://127.0.0.1:${parentAddress.port}/`, path: '/' },
       { name: 'parent dashboard change parent PIN', url: `http://127.0.0.1:${parentPinAddress.port}/`, path: '/' },
       { name: 'parent dashboard report', url: `http://127.0.0.1:${reportAddress.port}/`, path: '/' },
+      { name: 'parent dashboard report without website details', url: `http://127.0.0.1:${noWebsitesAddress.port}/`, path: '/' },
     ];
     for (const viewport of viewports) {
       await send('Emulation.setDeviceMetricsOverride', {
@@ -377,11 +385,22 @@ async function main() {
           let ready = false;
           while (Date.now() < deadline) {
             ready = await evaluate(send,
-              'document.querySelector("#report").hidden === false && document.querySelector("#apps li")?.textContent.includes("Safari")');
+              'document.querySelector("#report").hidden === false && document.querySelector("#apps li")?.textContent.includes("Safari") && Array.from(document.querySelectorAll(".website-observation-section")).length === 7 && Array.from(document.querySelectorAll(".website-observation-section")).every(section => !section.hidden)');
             if (ready) break;
             await new Promise((resolve) => setTimeout(resolve, 50));
           }
           if (!ready) throw new Error('The populated parent report did not render its sample data.');
+        }
+        if (target.name === 'parent dashboard report without website details') {
+          const deadline = Date.now() + 5000;
+          let ready = false;
+          while (Date.now() < deadline) {
+            ready = await evaluate(send,
+              'document.querySelector("#report").hidden === false && document.querySelector("#apps li")?.textContent.includes("Safari") && document.querySelector("#website-status").textContent.includes("No website details") && Array.from(document.querySelectorAll(".website-observation-section")).length === 7 && Array.from(document.querySelectorAll(".website-observation-section")).every(section => section.hidden)');
+            if (ready) break;
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
+          if (!ready) throw new Error('The parent report without website details did not hide empty website sections.');
         }
         const axeSource = JSON.stringify(axe.source);
         const result = await evaluate(send, `(() => {
@@ -473,6 +492,7 @@ async function main() {
     await new Promise((resolve) => parentServer.close(resolve));
     await new Promise((resolve) => parentPinChangeServer.close(resolve));
     await new Promise((resolve) => parentReportServer.close(resolve));
+    await new Promise((resolve) => parentNoWebsitesServer.close(resolve));
     await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   }
 }
