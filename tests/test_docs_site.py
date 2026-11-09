@@ -496,8 +496,11 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('Mac parent key sharing worked over the home LAN with a synthetic client', status)
         self.assertIn('the packaged Mac client completed a same-Mac key handoff', status)
         self.assertIn('These checks do not replace Mac-to-Mac setup', status)
-        self.assertIn('293 tests passed on the Linux development host', status)
-        self.assertIn('Mac and Windows package smoke builds passed', status)
+        self.assertIn('294 tests: 289 passed and five platform/tool checks were skipped', status)
+        self.assertIn('42587923902', status)
+        self.assertIn('42587923858', status)
+        self.assertIn('synthetic first-run and populated parent-dashboard screens', status)
+        self.assertIn('zero Axe violations and no horizontal overflow', status)
         self.assertIn('the real Windows agent lifecycle still needs a logged-in Windows computer', status)
         self.assertIn('cannot verify an interactive Task Scheduler session', status)
 
