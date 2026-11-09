@@ -54,22 +54,22 @@ class ParentAppTests(unittest.TestCase):
         self.assertEqual(self.request('POST', '/api/confirm-key-backup', {'confirmed':True})[0], 200)
         return backup
 
-    def test_conversation_prompts_are_cautious_and_tied_to_observations(self):
+    def test_conversation_prompts_are_welcoming_and_tied_to_observations(self):
         from family_activity.parent_app import _conversation_prompts
         report = {'sessions':[('start','heartbeat','stop')], 'incomplete':False, 'gaps':[],
                   'networks':[], 'network_settings':{'dns_observed':True,'proxy_indicator':False,'vpn_indicator':False}}
         prompts = _conversation_prompts(report)
-        self.assertTrue(any('cannot confirm' in prompt for prompt in prompts))
+        self.assertTrue(any('filter provider' in prompt for prompt in prompts))
         self.assertFalse(any(term in ' '.join(prompts).lower() for term in ('suspicious','misconduct','tampering')))
         report.update({'sessions':[], 'incomplete':True, 'gaps':[('from','to')],
                        'networks':[{'label':None}],
                        'network_settings':{'dns_observed':None,'proxy_indicator':True,'vpn_indicator':None}})
         prompts = _conversation_prompts(report)
-        self.assertTrue(any('no recent agent sessions' in prompt for prompt in prompts))
-        self.assertTrue(any('coverage is incomplete' in prompt for prompt in prompts))
-        self.assertTrue(any('unobserved intervals' in prompt for prompt in prompts))
-        self.assertTrue(any('unlabeled' in prompt for prompt in prompts))
-        self.assertTrue(any('school-managed' in prompt for prompt in prompts))
+        self.assertTrue(any('no recent ruffster sessions' in prompt.lower() for prompt in prompts))
+        self.assertTrue(any('starts partway through a session' in prompt for prompt in prompts))
+        self.assertTrue(any('without observations' in prompt for prompt in prompts))
+        self.assertTrue(any('new network to label' in prompt for prompt in prompts))
+        self.assertTrue(any('proxy or VPN setting appeared' in prompt for prompt in prompts))
 
     def test_parent_dashboard_has_a_live_four_step_setup_guide(self):
         status, _, page = self.request('GET', '/')
@@ -117,9 +117,9 @@ class ParentAppTests(unittest.TestCase):
         self.assertIn(b"$('report-transfer').hidden = !status.unlocked", script)
         self.assertIn(b"status.has_report", script)
         self.assertIn(b'Recorded agent runtime', script)
-        self.assertIn(b'cannot confirm every sample succeeded', script)
-        self.assertIn(b'This does not show whether websites were used.', script)
-        self.assertIn(b'This does not prove monitoring was continuous.', script)
+        self.assertIn(b'Ruffster uptime shows when the agent was running', script)
+        self.assertIn(b'No website details were recorded for this period.', script)
+        self.assertIn(b'No pauses are listed in this report.', script)
         status, _, styles = self.request('GET', '/app.css')
         self.assertEqual(status, 200)
         self.assertIn(b'.steps li.current', styles)
@@ -310,7 +310,7 @@ class ParentAppTests(unittest.TestCase):
         status, _, report = self.request('GET', '/api/report')
         self.assertEqual(status, 200)
         report_data=json.loads(report)
-        self.assertTrue(any('cannot confirm' in prompt for prompt in report_data['conversation_prompts']))
+        self.assertTrue(any('network indicators' in prompt for prompt in report_data['conversation_prompts']))
         self.assertEqual(len(report_data['sessions']), 1)
         self.assertIn('agent_runtime', report_data)
         self.assertGreaterEqual(report_data['agent_runtime']['seconds'], 0)
@@ -485,7 +485,7 @@ class ParentAppTests(unittest.TestCase):
             self.assertEqual(database.execute('SELECT count(*) FROM encrypted_events').fetchone()[0], merged_count)
         report = json.loads(self.request('GET', '/api/report')[2])
         self.assertEqual(len(report['sessions']), 2)
-        self.assertEqual({entry[0] for entry in report['apps']['today']},
+        self.assertEqual({entry[0] for entry in report['apps']['week']},
                          {'EarlierSyntheticApp', 'NewerSyntheticApp'})
         stored = self.server.data.read_bytes()
         self.assertNotIn(b'EarlierSyntheticApp', stored)
@@ -531,7 +531,7 @@ class ParentAppTests(unittest.TestCase):
             report = json.loads(content)
             self.assertEqual(report['selected_device'], device_id)
             self.assertEqual(len(report['sessions']), 1)
-            app_names = {entry[0] for entry in report['apps']['today']}
+            app_names = {entry[0] for entry in report['apps']['week']}
             self.assertIn(own_app, app_names)
             self.assertNotIn(other_snapshot[1], app_names)
         self.assertEqual(self.request('GET', '/api/report?device=not-a-device')[0], 400)

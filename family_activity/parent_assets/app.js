@@ -233,24 +233,24 @@ async function render() {
   $('delete-computer').hidden = !selected;
   $('device-label').value = selected ? selected.label : '';
   $('device-last-seen').textContent = selected
-    ? `Most recent recorded session: ${formatUtcTimestamp(selected.last_seen)}. The report updates when you bring back another encrypted snapshot.`
-    : 'No computer sessions were found in this report.';
+    ? `Most recent recorded session: ${formatUtcTimestamp(selected.last_seen)}. Bring back another report to update this view.`
+    : 'No computer sessions have been added to this report yet.';
   list('conversation-prompts', data.conversation_prompts || [], value => value);
   const freshness = data.recorded_through
-    ? `Data in this imported snapshot was recorded through ${formatUtcTimestamp(data.recorded_through)}. The snapshot does not update automatically; its age does not tell you why data is missing.`
-    : 'This report contains no dated activity observations. The snapshot does not update automatically.';
+    ? `Data in this imported snapshot was recorded through ${formatUtcTimestamp(data.recorded_through)}. Bring back another report to see more recent activity.`
+    : 'No dated activity has been added to this report yet.';
   const runtime = data.agent_runtime || {seconds:0,sessions:0,gaps:0};
   const runtimeHours = Math.floor(runtime.seconds / 3600);
   const runtimeMinutes = Math.floor((runtime.seconds % 3600) / 60);
   const runtimeText = runtime.sessions
-    ? `Recorded agent runtime in the past ${runtime.days} days: about ${runtimeHours} hr ${runtimeMinutes} min across ${runtime.sessions} session(s), with ${runtime.gaps} observed gap(s). This describes agent session boundaries; it cannot confirm every sample succeeded or that the computer was actively used.`
-    : `No dated agent runtime was available for the past ${runtime.days || 7} days. This does not mean the computer was unused.`;
+    ? `Recorded agent runtime in the past ${runtime.days} days: about ${runtimeHours} hr ${runtimeMinutes} min across ${runtime.sessions} session(s), with ${runtime.gaps} observed gap(s). Ruffster uptime shows when the agent was running; it is separate from estimated app time.`
+    : `No Ruffster uptime was recorded for the past ${runtime.days || 7} days.`;
   $('snapshot-note').textContent = freshness;
   $('report-timezone-note').textContent = `Daily and weekly calendar days use ${data.report_timezone || 'UTC'}. Observation timestamps remain in UTC.`;
   const websiteObservations = data.website_observations || {count: 0, latest_at: null};
   $('website-status').textContent = websiteObservations.count > 0
-    ? `Website add-on observations in this report: ${websiteObservations.count}. Most recent: ${formatUtcTimestamp(websiteObservations.latest_at)}. This confirms only that domains were reported at those times; it does not show complete browser coverage.`
-    : 'Website add-on observations: none in this report. The add-on may be absent, paused, disconnected, or there may have been no eligible browser activity; this report cannot tell which.';
+    ? `Website details from the optional add-on: ${websiteObservations.count}. Most recent: ${formatUtcTimestamp(websiteObservations.latest_at)}.`
+    : 'No website details were recorded in this report. Website sharing is optional; see “How website information works” for details.';
   $('coverage').textContent = `${runtimeText} ${data.incomplete ? 'Some older session starts are unavailable, so coverage may be incomplete. ' : ''}${data.sessions.length} recent session record(s) and ${data.gaps.length} unobserved interval(s) shown (up to 20 of each).`;
   const formatTime = ([name,seconds]) => `${name}: about ${(seconds/60).toFixed(1)} min`;
   const formatBytes = value => {
@@ -260,10 +260,10 @@ async function render() {
     return `${amount.toLocaleString(undefined, {maximumFractionDigits: unit ? 1 : 0})} ${units[unit]}`;
   };
   const formatTrafficTotal = ([iface,received,sent]) => `${iface}: ${formatBytes(received)} received · ${formatBytes(sent)} sent`;
-  list('apps', data.apps.today, formatTime, 'No app observations are in this report. This does not show whether apps were used.');
-  list('sites', data.sites.today, formatTime, 'No website observations are in this report. This does not show whether websites were used.');
-  list('apps-week', data.apps.week, formatTime, 'No app observations are in this report. This does not show whether apps were used.');
-  list('sites-week', data.sites.week, formatTime, 'No website observations are in this report. This does not show whether websites were used.');
+  list('apps', data.apps.today, formatTime, 'No app details were recorded for this period.');
+  list('sites', data.sites.today, formatTime, 'No website details were recorded for this period.');
+  list('apps-week', data.apps.week, formatTime, 'No app details were recorded for this period.');
+  list('sites-week', data.sites.week, formatTime, 'No website details were recorded for this period.');
   const categoryFormat = ([name,seconds]) => `${name}: about ${(seconds/60).toFixed(1)} min`;
   list('categories-today', data.site_categories.today, categoryFormat, 'No website observations could be categorized.');
   list('categories-week', data.site_categories.week, categoryFormat, 'No website observations could be categorized.');
@@ -271,17 +271,17 @@ async function render() {
   list('school-apps', data.contexts.apps.school, format, 'No app observations are available for these scheduled hours.');
   list('school-sites', data.contexts.sites.school, format, 'No website observations are available for these scheduled hours.');
   list('school-traffic', data.traffic_contexts.school, formatTrafficTotal,
-       'No traffic intervals could be placed in these scheduled hours. This does not show that traffic was zero.');
+       'No network measurements were available for these scheduled hours.');
   list('home-apps', data.contexts.apps.home, format, 'No app observations are available for this network label.');
   list('home-sites', data.contexts.sites.home, format, 'No website observations are available for this network label.');
   list('home-traffic', data.traffic_contexts.home, formatTrafficTotal,
-       'No traffic intervals could be linked to a home-labeled network. This does not show that traffic was zero.');
-  list('school-network-apps', data.contexts.apps.school_network, format, 'No app observations are linked to a School-labeled network. This does not establish where the computer was.');
+       'No network measurements were available for this Home-labeled network.');
+  list('school-network-apps', data.contexts.apps.school_network, format, 'No app details were recorded for this School-labeled network.');
   list('school-network-sites', data.contexts.sites.school_network, format, 'No website observations are linked to a School-labeled network.');
-  list('school-network-traffic', data.traffic_contexts.school_network, formatTrafficTotal, 'No counter intervals were linked to a School-labeled network. This does not show that traffic was zero.');
+  list('school-network-traffic', data.traffic_contexts.school_network, formatTrafficTotal, 'No network measurements were available for this School-labeled network.');
   list('other-network-apps', data.contexts.apps.other_network, format, 'No app observations are linked to an Other-labeled network.');
   list('other-network-sites', data.contexts.sites.other_network, format, 'No website observations are linked to an Other-labeled network.');
-  list('other-network-traffic', data.traffic_contexts.other_network, formatTrafficTotal, 'No counter intervals were linked to an Other-labeled network. This does not show that traffic was zero.');
+  list('other-network-traffic', data.traffic_contexts.other_network, formatTrafficTotal, 'No network measurements were available for this Other-labeled network.');
   list('categories-school', data.category_contexts.school, categoryFormat, 'No categorized website observations are available for these hours.');
   list('categories-home', data.category_contexts.home, categoryFormat, 'No categorized website observations are available for this network label.');
   list('categories-school-network', data.category_contexts.school_network, categoryFormat, 'No categorized website observations are linked to a School-labeled network.');
@@ -291,7 +291,7 @@ async function render() {
   const settingLines = [];
   if (settings) {
     $('settings-observed').textContent = `Last observed ${formatUtcTimestamp(settings.sampled_at)}. These are indicators from the operating-system settings the agent can inspect.`;
-    settingLines.push(`DNS configuration: ${settings.dns_observed === true ? 'a resolver address appeared in the inspected settings; this does not show which resolver was active or whether filtering works' : settings.dns_observed === false ? 'no resolver address appeared among the inspected settings; other DNS paths may still apply' : 'unavailable'}`);
+    settingLines.push(`DNS configuration: ${settings.dns_observed === true ? 'a resolver address appeared in the settings Ruffster can inspect' : settings.dns_observed === false ? 'no resolver address appeared in the settings Ruffster can inspect' : 'unavailable'}`);
     settingLines.push(`System proxy: ${settings.proxy_indicator === true ? 'a supported proxy setting was enabled' : settings.proxy_indicator === false ? 'no enabled supported proxy setting was reported' : 'unknown'}`);
     settingLines.push(`VPN connection: ${settings.vpn_indicator === true ? 'a supported VPN connection appears active; other VPN apps may not be detected' : settings.vpn_indicator === false ? 'no built-in VPN connection appeared active; other VPN apps may not be detected' : 'could not check VPN status; some VPN apps may not be detected'}`);
   } else {
@@ -299,15 +299,15 @@ async function render() {
   }
   list('settings-list', settingLines, value => value);
   list('traffic-today', data.traffic_usage.today, formatTrafficTotal,
-       'No traffic intervals are available for today. This does not show that traffic was zero.');
+       'No network measurements are available for today.');
   list('traffic-week-summary', data.traffic_usage.week, formatTrafficTotal,
-       'No traffic intervals are available for these seven days. This does not show that traffic was zero.');
+       'No network measurements are available for these seven days.');
   list('traffic', data.traffic, ([at,iface,received,sent]) => `${formatUtcTimestamp(at)} · ${iface}: ${formatBytes(received)} received, ${formatBytes(sent)} sent`, 'No interface measurements were recorded in this report.');
   const processTraffic = data.process_traffic || {status: null, today: [], week: []};
   $('process-traffic-status').textContent = processTraffic.status === 'enabled'
     ? 'This optional Mac source was enabled. It records process-associated byte deltas, not website traffic. Some connections may belong to helper services.'
     : processTraffic.status === 'unavailable'
-      ? 'The optional process measurement stopped reporting. Missing values do not mean zero traffic.'
+      ? 'The optional process-based network measurement was unavailable during this session.'
       : processTraffic.status === 'disabled'
         ? 'Process-associated network totals were turned off during the latest monitoring session.'
         : processTraffic.status === 'unsupported'
@@ -315,9 +315,9 @@ async function render() {
           : 'Process-associated network totals were not included in this report. They may not have been enabled on the child’s Mac.';
   const formatProcessTraffic = ([process,received,sent]) => `${process}: ${formatBytes(received)} received · ${formatBytes(sent)} sent`;
   list('process-traffic-today', processTraffic.today, formatProcessTraffic,
-       'No process byte changes were available for today. This does not show that traffic was zero.');
+       'No process-based network measurements were recorded today.');
   list('process-traffic-week', processTraffic.week, formatProcessTraffic,
-       'No process byte changes were available for these seven days. This does not show that traffic was zero.');
+       'No process-based network measurements were recorded for these seven days.');
   const networks = $('networks'); networks.replaceChildren();
   if (!data.networks.length) networks.textContent = 'No identified routers in this report.';
   for (const network of data.networks) {
@@ -334,7 +334,7 @@ async function render() {
     });
     row.append(label,select); networks.appendChild(row);
   }
-  list('gaps', data.gaps, ([start,end]) => `${formatUtcTimestamp(start)} to ${formatUtcTimestamp(end)} — cause unknown`, 'No gaps were recorded in this report. This does not prove monitoring was continuous.');
+  list('gaps', data.gaps, ([start,end]) => `${formatUtcTimestamp(start)} to ${formatUtcTimestamp(end)} — no observations recorded`, 'No pauses are listed in this report.');
 }
 $('report-device').addEventListener('change', async () => {
   selectedDeviceId = $('report-device').value;

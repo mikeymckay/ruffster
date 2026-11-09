@@ -197,8 +197,8 @@ class DocumentationSiteTests(unittest.TestCase):
     def test_home_page_discloses_limits_of_optional_mac_process_totals(self):
         home = (SITE / 'index.html').read_text(encoding='utf-8')
         self.assertIn('optional experimental summary of bytes associated with processes', home)
-        self.assertIn('Which website used process-associated bytes', home)
-        self.assertIn('helper services may own connections', home)
+        self.assertIn('Process totals may list helper services', home)
+        self.assertIn('quick connections can be missed', home)
 
     def test_filtering_guidance_explains_network_scope_and_school_settings(self):
         faq = (SITE / 'faq.html').read_text(encoding='utf-8')

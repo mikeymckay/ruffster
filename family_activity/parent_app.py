@@ -791,22 +791,22 @@ def _conversation_prompts(report):
     """Suggest context questions from observations; never classify behavior."""
     prompts = []
     if not report['sessions']:
-        prompts.append('This report has no recent agent sessions. Check whether monitoring was active and when the report was last updated; missing observations do not mean the computer was unused.')
+        prompts.append('No recent Ruffster sessions are in this report. Check when the report was last shared and whether Ruffster is running.')
     if report['incomplete']:
-        prompts.append('Some older session starts are missing, so coverage is incomplete. Retention or earlier gaps can explain this; the report cannot identify a cause.')
+        prompts.append('This report starts partway through a session, so earlier activity may not be included.')
     if report['gaps']:
-        prompts.append('There are unobserved intervals. Ask whether the computer was asleep, turned off, or monitoring stopped; these records cannot tell which happened.')
+        prompts.append('Ruffster marked time without observations. Was the computer asleep, turned off, or updating then?')
     if any(network['label'] is None for network in report['networks']):
-        prompts.append('One or more routers are unlabeled. Ask which network they might be; a router identifier is not proof of location.')
+        prompts.append('There’s a new network to label. Does it look like Home, School, or Other?')
     settings = report['network_settings']
     if settings is None:
-        prompts.append('No network-configuration sample is available, so this report cannot assess filtering setup.')
+        prompts.append('No recent network settings are in this report. Your filter provider can show whether protection is active.')
     else:
         if settings['proxy_indicator'] is True or settings['vpn_indicator'] is True:
-            prompts.append('A proxy or VPN indicator was observed. These can be expected on school-managed devices; ask whether either is part of the computer setup.')
-        prompts.append('DNS, proxy, and VPN indicators cannot confirm that content filtering worked. Check protections separately on school Wi-Fi and hotspots if that matters to your family.')
+            prompts.append('A proxy or VPN setting appeared. Does that match the school or home computer setup?')
+        prompts.append('Ruffster shares a few network indicators. Check your filter provider on school Wi-Fi and hotspots too if you want to confirm it is active there.')
     if not prompts:
-        prompts.append('These observations alone do not call for a specific follow-up. Ask the child for context before interpreting estimated time or app and website names.')
+        prompts.append('Want to add more context? Look together at the estimated time, app names, and any website details.')
     return prompts
 
 
