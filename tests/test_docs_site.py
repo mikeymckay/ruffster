@@ -148,7 +148,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn("'mac-family-*'", release)
         self.assertIn('--prerelease', release)
         self.assertIn('.github/MAC-FAMILY-RELEASE-NOTES.md', release)
-        self.assertIn('Ruffster for Mac 0.1.17', family_release_notes)
+        self.assertIn('Ruffster for Mac 0.1.18', family_release_notes)
         self.assertIn('A real family setup and report exchange are the next validation step', family_release_notes)
         self.assertIn('scripts/run-tests.py', release)
         self.assertIn('shasum -a 256', packager)
