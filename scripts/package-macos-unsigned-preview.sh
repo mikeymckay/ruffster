@@ -4,7 +4,7 @@
 set -euo pipefail
 
 if [[ "$(uname -s)" != "Darwin" ]]; then
-  echo "Package the Mac preview on macOS." >&2
+  echo "Package the Mac app on macOS." >&2
   exit 1
 fi
 if [[ "$(uname -m)" != "arm64" ]]; then
@@ -39,22 +39,22 @@ if [[ "$SOURCE_COMMIT" != "$HEAD_COMMIT" ]]; then
   exit 1
 fi
 mkdir -p "$OUTPUT"
-DMG="$OUTPUT/Ruffster-Mac-Family-Preview-Apple-Silicon.dmg"
-if [[ -e "$DMG" || -e "$OUTPUT/Ruffster Preview.app" ]]; then
-  echo "Output already contains a Ruffster preview; choose a new output directory." >&2
+DMG="$OUTPUT/Ruffster-Mac-Family-App-Apple-Silicon.dmg"
+if [[ -e "$DMG" || -e "$OUTPUT/Ruffster.app" ]]; then
+  echo "Output already contains Ruffster; choose a new output directory." >&2
   exit 1
 fi
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/ruffster-dmg.XXXXXXXX")
 trap 'rm -rf -- "$WORK"' EXIT HUP INT TERM
 
 "$ROOT/scripts/build-macos-preview.sh" "$PYTHON" "$OUTPUT"
-APP="$OUTPUT/Ruffster Preview.app"
+APP="$OUTPUT/Ruffster.app"
 DMG_ROOT="$WORK/image"
 mkdir -p "$DMG_ROOT"
-ditto "$APP" "$DMG_ROOT/Ruffster Preview.app"
+ditto "$APP" "$DMG_ROOT/Ruffster.app"
 ln -s /Applications "$DMG_ROOT/Applications"
 cat > "$DMG_ROOT/READ BEFORE OPENING.txt" <<EOF
-RUFFSTER FOR MAC — FAMILY DEVELOPMENT PREVIEW
+RUFFSTER FOR MAC — FAMILY APP
 
 Ruffster helps parents and children understand computer use together,
 including school-day patterns. This build has visible monitoring, encrypted
@@ -75,9 +75,9 @@ checks that the file arrived unchanged.
 The setup explains what Ruffster records before monitoring begins. Read it
 together and choose the options that fit your family.
 EOF
-hdiutil create -volname "Ruffster unsigned preview" -srcfolder "$DMG_ROOT" -ov -format UDZO "$DMG" >/dev/null
+hdiutil create -volname "Ruffster" -srcfolder "$DMG_ROOT" -ov -format UDZO "$DMG" >/dev/null
 (cd "$OUTPUT" && shasum -a 256 "$(basename "$DMG")" > "$(basename "$DMG").sha256")
-echo "Ruffster Mac family development preview created: $DMG"
+echo "Ruffster Mac family app created: $DMG"
 echo "SHA-256: $OUTPUT/$(basename "$DMG").sha256"
 echo "Source commit: $SOURCE_COMMIT"
 echo "No signing, notarization, quarantine removal, or monitoring installation was performed."

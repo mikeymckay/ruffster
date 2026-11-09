@@ -1,4 +1,4 @@
-## Ruffster for Mac — family preview
+## Ruffster for Mac — family app
 
 Ruffster helps parents and children understand everyday computer use together, including during the school day. The Mac app keeps its status visible, encrypts activity reports for the parent, and opens the local parent dashboard.
 

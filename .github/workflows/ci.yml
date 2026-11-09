@@ -95,8 +95,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - shard: Parent setup and report flow
-            files: test_parent_app.py test_dashboard.py test_key_vault.py test_local_share.py test_docs_site.py
+          - shard: Parent report API
+            files: test_parent_app.py
+          - shard: Parent dashboard and key access
+            files: test_dashboard.py test_key_vault.py
+          - shard: Local report sharing
+            files: test_local_share.py
+          - shard: Website and contributor docs
+            files: test_docs_site.py
           - shard: Agent and network sampling
             files: test_encrypted_agent.py test_encrypted_view.py test_encrypted_store.py test_browser_channel.py test_process_network.py test_status.py test_network_labels.py test_network_identity.py test_device_identity.py test_device_labels.py test_public_key_file.py
           - shard: Native setup and install

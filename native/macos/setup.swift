@@ -308,7 +308,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 }
             }
         } catch {
-            dashboardStatus?.stringValue = "Could not start the parent dashboard. Check the preview installation and try again."
+            dashboardStatus?.stringValue = "Could not start the parent dashboard. Check that Ruffster is in Applications, then try again."
             dashboardOpenButton?.title = "Start dashboard"
             dashboardOpenButton?.isEnabled = true
             dashboardStopButton?.isEnabled = false
@@ -462,7 +462,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         let review = NSAlert()
         review.messageText = "Set up this Mac together?"
-        review.informativeText = "Read what this preview records, choose how long to keep detailed records, and explain the monitoring to the child before setup."
+        review.informativeText = "Review what Ruffster records together, choose how long to keep details, and make sure the child knows what to expect."
         let disclosureText = NSTextView()
         disclosureText.frame = NSRect(x: 0, y: 0, width: 460, height: 190)
         disclosureText.isEditable = false

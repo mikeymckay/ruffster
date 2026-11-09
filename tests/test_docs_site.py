@@ -145,8 +145,8 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('status --porcelain', packager)
         self.assertIn('must exactly match the checked-out HEAD', packager)
         self.assertIn('Ruffster helps parents and children understand everyday computer use together', release_notes)
-        self.assertIn('Ruffster-Mac-Family-Preview-Apple-Silicon.dmg', release)
-        self.assertIn('early-access download', readme)
+        self.assertIn('Ruffster-Mac-Family-App-Apple-Silicon.dmg', release)
+        self.assertIn('unsigned Apple-silicon family app', readme)
 
     def test_test_runner_exposes_stall_diagnostics_in_github_summary(self):
         runner = (ROOT / 'scripts/run-tests.py').read_text(encoding='utf-8')

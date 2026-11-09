@@ -167,5 +167,5 @@ def validate(app_path):
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        raise SystemExit('Usage: validate-macos-preview-bundle.py /path/to/Ruffster Preview.app')
+        raise SystemExit('Usage: validate-macos-preview-bundle.py /path/to/Ruffster.app')
     print(validate(sys.argv[1]))

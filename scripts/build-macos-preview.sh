@@ -21,7 +21,7 @@ PY
 mkdir -p "$OUTPUT"
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/family-build.XXXXXXXX")
 trap 'rm -rf -- "$WORK"' EXIT HUP INT TERM
-APP="$OUTPUT/Ruffster Preview.app"
+APP="$OUTPUT/Ruffster.app"
 if [ -e "$APP" ]; then
   printf '%s\n' 'The output app already exists; choose a new output directory.' >&2; exit 1
 fi
@@ -51,8 +51,8 @@ swiftc "$ROOT/native/macos/status.swift" -o "$APP/Contents/Resources/helpers/sta
 "$PYTHON" - "$APP/Contents/Info.plist" "$VERSION" <<'PY'
 import plistlib, sys
 with open(sys.argv[1], 'wb') as file:
-    plistlib.dump({'CFBundleName':'Ruffster Preview', 'CFBundleDisplayName':'Ruffster Preview',
-                   'CFBundleIdentifier':'org.familyactivity.preview', 'CFBundleExecutable':'FamilyActivitySetup',
+    plistlib.dump({'CFBundleName':'Ruffster', 'CFBundleDisplayName':'Ruffster',
+                   'CFBundleIdentifier':'org.ruffster.app', 'CFBundleExecutable':'FamilyActivitySetup',
                    'CFBundlePackageType':'APPL', 'CFBundleIconFile':'Ruffster.icns',
                    'CFBundleShortVersionString':sys.argv[2],
                    'CFBundleVersion':sys.argv[2], 'NSHighResolutionCapable':True,
@@ -65,4 +65,4 @@ PY
 test -s "$APP/Contents/Resources/LICENSE"
 "$APP/Contents/Resources/runtime/FamilyActivityCore" --help >/dev/null
 "$PYTHON" "$ROOT/scripts/validate-macos-preview-bundle.py" "$APP"
-printf 'Unsigned local preview created: %s\n' "$APP"
+printf 'Unsigned Ruffster app created: %s\n' "$APP"

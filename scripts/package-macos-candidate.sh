@@ -51,7 +51,7 @@ fi
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 mkdir -p "$OUTPUT"
 ARCH=$(uname -m)
-DMG="$OUTPUT/Ruffster Preview-${VERSION}-macOS-${ARCH}.dmg"
+DMG="$OUTPUT/Ruffster-${VERSION}-macOS-${ARCH}.dmg"
 if [[ -e "$DMG" ]]; then
   echo "The candidate already exists; choose a new output directory or remove it explicitly." >&2
   exit 1
@@ -66,7 +66,7 @@ trap cleanup EXIT
 trap 'exit 1' HUP INT TERM
 
 "$ROOT/scripts/build-macos-preview.sh" "$PYTHON" "$WORK/unsigned"
-APP="$WORK/unsigned/Ruffster Preview.app"
+APP="$WORK/unsigned/Ruffster.app"
 "$PYTHON" - "$APP/Contents/Info.plist" "$BUNDLE_ID" "$VERSION" <<'PY'
 import plistlib
 import sys
@@ -76,8 +76,8 @@ with open(path, 'rb') as stream:
     info = plistlib.load(stream)
 info.update({
     'CFBundleIdentifier': bundle_id,
-    'CFBundleName': 'Ruffster Preview',
-    'CFBundleDisplayName': 'Ruffster Preview',
+    'CFBundleName': 'Ruffster',
+    'CFBundleDisplayName': 'Ruffster',
     'CFBundleShortVersionString': version,
     'CFBundleVersion': version,
 })
@@ -95,7 +95,7 @@ done < <(/usr/bin/find "$APP" -type f -print0)
 /usr/bin/codesign --verify --deep --strict --verbose=2 "$APP"
 
 # Notarize and staple the app before placing it in a disk image.
-APP_ZIP="$WORK/Ruffster Preview-${VERSION}.zip"
+APP_ZIP="$WORK/Ruffster-${VERSION}.zip"
 /usr/bin/ditto -c -k --sequesterRsrc --keepParent "$APP" "$APP_ZIP"
 xcrun notarytool submit "$APP_ZIP" --keychain-profile "$NOTARY_PROFILE" --wait --output-format json > "$WORK/app-notary.json"
 APP_STATUS=$("$PYTHON" -c 'import json,sys; print(json.load(open(sys.argv[1])).get("status", ""))' "$WORK/app-notary.json")
@@ -110,9 +110,9 @@ xcrun stapler validate "$APP"
 # The disk image opens with the app and a standard Applications shortcut.
 DMG_ROOT="$WORK/dmg-root"
 mkdir -p "$DMG_ROOT"
-ditto "$APP" "$DMG_ROOT/Ruffster Preview.app"
+ditto "$APP" "$DMG_ROOT/Ruffster.app"
 ln -s /Applications "$DMG_ROOT/Applications"
-hdiutil create -volname "Ruffster Preview" -srcfolder "$DMG_ROOT" -ov -format UDZO "$DMG"
+hdiutil create -volname "Ruffster" -srcfolder "$DMG_ROOT" -ov -format UDZO "$DMG"
 /usr/bin/codesign --force --timestamp --sign "$IDENTITY" "$DMG"
 xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait --output-format json > "$WORK/dmg-notary.json"
 DMG_STATUS=$("$PYTHON" -c 'import json,sys; print(json.load(open(sys.argv[1])).get("status", ""))' "$WORK/dmg-notary.json")

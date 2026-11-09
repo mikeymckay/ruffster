@@ -1,12 +1,12 @@
-# macOS signing and candidate packaging
+# Mac app distribution
 
-`scripts/package-macos-candidate.sh` builds a drag-to-Applications disk image from the current preview sources, signs each Mach-O payload and the app with a Developer ID Application identity, notarizes and staples the app and disk image, and verifies their signatures. The disk image contains `Ruffster Preview.app` and an Applications shortcut. The underlying unsigned preview builder compiles all native helpers and runs `scripts/validate-macos-preview-bundle.py` against the built app, which starts the frozen parent dashboard on loopback with temporary data and checks that unauthenticated API requests are rejected. This smoke check does not install a LaunchAgent or open a native setup window.
+Ruffster currently ships as an unsigned Apple-silicon Mac family app. GitHub Actions builds it from the tagged source, checks the Mac test suite and packaged dashboard, and publishes a drag-to-Applications disk image with its source commit and checksum. The app appears as **Ruffster** in Applications and includes the golden retriever icon.
 
-This produces a **signed preview candidate**. It does not change the setup disclosures or satisfy the open accessibility, usability, privacy, and security work. The project does not currently have the identity needed to use this route. The current public path is the unsigned Mac family development preview described below.
+## Opening Ruffster on Mac
 
-## Unsigned preview without a Developer ID
+Because this project does not yet have an Apple Developer ID, macOS asks you to confirm the first time Ruffster opens. Follow [Apple's current steps for an app from an identified developer](https://support.apple.com/en-us/102445) for Ruffster; keep your Mac's built-in security settings as they are. The release notes include the source commit and checksum so families can see which build they downloaded. A checksum checks that the file arrived unchanged; it is not a publisher signature.
 
-Unsigned builds are less convenient and macOS may block them. Ruffster does not remove quarantine, disable Gatekeeper, or provide a Terminal bypass. A parent or tester decides whether to use Apple's per-app override after reviewing the source and Apple's warning. The override does not mean Apple checked or approved the app.
+## How the family app is published
 
 The release workflow runs on the standard `macos-latest` Apple-silicon GitHub Actions runner when a `mac-preview-*` tag is pushed. It runs the Mac test suite, builds and smoke-checks the app, makes a drag-to-Applications disk image, and publishes a GitHub **prerelease** with:
 
@@ -15,7 +15,7 @@ The release workflow runs on the standard `macos-latest` Apple-silicon GitHub Ac
 - a SHA-256 checksum sidecar (integrity check only, not a digital signature);
 - release notes linking Apple's current Gatekeeper guidance.
 
-The workflow does not need a signing secret and does not claim that checksum verification authenticates a publisher. To create a preview, first review the changes and run the Mac workflow, then tag the reviewed commit with a name such as `mac-preview-0.1.2` and push that tag. Do not use a final version tag or describe this as a signed or notarized installer. Label it as a family development preview and explain Apple's first-open prompt.
+The workflow needs no signing secret. To publish a family app prerelease, review the changes, run the Mac workflow, then tag the reviewed commit with a version such as `mac-preview-0.1.6` and push that tag. The prerelease label keeps the app's current status clear while families begin using it.
 
 For a local package on the real Mac, install build dependencies, then run:
 
@@ -26,7 +26,7 @@ scripts/package-macos-unsigned-preview.sh \
   "$(git rev-parse HEAD)"
 ```
 
-This creates a `.dmg` and adjacent `.sha256` file. It never installs the monitoring agent. Read [Apple's current Gatekeeper instructions and risks](https://support.apple.com/en-us/102445); do not use `xattr` or change system-wide security settings to force the app open.
+This creates a `.dmg` and adjacent `.sha256` file. It never installs the monitoring agent. Follow [Apple's current first-open instructions](https://support.apple.com/en-us/102445); the package does not change your Mac's built-in security settings.
 
 ## Prerequisites
 
