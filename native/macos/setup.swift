@@ -496,6 +496,8 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         The menu-bar status icon must stay visible to the child. Reports are locked on this Mac and can be opened on the parent's computer. Keep this app in its current location; moving it may stop monitoring.
 
+        The parent report may show when a new session followed an earlier session without a recorded stop. It cannot tell whether that was a crash, sleep, power-off, or another interruption.
+
         Choose the maximum time to keep detailed records here. Records are removed while monitoring runs; calendar-day rounding may remove them up to a day before that limit. Removing monitoring keeps the encrypted report and Ruffster connection details unless you choose to delete them. Reports already shared elsewhere and other copies are not affected.
         """
         disclosureText.setAccessibilityLabel("Ruffster collection and retention details")

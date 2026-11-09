@@ -97,6 +97,9 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('no agent was started', capture)
         self.assertIn("'parent-setup.png'", capture)
         self.assertIn("'parent-dashboard.png'", capture)
+        self.assertIn('recent home restart example', capture)
+        self.assertIn("writer.event('heartbeat', at=stamp(finish))", capture)
+        self.assertIn('restart coverage', (ROOT / 'README.md').read_text(encoding='utf-8'))
 
     def test_plan_prioritizes_mac_then_windows_and_public_parent_experience(self):
         plan = (ROOT / 'PLAN.md').read_text(encoding='utf-8')
@@ -186,6 +189,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('await waitForPageReady(send, target.name, target.path)', script)
         self.assertIn("name: 'parent dashboard setup'", script)
         self.assertIn("name: 'parent dashboard report'", script)
+        self.assertIn('restarts: 1', script)
         self.assertIn('has_key: populated, unlocked: populated, has_report: populated, backup_confirmed: populated', script)
         self.assertIn('GITHUB_STEP_SUMMARY', script)
         self.assertIn('chromeVersion', script)

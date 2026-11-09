@@ -239,12 +239,26 @@ async function render() {
   const freshness = data.recorded_through
     ? `Data in this imported snapshot was recorded through ${formatUtcTimestamp(data.recorded_through)}. Bring back another report to see more recent activity.`
     : 'No dated activity has been added to this report yet.';
-  const runtime = data.agent_runtime || {seconds:0,sessions:0,gaps:0};
+  const runtime = data.agent_runtime || {seconds:0,sessions:0,gaps:0,restarts:0};
   const runtimeHours = Math.floor(runtime.seconds / 3600);
   const runtimeMinutes = Math.floor((runtime.seconds % 3600) / 60);
+  const restartCount = runtime.restarts || 0;
+  const restartSummary = restartCount === 1
+    ? '1 observed restart followed a session without a recorded stop'
+    : restartCount === 0
+      ? 'No restarts followed a session without a recorded stop'
+      : `${restartCount} observed restarts followed sessions without recorded stops`;
+  const sessionLabel = `${runtime.sessions} session${runtime.sessions === 1 ? '' : 's'}`;
+  const intervalSummary = runtime.gaps === 1
+    ? '1 unobserved interval is listed below'
+    : `${runtime.gaps} unobserved intervals are listed below`;
+  const runtimeSummary = runtime.sessions
+    ? `Ruffster was running for about ${runtimeHours} hr ${runtimeMinutes} min across ${sessionLabel} in the past ${runtime.days} days. ${restartSummary}. The report cannot tell why. ${intervalSummary}.`
+    : `No Ruffster uptime was recorded in the past ${runtime.days || 7} days.`;
+  $('monitoring-summary').textContent = runtimeSummary;
   const runtimeText = runtime.sessions
-    ? `Recorded agent runtime in the past ${runtime.days} days: about ${runtimeHours} hr ${runtimeMinutes} min across ${runtime.sessions} session(s), with ${runtime.gaps} observed gap(s). Ruffster uptime shows when the agent was running; it is separate from estimated app time.`
-    : `No Ruffster uptime was recorded for the past ${runtime.days || 7} days.`;
+    ? `${runtimeSummary} A restart record does not say why the earlier session ended; that can follow a crash, sleep, power-off, or another interruption. Ruffster uptime shows when the agent was running; it is separate from estimated app time.`
+    : runtimeSummary;
   $('snapshot-note').textContent = freshness;
   $('report-timezone-note').textContent = `Daily and weekly calendar days use ${data.report_timezone || 'UTC'}. Observation timestamps remain in UTC.`;
   const websiteObservations = data.website_observations || {count: 0, latest_at: null};

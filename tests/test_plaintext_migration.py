@@ -38,13 +38,11 @@ class PlaintextMigrationTests(unittest.TestCase):
         try:
             first = store.start(db, stamp(start))
             first_stop = start + timedelta(seconds=30)
-            store.stop(db, first, stamp(first_stop))
+            store.heartbeat(db, first, stamp(first_stop))
             second_start = start + timedelta(seconds=90)
             second = store.start(db, stamp(second_start))
             store.stop(db, second, stamp(second_start + timedelta(seconds=30)))
             with db:
-                db.execute('INSERT INTO gaps(session_id,from_at,to_at) VALUES (?,?,?)',
-                           (first, stamp(first_stop), stamp(second_start)))
                 db.execute('INSERT INTO foreground_samples(session_id,sampled_at,app_name,bundle_id) VALUES (?,?,?,?)',
                            (first, stamp(start + timedelta(seconds=5)), 'LEGACY_PRIVATE_APP', 'example.bundle'))
                 db.execute('INSERT INTO foreground_samples(session_id,sampled_at,app_name,bundle_id) VALUES (?,?,?,?)',
@@ -82,6 +80,8 @@ class PlaintextMigrationTests(unittest.TestCase):
             self.assertFalse(incomplete)
             self.assertEqual(projection.execute('SELECT count(*) FROM sessions').fetchone()[0], 2)
             self.assertEqual(projection.execute('SELECT count(*) FROM gaps').fetchone()[0], 1)
+            self.assertEqual(projection.execute('SELECT restarted_after_unclean_exit FROM sessions ORDER BY id').fetchall(),
+                             [(0,), (1,)])
             self.assertEqual(projection.execute('SELECT app_name FROM foreground_samples LIMIT 1').fetchone()[0],
                              'LEGACY_PRIVATE_APP')
             self.assertEqual(projection.execute('SELECT domain FROM website_samples').fetchone()[0], 'example.org')

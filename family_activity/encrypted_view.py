@@ -113,6 +113,10 @@ def _project(source, private_key):
                 process_network_states[session_key] = None
                 continue
             if typ not in {'heartbeat', 'stop', 'foreground', 'network', 'network_identity', 'website', 'tick', 'network_settings', 'gap', 'process_network', 'process_network_status'}:
+                if typ == 'restart_marker' and session_key in sessions:
+                    memory.execute('UPDATE sessions SET restarted_after_unclean_exit = 1 WHERE id = ?',
+                                   (sessions[session_key],))
+                    continue
                 raise ValueError('unsupported encrypted event')
             if session_key not in sessions:
                 # Retention may remove a start before newer records expire.

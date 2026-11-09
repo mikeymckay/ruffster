@@ -720,7 +720,7 @@ def _report(path, private_key, labels_path, schedule_path, selected_device=None)
             (cutoff,)).fetchone()
         gaps = db.execute('SELECT from_at, to_at FROM gaps ORDER BY id DESC LIMIT 20').fetchall()
         sessions = db.execute('SELECT started_at, heartbeat_at, stopped_at FROM sessions ORDER BY id DESC LIMIT 20').fetchall()
-        runtime_sessions = db.execute('SELECT started_at, heartbeat_at, stopped_at FROM sessions WHERE heartbeat_at >= ? OR stopped_at >= ?', (cutoff, cutoff)).fetchall()
+        runtime_sessions = db.execute('SELECT started_at, heartbeat_at, stopped_at, restarted_after_unclean_exit FROM sessions WHERE heartbeat_at >= ? OR stopped_at >= ?', (cutoff, cutoff)).fetchall()
         runtime_gaps = db.execute('SELECT from_at, to_at FROM gaps WHERE to_at >= ? AND from_at <= ?', (cutoff, now.isoformat())).fetchall()
         traffic = db.execute('SELECT to_at, interface, received_bytes, sent_bytes FROM network_intervals ORDER BY id DESC LIMIT 20').fetchall()
         traffic_interval_rows = db.execute(

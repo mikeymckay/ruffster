@@ -172,10 +172,20 @@ class ReportsTests(unittest.TestCase):
             ('2026-10-29T08:00:00+00:00', '2026-10-29T08:05:00+00:00'),
         ]
         self.assertEqual(agent_runtime(sessions, gaps, as_of),
-                         {'seconds': 2700.0, 'sessions': 2, 'gaps': 2, 'days': 7})
+                         {'seconds': 2700.0, 'sessions': 2, 'gaps': 2, 'restarts': 0, 'days': 7})
+
+    def test_agent_runtime_counts_only_observed_unclean_session_starts_in_window(self):
+        as_of = datetime(2026, 11, 7, 10, tzinfo=timezone.utc)
+        sessions = [
+            ('2026-11-07T09:00:00+00:00', '2026-11-07T09:30:00+00:00', '2026-11-07T09:30:00+00:00', 1),
+            ('2026-10-29T09:00:00+00:00', '2026-10-29T09:30:00+00:00', '2026-10-29T09:30:00+00:00', 1),
+            ('2026-11-07T09:00:00+00:00', '2026-11-07T09:30:00+00:00', '2026-11-07T09:30:00+00:00', 0),
+        ]
+        result = agent_runtime(sessions, [], as_of)
+        self.assertEqual(result['restarts'], 1)
 
     def test_agent_runtime_rejects_naive_reference_and_handles_empty_report(self):
         with self.assertRaises(ValueError):
             agent_runtime([], [], datetime(2026, 11, 7))
         self.assertEqual(agent_runtime([], [], datetime(2026, 11, 7, tzinfo=timezone.utc)),
-                         {'seconds': 0.0, 'sessions': 0, 'gaps': 0, 'days': 7})
+                         {'seconds': 0.0, 'sessions': 0, 'gaps': 0, 'restarts': 0, 'days': 7})

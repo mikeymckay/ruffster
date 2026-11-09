@@ -35,7 +35,7 @@ def stamp(value):
 
 
 def synthetic_report(database, parent_key, now):
-    """Write a handful of fictional weekday sessions and one recent home session."""
+    """Write fictional weekday sessions and a recent home restart example."""
     school_days = []
     date_cursor = now.astimezone(LOCAL_ZONE).date() - timedelta(days=1)
     while len(school_days) < 5:
@@ -86,6 +86,14 @@ def synthetic_report(database, parent_key, now):
             writer.event('tick', at=stamp(current), application=['Google Chrome', 'com.google.Chrome'])
             writer.event('website', at=stamp(current), domain='video.example')
             current += timedelta(seconds=15)
+        writer.event('heartbeat', at=stamp(finish))
+    finally:
+        writer.close()
+
+    restarted_at = now - timedelta(minutes=6)
+    writer = EncryptedAgentStore(database, parent_key.public_key, 30)
+    try:
+        writer.event('start', at=stamp(restarted_at))
         writer.event('gap', at=stamp(now - timedelta(minutes=3)),
                      from_at=stamp(now - timedelta(minutes=5)),
                      to_at=stamp(now - timedelta(minutes=3)))

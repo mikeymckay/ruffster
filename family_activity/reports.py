@@ -216,7 +216,9 @@ def agent_runtime(sessions, gaps, as_of, days=7):
     """Summarize recorded agent session time, excluding known gaps.
 
     This is process-session coverage, not proof that every collector succeeded
-    or that the computer was actively used. Missing session starts are ignored.
+    or that the computer was actively used. Restart counts identify sessions
+    following an unclosed session; they do not determine why it ended. Missing
+    session starts are ignored.
     """
     if as_of.tzinfo is None or days < 1:
         raise ValueError('as_of must be timezone-aware and days must be positive')
@@ -224,16 +226,22 @@ def agent_runtime(sessions, gaps, as_of, days=7):
     boundary = end - timedelta(days=days)
     spans = []
     session_count = 0
-    for started_at, heartbeat_at, stopped_at in sessions:
+    restart_count = 0
+    for row in sessions:
+        started_at, heartbeat_at, stopped_at = row[:3]
+        restarted_after_unclean_exit = bool(row[3]) if len(row) > 3 else False
         try:
             start = datetime.fromisoformat(started_at)
             last = datetime.fromisoformat(stopped_at or heartbeat_at)
             if start.tzinfo is None or last.tzinfo is None:
                 continue
-            start = max(start.astimezone(timezone.utc), boundary)
+            start = start.astimezone(timezone.utc)
             last = min(last.astimezone(timezone.utc), end)
         except (TypeError, ValueError):
             continue
+        if restarted_after_unclean_exit and boundary <= start <= end:
+            restart_count += 1
+        start = max(start, boundary)
         if last <= start:
             continue
         session_count += 1
@@ -273,7 +281,8 @@ def agent_runtime(sessions, gaps, as_of, days=7):
                     for session_start, session_end in merged)
     runtime = sum((finish - start).total_seconds() for start, finish in merged)
     return {'seconds': max(0.0, runtime - gap_total),
-            'sessions': session_count, 'gaps': gap_count, 'days': days}
+            'sessions': session_count, 'gaps': gap_count,
+            'restarts': restart_count, 'days': days}
 
 
 def contextual_estimates(samples, network_changes, labels, schedule, as_of, max_gap_seconds=30):

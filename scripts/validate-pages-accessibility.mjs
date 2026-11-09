@@ -118,7 +118,7 @@ function sampleReport() {
     site_categories: byPeriod([['Learning', 1800], ['Reference', 900]]),
     category_contexts: { school: appRows, home: appRows, school_network: appRows, other_network: empty },
     gaps: [[now, now]], sessions: [[now, now, null]],
-    agent_runtime: { seconds: 21600, sessions: 3, gaps: 1, days: 7 },
+    agent_runtime: { seconds: 21600, sessions: 3, gaps: 1, restarts: 1, days: 7 },
     traffic: [[now, 'en0', 125000000, 14000000]],
     traffic_usage: byPeriod(trafficRows), traffic_contexts: byContext(trafficRows),
     process_traffic: { status: 'enabled', status_at: now, today: [['Safari', 86000000, 8000000]], week: [['Safari', 86000000, 8000000]] },

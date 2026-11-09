@@ -1,5 +1,9 @@
 # Real-machine validation
 
+## 2026-11-09: Show observed monitoring restarts in family reports
+
+The parent report now shows runtime, observed gaps, and a count of new sessions that followed a session without a recorded stop. It explicitly says the reason is unknown. The Mac menu-bar explanation, Mac setup disclosure, and Windows setup disclosure use matching wording. The existing local session database gains a defaulted migration column, and plaintext-to-encrypted migration preserves restart observations through an encrypted marker event. An end-to-end synthetic report confirmed the parent sees one restart; clean stops and sessions with missing old starts do not count as restarts. The synthetic screenshot was regenerated and visually reviewed. The focused suite passed 119 tests; the complete local suite ran 297 tests (292 passed, 5 host-specific checks skipped). All four public pages and both synthetic parent-dashboard states passed desktop/phone Axe scans with zero violations and no horizontal overflow. This code has not yet been run on the family Mac or Windows, and the hosted checks have not yet run for this change.
+
 ## 2026-11-09: Clarify shared app installation and per-account monitoring
 
 Updated the README, Mac install guide, and FAQ to explain that Ruffster can remain in the shared `/Applications` folder while the background monitor is installed only for the account that completes setup. This makes clear that families do not need a second app copy for a child account, and that setup in an administrator account does not monitor the child's account. The focused documentation suite passed (32 tests); the public pages and both synthetic parent-dashboard states passed local desktop/phone Axe scans with zero violations or horizontal overflow. Hosted CI `42589456802` and Pages deployment `42589456819` passed. The published wording was checked directly. Annika's Mac remained offline, so her account setup was not performed.

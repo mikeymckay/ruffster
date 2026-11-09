@@ -31,6 +31,7 @@ OPTIONAL_EMPTY_SCHEMA = {
     'process_network_samples': {'id', 'session_id', 'sampled_at', 'process_name', 'received_bytes', 'sent_bytes'},
     'process_network_status': {'id', 'session_id', 'sampled_at', 'state'},
 }
+SESSION_OPTIONAL_COLUMNS = {'device_id', 'restarted_after_unclean_exit'}
 MAX_COUNTER = 2**63 - 1
 
 
@@ -69,7 +70,7 @@ def _secure_event_streams(db, sessions):
                 raise ValueError('plaintext database contains an invalid row id')
             yield (timestamp, int(sid), priority, row_id, event_type, sid, convert(row[3:]))
 
-    return [
+    streams = [
         stream('SELECT started_at,id,id FROM sessions ORDER BY started_at,id', 'start', 0,
                lambda fields: {}),
         stream('SELECT sampled_at,session_id,id,app_name,bundle_id FROM foreground_samples ORDER BY sampled_at,session_id,id',
@@ -91,6 +92,12 @@ def _secure_event_streams(db, sessions):
         stream('SELECT stopped_at,id,id FROM sessions WHERE stopped_at IS NOT NULL ORDER BY stopped_at,id',
                'stop', 8, lambda fields: {}),
     ]
+    session_columns = {row[1] for row in db.execute('PRAGMA table_info(sessions)')}
+    if 'restarted_after_unclean_exit' in session_columns:
+        streams.insert(1, stream(
+            'SELECT started_at,id,id FROM sessions WHERE restarted_after_unclean_exit=1 ORDER BY started_at,id',
+            'restart_marker', 1, lambda fields: {}))
+    return streams
 
 
 def _application(fields):
@@ -174,11 +181,18 @@ def encrypt_legacy_database(source_path, public_key_path, output_path, retention
             if name not in tables:
                 continue
             columns = {row[1] for row in source.execute(f'PRAGMA table_info("{name}")')}
-            accepted = (expected, expected | {'device_id'}) if name == 'sessions' else (expected,)
+            accepted = tuple(expected | extensions for extensions in (
+                set(), {'device_id'}, {'restarted_after_unclean_exit'}, SESSION_OPTIONAL_COLUMNS
+            )) if name == 'sessions' else (expected,)
             if columns not in accepted:
                 raise ValueError('source activity database schema is unsupported')
             if name in OPTIONAL_EMPTY_SCHEMA and source.execute(f'SELECT 1 FROM "{name}" LIMIT 1').fetchone() is not None:
                 raise ValueError('source contains newer process network records that this migration cannot preserve')
+        if 'restarted_after_unclean_exit' in {row[1] for row in source.execute('PRAGMA table_info(sessions)')}:
+            invalid_restart = source.execute(
+                'SELECT 1 FROM sessions WHERE restarted_after_unclean_exit NOT IN (0,1) LIMIT 1').fetchone()
+            if invalid_restart is not None:
+                raise ValueError('source contains an invalid restart marker')
         if source.execute('PRAGMA foreign_key_check').fetchone() is not None:
             raise ValueError('plaintext source contains broken session references')
         gap_rows = source.execute('SELECT count(*) FROM gaps').fetchone()[0]
