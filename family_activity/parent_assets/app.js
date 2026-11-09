@@ -100,13 +100,13 @@ function updateSetupProgress() {
   });
   $('step-one-title').textContent = !status.has_key ? 'Set up parent access' : !status.unlocked ? 'Unlock parent access' : !status.backup_confirmed ? 'Save your recovery copy' : 'Parent access is ready';
   $('step-one-state').textContent = current > 0 ? 'Ready on this device.' : !status.has_key ? 'Choose a six-digit PIN only you know.' : !status.unlocked ? 'Enter your PIN below to continue.' : 'Save your recovery copy before setting up the child computer.';
-  $('step-two-state').textContent = status.has_report ? 'A report has arrived on this device.' : !status.backup_confirmed ? 'Save your recovery copy before setting up the child computer.' : current === 1 ? 'Enter the two digits shown here on the child computer.' : 'Ready after parent access is unlocked.';
+  $('step-two-state').textContent = status.has_report ? 'A report has arrived; add another computer if needed.' : !status.backup_confirmed ? 'Save your recovery copy before setting up a child computer.' : current === 1 ? 'Enter these two digits on one child computer.' : 'Ready after parent access is unlocked.';
   $('step-three-state').textContent = status.has_report ? 'Encrypted report received on this device.' : 'Later, bring the encrypted report back here.';
   const messages = [
     !status.has_key ? 'Next: set up parent access with a six-digit PIN only you know.' : !status.unlocked ? 'Next: unlock parent access with your PIN.' : !status.backup_confirmed ? 'Next: save your recovery copy somewhere you control before setting up the child computer.' : 'Parent access is ready. You can continue with child setup.',
-    'Next: set up the child computer together. Then bring an encrypted report back here.',
-    'Next: set up the child computer together. Then bring an encrypted report back here.',
-    'Next: review the report together. Times are estimates, and missing observations do not explain why they are missing.'
+    'Next: set up one child computer together. Repeat for each child, then bring encrypted reports back here.',
+    'Next: set up one child computer together. Repeat for each child, then bring encrypted reports back here.',
+    'Next: name each computer and review its report together. Times are estimates, and missing observations do not explain why they are missing.'
   ];
   $('next-step').textContent = messages[current];
 }
