@@ -61,12 +61,13 @@ class KeyVaultTests(unittest.TestCase):
             self.assertEqual(pub.read_bytes(), exported.read_bytes())
             writer = EncryptedAgentStore(db, PublicKey(pub.read_bytes()), 30)
             writer.event('start'); writer.event('foreground', application=['TEST_VAULT_APP', 'test']); writer.event('stop'); writer.close()
-            proc = subprocess.Popen([sys.executable, '-m', 'family_activity', 'dashboard', '--db', str(db), '--port', '0', '--experimental-key-vault', str(vault)], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+            private_key_file = Path(tmp)/'dashboard.private'
+            private_key_file.write_bytes(bytes(unlock(vault.read_bytes(), password)))
+            proc = subprocess.Popen([sys.executable, '-m', 'family_activity', 'dashboard', '--db', str(db), '--port', '0', '--experimental-private-key', str(private_key_file)], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
             try:
-                proc.stdin.write(password + '\n'); proc.stdin.flush()
                 url = proc.stdout.readline().strip().split(' ', 1)[1]
                 with urllib.request.urlopen(url, timeout=5) as response:
                     self.assertIn('TEST_VAULT_APP', response.read().decode())
             finally:
                 proc.terminate(); proc.wait(timeout=5)
-                proc.stdin.close(); proc.stdout.close()
+                proc.stdout.close()
