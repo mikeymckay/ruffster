@@ -70,7 +70,8 @@ function Get-VpnConnection {
             environment['FAMILY_ACTIVITY_TEST_VPN_MODE'] = mode
             result = subprocess.run([shell, '-NoLogo', '-NoProfile', '-Command',
                                      prefix + _WINDOWS_VPN_SCRIPT], capture_output=True,
-                                    text=True, timeout=10, env=environment, check=True)
+                                    # PowerShell's first startup can be slow on a loaded CI host.
+                                    text=True, timeout=30, env=environment, check=True)
             self.assertEqual(result.stdout.strip(), expected)
             self.assertNotIn('SECRET_PROFILE_NAME', result.stdout)
             self.assertNotIn('PRIVATE_ERROR_TEXT', result.stdout)
