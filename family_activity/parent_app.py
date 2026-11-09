@@ -101,6 +101,18 @@ class ParentServer(HTTPServer):
             current = self._key_share_server
             if current is not None and not current.used and time.monotonic() < current.deadline:
                 return current.short_code
+        # A one-use share may have been consumed while its serving thread is
+        # still closing the UDP discovery socket. Join that thread before
+        # binding a replacement; Windows in particular may reject the new bind
+        # while the previous listener is still unwinding.
+        if current is not None:
+            self.stop_public_key_share()
+        with self._key_share_lock:
+            current = self._key_share_server
+            if current is not None and not current.used and time.monotonic() < current.deadline:
+                return current.short_code
+            if current is not None:
+                raise RuntimeError('the previous nearby connection is still closing; try again shortly')
             host = local_ipv4_address()
             transfer = PublicKeyShareServer(private_key.public_key, host, lifetime=300)
             self._key_share_server = transfer

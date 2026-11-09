@@ -35,7 +35,10 @@ from . import public_key_file
 
 MAX_SNAPSHOT = MAX_SNAPSHOT_BYTES
 ALLOWED = tuple(ipaddress.ip_network(x) for x in ('10.0.0.0/8','172.16.0.0/12','192.168.0.0/16','169.254.0.0/16','127.0.0.0/8'))
-DISCOVERY_PORT = 49372
+# Keep the fixed discovery port below Windows' default dynamic range. Hyper-V
+# and other Windows networking components can reserve ports in 49152–65535,
+# where bind() may fail with WSAEACCES even when SO_REUSEADDR is set.
+DISCOVERY_PORT = 39372
 DISCOVERY_BROADCAST = '255.255.255.255'
 
 
@@ -81,7 +84,6 @@ class _LanCodeAnnouncer:
         self.deadline = time.monotonic() + lifetime
         self.stopped = threading.Event()
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind(('', DISCOVERY_PORT))
         self.socket.settimeout(0.2)
         self.thread = threading.Thread(target=self._run, daemon=True, name='family-local-discovery')

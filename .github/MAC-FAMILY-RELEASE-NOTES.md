@@ -14,6 +14,8 @@ Setup now waits for launchd to start the agent, confirm it is still running, and
 
 If the two-digit nearby-computer connection does not work, the Mac setup screen now offers a direct retry or the connection-file option. It explains the same-Wi-Fi requirement and where to allow Ruffster on the Mac's Local Network settings.
 
+Nearby-computer sharing now reopens cleanly after a one-time connection is used. Its Windows discovery port is outside Windows' default dynamic port range, avoiding a reserved-port bind failure seen in hosted Windows checks.
+
 The Mac app has been checked with automated tests and synthetic activity. A real family setup and report exchange are the next validation step. Ruffster records foreground app names and network measurements; network totals do not identify websites. It does not record screenshots, keystrokes, messages, audio, or camera data. Windows setup is not part of this Mac download.
 
 See the [family install guide](https://mikeymckay.github.io/ruffster/install.html), [privacy and children's rights notes](https://github.com/mikeymckay/ruffster/blob/main/PRIVACY-AND-CHILDREN.md), and the release's source commit.

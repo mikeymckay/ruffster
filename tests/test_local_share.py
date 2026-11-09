@@ -15,6 +15,11 @@ from family_activity.local_share import (PublicKeyShareServer, ShareServer, deco
 from family_activity.public_key_file import decode as decode_public_key_file
 
 class LocalShareTests(unittest.TestCase):
+    def test_discovery_port_stays_below_windows_dynamic_port_range(self):
+        from family_activity.local_share import DISCOVERY_PORT
+        self.assertGreater(DISCOVERY_PORT, 1024)
+        self.assertLess(DISCOVERY_PORT, 49152)
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.server = None
