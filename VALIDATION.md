@@ -1,5 +1,9 @@
 # Real-machine validation
 
+## 2026-11-09: Publish Mac 0.1.23 with simpler parent access
+
+The parent dashboard now describes its PIN as six numbers the child doesn't know and explains where to keep the recovery copy. Updated the README, getting-started guide, progress page, and synthetic setup/report screenshots. The 0.1.23 release workflow `42653085737` passed and published the Apple-silicon DMG; its 17,656,503 bytes match the release sidecar SHA-256 (`d203c788419426c7b177282f6cd3e62a29b5a28878780a1fdbee3c6368f1d4bc`). Tag CI `42653085751` passed all platform tests and package builds. The local suite ran 305 tests: 300 passed and five platform/tool checks were skipped; all 16 desktop/mobile accessibility scans found zero Axe violations. Pages deployment `42654859526` passed; the live install and progress pages show 0.1.23, the progress page checksum matches the release, and the live dashboard image matches the repository file. The family Mac remains offline; 0.1.23 is not confirmed installed in the child's account. No child setup, monitoring, or family activity is verified.
+
 ## 2026-11-09: Refresh the parent dashboard screenshot
 
 Regenerated the fictional parent dashboard image after the setup-flow and PIN changes. The first-run image was unchanged; only the report screenshot needed refreshing. The capture used temporary keys, reports, and browser profiles and did not start a monitoring agent. The focused documentation suite passed 37 tests, and all 16 desktop/mobile accessibility scans found zero Axe violations. Pages deployment `42650406852` completed successfully; the live screenshot's SHA-256 matches the updated repository image. No family activity was used.
