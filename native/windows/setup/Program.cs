@@ -245,7 +245,7 @@ internal static class SetupApplication
             if ((typedCode.Length == 0) == (keyPath.Text.Length == 0)) { MessageBox.Show(this, "Enter the two digits or choose the connection file from the parent.", "Parent connection needed", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
             if (typedCode.Length > 0 && (typedCode.Length != 2 || !typedCode.All(c => c >= '0' && c <= '9')))
             {
-                MessageBox.Show(this, "Enter the two digits shown in the parent's dashboard. If they are not working, ask for the connection file instead.", "Check the two digits", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(this, "Enter the two digits exactly as shown, or choose the connection file from the parent.", "Check the two digits", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             install.Enabled = false; status.Text = "Preparing the disclosed per-user setup…";
