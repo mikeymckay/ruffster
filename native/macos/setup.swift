@@ -476,7 +476,8 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         let review = NSAlert()
         review.messageText = "Set up this Mac together?"
-        review.informativeText = "Ruffster will monitor only the account currently signed in. Review what it records together, choose how long to keep details, and make sure the child knows what to expect."
+        let signedInAccount = NSFullUserName().isEmpty ? NSUserName() : NSFullUserName()
+        review.informativeText = "Ruffster will monitor the “\(signedInAccount)” account currently signed in. If this isn't the child's account, choose Cancel and sign in to the child's account first. Review what it records together, choose how long to keep details, and make sure the child knows what to expect."
         let disclosureText = NSTextView()
         disclosureText.frame = NSRect(x: 0, y: 0, width: 460, height: 190)
         disclosureText.isEditable = false

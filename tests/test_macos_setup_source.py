@@ -70,7 +70,7 @@ class MacSetupSourceTests(unittest.TestCase):
         source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')
         self.assertIn('Choose the maximum time to keep detailed records', source)
         self.assertIn('calendar-day rounding may remove them up to a day before that limit', source)
-        self.assertIn('Ruffster will monitor only the account currently signed in', source)
+        self.assertIn('Ruffster will monitor the “\\(signedInAccount)” account currently signed in', source)
 
     def test_process_traffic_is_off_by_default_and_disclosed(self):
         source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')
@@ -92,6 +92,8 @@ class MacSetupSourceTests(unittest.TestCase):
         end = source.index('@objc private func updateSetupConfirmation', start)
         review = source[start:end]
         self.assertIn('review.messageText = "Set up this Mac together?"', review)
+        self.assertIn('let signedInAccount = NSFullUserName().isEmpty ? NSUserName() : NSFullUserName()', review)
+        self.assertIn('If this isn\'t the child\'s account, choose Cancel and sign in to the child\'s account first', review)
         self.assertIn('let disclosureScroll = NSScrollView', review)
         self.assertIn('disclosureScroll.hasVerticalScroller = true', review)
         self.assertIn('message contents, microphone, camera', review)
