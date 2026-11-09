@@ -303,7 +303,9 @@ def install(public_key, python_exe, source_directory, status_exe, local_app_data
             if live.returncode == 0:
                 registration_uncertain = True
                 raise RuntimeError('task registration state is uncertain; use explicit removal')
-            raise RuntimeError('Task Scheduler could not register the agent')
+            detail = (result.stderr or result.stdout or '').strip()
+            suffix = f': {detail}' if detail else ''
+            raise RuntimeError(f'Task Scheduler could not register the agent{suffix}')
         # From this point on, exceptions must preserve the metadata and keys so
         # the registered task can still be identified and removed safely.
         registration_uncertain = True
