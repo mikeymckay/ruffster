@@ -501,6 +501,10 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('42587923858', status)
         self.assertIn('synthetic first-run and populated parent-dashboard screens', status)
         self.assertIn('zero Axe violations and no horizontal overflow', status)
+        self.assertIn('<h2>Current automated test results</h2>', status)
+        self.assertIn('294 tests ran on the Linux development host: 289 passed', status)
+        self.assertIn('first-run parent dashboard, and populated parent report', status)
+        self.assertNotIn('293 tests', status)
         self.assertIn('the real Windows agent lifecycle still needs a logged-in Windows computer', status)
         self.assertIn('cannot verify an interactive Task Scheduler session', status)
 
