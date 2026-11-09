@@ -72,18 +72,22 @@ class EncryptedAgentTests(unittest.TestCase):
             database = Path(tmp) / 'activity.sqlite3'
             sampler = SyntheticSampler()
             previous = signal.getsignal(signal.SIGTERM)
-            # Give the first synthetic sample time to complete even on a busy
-            # CI runner before requesting a graceful stop.
-            stop = threading.Timer(1.0, lambda: os.kill(os.getpid(), signal.SIGTERM))
+            # Invoke the agent's graceful handler directly: os.kill(SIGTERM)
+            # terminates the entire test process on Windows.
+            real_signal = signal.signal
+            def register_and_stop(signum, handler):
+                previous_handler = real_signal(signum, handler)
+                if signum == signal.SIGTERM:
+                    threading.Timer(1.0, lambda: handler(signum, None)).start()
+                return previous_handler
             try:
                 with patch('family_activity.__main__.start_status', return_value=None), \
+                     patch('family_activity.__main__.signal.signal', side_effect=register_and_stop), \
                      patch('family_activity.process_network.MacProcessNetworkSampler', return_value=sampler), \
                      redirect_stdout(io.StringIO()):
-                    stop.start()
                     agent(database, .1, public_key_path=public, experimental_process_network=True)
             finally:
-                stop.cancel()
-                signal.signal(signal.SIGTERM, previous)
+                real_signal(signal.SIGTERM, previous)
             connection = sqlite3.connect(database)
             events = [encrypted_store.open_event(parent, row[0])
                       for row in connection.execute('SELECT ciphertext FROM encrypted_events ORDER BY id')]

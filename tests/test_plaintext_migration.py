@@ -68,7 +68,8 @@ class PlaintextMigrationTests(unittest.TestCase):
         self.assertEqual(result['source_sessions'], 2)
         self.assertGreater(result['inserted_events'], result['retained_events'] - 1)
         self.assertEqual(self.source.read_bytes(), before)
-        self.assertEqual(stat.S_IMODE(self.output.stat().st_mode), 0o600)
+        if os.name != 'nt':  # Windows access is governed by inherited ACLs.
+            self.assertEqual(stat.S_IMODE(self.output.stat().st_mode), 0o600)
         self.assertNotIn(b'LEGACY_PRIVATE_APP', self.output.read_bytes())
         db = sqlite3.connect(self.output)
         try:
