@@ -364,6 +364,13 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('Your PIN opens the parent dashboard, and reports are encrypted for the parent computer', faq)
         self.assertNotIn('separate public part', readme + guide + faq)
 
+    def test_install_guide_explains_child_account_setup_for_ssh_admins(self):
+        guide = (SITE / 'install.html').read_text(encoding='utf-8')
+        self.assertIn('monitoring is set up separately for each account', guide)
+        self.assertIn('Sign in to the child\'s Mac account and open Ruffster there', guide)
+        self.assertIn('An SSH session signed in as a parent or admin does not set up the child\'s account', guide)
+        self.assertIn('Ruffster shows the account it will monitor so you can check that it\'s the child\'s', guide)
+
     def test_parent_access_and_pairing_copy_is_plain_and_honest_about_preview_codes(self):
         dashboard = (ROOT / 'family_activity/parent_assets/index.html').read_text(encoding='utf-8')
         script = (ROOT / 'family_activity/parent_assets/app.js').read_text(encoding='utf-8')
