@@ -211,6 +211,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('Ruffster starts automatically whenever the child signs in', guide)
         self.assertIn('When does Ruffster run?', (SITE / 'faq.html').read_text(encoding='utf-8'))
         faq = (SITE / 'faq.html').read_text(encoding='utf-8')
+        self.assertIn('Setup applies only to the account that is signed in when a parent confirms it', faq)
         self.assertIn('available for ongoing, visible use', faq)
         self.assertIn('adds each child\'s Mac one at a time', faq)
         self.assertIn('Why does my Mac ask me to confirm the first time?', faq)
@@ -223,6 +224,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('your Mac’s general app protections stay on', guide)
         self.assertIn('VoiceOver', guide)
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
+        self.assertIn('Ruffster monitors only the account that completes setup', readme)
         self.assertIn('explicit screen-reader labels and help', readme)
         self.assertIn('actual VoiceOver behavior also need review', readme)
 

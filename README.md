@@ -4,7 +4,7 @@
 
 <p align="center"><img src="docs/assets/ruffster-mascot.webp" alt="Ruffster golden retriever mascot" width="190"></p>
 
-**Ruffster for Mac 0.1.13 is available for families.** Start on the parent Mac, then set up each child's Mac together and bring encrypted reports back to the parent dashboard. Setup waits for the first encrypted sample, and if nearby-computer pairing fails it offers a direct retry or connection-file choice with Wi-Fi permission help. Windows setup and packaging pass automated checks, and still need review on a logged-in Windows computer before a Windows download is offered.
+**Ruffster for Mac 0.1.13 is available for families.** Start on the parent Mac, then set up each child's Mac together and bring encrypted reports back to the parent dashboard. Sign in to the child's account before setup; Ruffster monitors only the account that completes setup. Setup waits for the first encrypted sample, and if nearby-computer pairing fails it offers a direct retry or connection-file choice with Wi-Fi permission help. Windows setup and packaging pass automated checks, and still need review on a logged-in Windows computer before a Windows download is offered.
 
 [Download Ruffster for Mac 0.1.13 (.dmg)](https://github.com/mikeymckay/ruffster/releases/download/mac-family-0.1.13/Ruffster-Mac-Family-App-Apple-Silicon.dmg) · [Release notes and checksum](https://github.com/mikeymckay/ruffster/releases/tag/mac-family-0.1.13) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
 

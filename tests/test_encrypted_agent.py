@@ -295,7 +295,9 @@ class EncryptedAgentTests(unittest.TestCase):
                 line=first if 'Monitoring heartbeat active' in first else proc.stdout.readline()
                 self.assertIn('Monitoring heartbeat active',line)
                 self.assertTrue(marker.exists())
-                proc.terminate(); proc.wait(timeout=5)
+                # SIGTERM can arrive during a bounded network-system call;
+                # allow time for that call and status-helper cleanup to finish.
+                proc.terminate(); proc.wait(timeout=15)
                 self.assertEqual(proc.returncode,0)
             finally:
                 if proc.poll() is None: proc.kill(); proc.wait()
