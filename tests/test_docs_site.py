@@ -494,3 +494,10 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('Mac and Windows package smoke builds passed', status)
         self.assertIn('the real Windows agent lifecycle still needs a logged-in Windows computer', status)
         self.assertIn('cannot verify an interactive Task Scheduler session', status)
+
+    def test_product_design_matches_unsigned_mac_release_and_family_install_state(self):
+        design = (ROOT / 'PRODUCT-DESIGN.md').read_text(encoding='utf-8')
+        self.assertIn('installed in `/Applications` on the first family Mac', design)
+        self.assertIn('guided setup was not opened, so no agent was installed or started', design)
+        self.assertIn("currently ships unsigned with clear first-open instructions", design)
+        self.assertIn('not prerequisites for family testing', design)
