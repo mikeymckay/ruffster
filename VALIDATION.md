@@ -1,5 +1,9 @@
 # Real-machine validation
 
+## 2026-11-09: Hide empty optional website report sections
+
+The parent dashboard still shows whether website details were recorded and keeps the explanation available, but hides the empty website lists and category view when none were included. Extended the synthetic browser accessibility scan to check both website-data states at desktop and mobile widths; all sixteen page/dashboard scans had zero Axe violations or horizontal overflow. The full local suite passed 300 tests (295 passed, 5 host-specific skips). Main CI `42615708169` and Mac release workflow `42616282201` passed. The downloaded 0.1.20 DMG matches its published SHA-256 (`ebac956a8abae31e47dfe2f2ec318d8685623aa4ede507e7a063b8d2bb04553d`). The family Mac was offline, so this release has not been installed in Annika's account and no family activity was collected.
+
 ## 2026-11-09: Publish Ruffster 0.1.19 with a clearer child setup disclosure
 
 Shortened the Mac collection dialog and removed its repeated explanation of optional app network totals. It still says what the Mac records, what remains private, how optional process totals work, that reports stay locked on the child Mac, and that session gaps cannot establish a cause. Focused Mac setup and website tests passed (47 tests). Main CI `42612496249` passed Linux, macOS, all Windows groups, both package checks, and the desktop/phone accessibility scan. Tag release workflow `42613083914` passed the Mac tests, bundle seal, and packaged dashboard/report checks. Downloaded the Apple-silicon DMG and confirmed its SHA-256 (`c1e316f9e72ff8ebad01c1db8b695823740beb9304d5abb5da138d43942768fd`) matches the release sidecar. Annika's Mac remained offline and the app was not installed in her account; no family data was collected.
