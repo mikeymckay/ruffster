@@ -80,7 +80,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         readiness.title = "Getting started"
         readiness.titlePosition = .atTop
         readiness.contentViewMargins = NSSize(width: 12, height: 10)
-        readiness.contentView = paragraph("Choose the parent dashboard on your computer, or set up this Mac with your child. Review the collection choices together and use the report as a starting point for conversation.")
+        readiness.contentView = paragraph("Choose the parent dashboard on the parent's computer. On a child's Mac, sign in to the child's account before choosing “Set up this Mac together”; monitoring applies only to the account currently signed in. Review the collection choices together and use the report as a starting point for conversation.")
 
         let collected = paragraph("Ruffster records the app in front, total traffic for each network connection, a private hint when the default router changes, and a few summarized DNS, proxy, and VPN settings. An optional Mac setting estimates traffic by app or helper service. Network traffic totals do not identify websites.")
         let excluded = paragraph("Ruffster never records screenshots, keystrokes, messages, audio, or camera. Website names and full web addresses are not part of this Mac setup.")
@@ -476,7 +476,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         let review = NSAlert()
         review.messageText = "Set up this Mac together?"
-        review.informativeText = "Review what Ruffster records together, choose how long to keep details, and make sure the child knows what to expect."
+        review.informativeText = "Ruffster will monitor only the account currently signed in. Review what it records together, choose how long to keep details, and make sure the child knows what to expect."
         let disclosureText = NSTextView()
         disclosureText.frame = NSRect(x: 0, y: 0, width: 460, height: 190)
         disclosureText.isEditable = false

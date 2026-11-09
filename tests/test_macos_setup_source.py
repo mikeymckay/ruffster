@@ -42,7 +42,8 @@ class MacSetupSourceTests(unittest.TestCase):
         self.assertIn('showWelcomeWindow()', launch)
         self.assertNotIn('runModal()', welcome)
         self.assertIn('Ruffster helps parents and children understand computer use', welcome)
-        self.assertIn('Choose the parent dashboard on your computer', welcome)
+        self.assertIn("Choose the parent dashboard on the parent's computer", welcome)
+        self.assertIn('monitoring applies only to the account currently signed in', welcome)
         self.assertIn('What Ruffster records', welcome)
         self.assertIn('What stays private', welcome)
         self.assertIn('Network traffic totals do not identify websites', welcome)
@@ -67,6 +68,7 @@ class MacSetupSourceTests(unittest.TestCase):
         source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')
         self.assertIn('Choose the maximum time to keep detailed records', source)
         self.assertIn('calendar-day rounding may remove them up to a day before that limit', source)
+        self.assertIn('Ruffster will monitor only the account currently signed in', source)
 
     def test_process_traffic_is_off_by_default_and_disclosed(self):
         source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')

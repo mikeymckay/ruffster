@@ -206,6 +206,8 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('Ruffster for Mac is ready for families', guide)
         self.assertIn('This is Ruffster\'s first Mac family release', guide)
         self.assertIn('Drag Ruffster into the Applications folder', guide)
+        self.assertIn('sign in to the child’s account before choosing', guide)
+        self.assertIn('Setup monitors only the account that is signed in', guide)
         self.assertIn('Ruffster starts automatically whenever the child signs in', guide)
         self.assertIn('When does Ruffster run?', (SITE / 'faq.html').read_text(encoding='utf-8'))
         faq = (SITE / 'faq.html').read_text(encoding='utf-8')
