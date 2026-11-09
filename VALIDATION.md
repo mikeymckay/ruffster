@@ -1,5 +1,9 @@
 # Real-machine validation
 
+## 2026-11-09: Clarify shared app installation and per-account monitoring
+
+Updated the README, Mac install guide, and FAQ to explain that Ruffster can remain in the shared `/Applications` folder while the background monitor is installed only for the account that completes setup. This makes clear that families do not need a second app copy for a child account, and that setup in an administrator account does not monitor the child's account. The focused documentation suite passed (32 tests); the public pages and both synthetic parent-dashboard states passed local desktop/phone Axe scans with zero violations or horizontal overflow. Hosted CI `42589456802` and Pages deployment `42589456819` passed. The published wording was checked directly. Annika's Mac remained offline, so her account setup was not performed.
+
 ## 2026-11-09: Scan the populated parent report for accessibility issues
 
 Extended the local Chrome/Axe scan to render both first-run setup and a populated dashboard using synthetic report data. The four public Pages and both dashboard states each passed at desktop and phone widths: zero Axe violations and no horizontal overflow. The focused documentation suite passed 32 tests. This automated scan does not replace keyboard, screen-reader, or family usability review. The family Mac was unreachable by SSH during this work, so no new device setup or activity collection was performed.
