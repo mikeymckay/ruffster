@@ -1,0 +1,27 @@
+name: Sync Mac family release notes
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/MAC-FAMILY-RELEASE-NOTES.md
+
+permissions:
+  contents: write
+
+jobs:
+  update-existing-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update notes for the current published Mac family version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')"
+          tag="mac-family-${version}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release edit "$tag" --notes-file .github/MAC-FAMILY-RELEASE-NOTES.md
+          else
+            echo "No published Mac family release for ${version}; the tag workflow will use these notes when it publishes."
+          fi

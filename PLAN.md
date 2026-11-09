@@ -52,3 +52,7 @@ Before describing Ruffster as a supported family release, complete hands-on Mac 
 - Use synthetic records for development, screenshots, and automated checks. Do not add screenshots, keystrokes, message contents, audio, or camera collection.
 - Keep known limitations in [PRODUCT-DESIGN.md](PRODUCT-DESIGN.md), collection details in [PRIVACY-AND-CHILDREN.md](PRIVACY-AND-CHILDREN.md), and contributor conventions in [AGENTS.md](AGENTS.md).
 - Validate platform behavior on that operating system. Linux test results do not establish macOS or Windows behavior.
+
+## Latest shipped step — 2026-11-09
+
+Mac 0.1.15 is published. Parent reports now show monitoring runtime, observable gaps, and restarts after a session without a clean stop; the UI says these counts do not explain why the session ended. CI passed on Linux, macOS, and Windows, including Mac and Windows package smoke builds. The DMG checksum was verified against its release sidecar. Annika's Mac is currently unreachable over SSH, so the requested child-account setup and real school-day collection still need the Mac awake and reachable.
