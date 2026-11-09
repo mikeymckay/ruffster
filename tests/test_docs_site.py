@@ -418,11 +418,12 @@ class DocumentationSiteTests(unittest.TestCase):
     def test_github_workflows_use_node24_compatible_action_majors(self):
         workflows = '\n'.join(path.read_text(encoding='utf-8')
                                for path in (ROOT / '.github' / 'workflows').glob('*.yml'))
-        for action in ('actions/checkout@v7', 'actions/setup-python@v6',
+        for action in ('actions/checkout@v7', 'actions/setup-python@v7',
                        'actions/setup-node@v7', 'actions/setup-dotnet@v6'):
             with self.subTest(action=action):
                 self.assertIn(action, workflows)
         for stale in ('actions/checkout@v4', 'actions/setup-python@v5',
+                      'actions/setup-python@v6',
                       'actions/setup-node@v4', 'actions/setup-dotnet@v4'):
             with self.subTest(stale=stale):
                 self.assertNotIn(stale, workflows)
