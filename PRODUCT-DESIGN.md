@@ -1,6 +1,6 @@
 # Product direction: a family-first experience
 
-Status: product direction with a published Mac family release. Ruffster is intended for ongoing, visible use by families. The app includes encrypted activity reports, a local parent dashboard, and a guided but unsigned Mac setup app. The release package has been verified on Apple silicon, but the first family setup, two-Mac report flow, and routine updates still need hands-on use. Windows setup is implemented but has not been tried on a family Windows computer.
+Status: product direction with a published Mac family release. Ruffster is intended for ongoing, visible use by families. The app includes encrypted activity reports, a local parent dashboard, and a guided but unsigned Mac setup app. The release package has been verified on Apple silicon, but the first family setup, three-Mac report flow, and routine updates still need hands-on use. Windows setup is implemented but has not been tried on a family Windows computer.
 
 ## The family journey
 
