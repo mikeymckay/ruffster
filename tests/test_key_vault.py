@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from nacl.exceptions import CryptoError
 from nacl.public import PrivateKey
-from family_activity.key_vault import create_new, encrypt_private_key, unlock
+from family_activity.key_vault import create_new, encrypt_private_key, replace_existing_private, unlock
 
 class KeyVaultTests(unittest.TestCase):
     def test_key_round_trip_wrong_passphrase_and_corruption(self):
@@ -41,6 +41,19 @@ class KeyVaultTests(unittest.TestCase):
             with self.assertRaises(FileExistsError): create_new(path, b'replacement')
             self.assertEqual(path.read_bytes(), b'original')
             if os.name == 'posix': self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+
+    def test_atomic_private_replacement_preserves_permissions_and_original_on_failure(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)/'parent.vault'
+            create_new(path, b'old encrypted key')
+            replace_existing_private(path, b'new encrypted key')
+            self.assertEqual(path.read_bytes(), b'new encrypted key')
+            if os.name == 'posix': self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+            with patch('family_activity.key_vault.os.replace', side_effect=OSError('simulated replacement failure')):
+                with self.assertRaises(OSError): replace_existing_private(path, b'not committed')
+            self.assertEqual(path.read_bytes(), b'new encrypted key')
+            self.assertEqual(list(Path(tmp).glob('.parent-vault-*')), [])
 
     def test_create_export_and_open_dashboard(self):
         import subprocess

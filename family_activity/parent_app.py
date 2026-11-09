@@ -329,6 +329,35 @@ class Handler(BaseHTTPRequestHandler):
             except Exception:
                 self._json({'error': 'Could not restore that backup. Check the recovery copy and parent access PIN (or the older passphrase used for it).'}, 400)
             return
+        if self.path == '/api/change-pin':
+            if self.server.private_key is None:
+                self._json({'error': 'Unlock parent access first.'}, 403); return
+            try:
+                body = json.loads(self._body())
+                if not isinstance(body, dict):
+                    raise ValueError('invalid request')
+                current_pin = body.get('current_pin')
+                new_pin = body.get('new_pin')
+                confirm_pin = body.get('confirm_pin')
+                if not all(isinstance(value, str) for value in (current_pin, new_pin, confirm_pin)):
+                    raise ValueError('invalid request')
+                if new_pin != confirm_pin:
+                    self._json({'error': 'The new PINs do not match.'}, 400); return
+                if new_pin == current_pin:
+                    self._json({'error': 'Choose a different six-digit PIN.'}, 400); return
+                current_key = key_vault.unlock(self.server.vault.read_bytes(), current_pin)
+                if not hmac.compare_digest(bytes(current_key), bytes(self.server.private_key)):
+                    raise ValueError('current PIN does not match the unlocked parent key')
+                backup = key_vault.encrypt_private_key(self.server.private_key, new_pin)
+                self.server.stop_public_key_share()
+                parent_settings.save_backup_confirmation(self.server.settings, False)
+                self.server.backup_confirmed = False
+                self.server.backup_downloaded = False
+                key_vault.replace_existing_private(self.server.vault, backup)
+                self._json({'ok': True, 'backup_confirmed': False})
+            except Exception:
+                self._json({'error': 'Could not change the PIN. Check your current PIN and choose a new six-digit PIN.'}, 400)
+            return
         if self.path in ('/api/create', '/api/unlock'):
             try:
                 body = json.loads(self._body())

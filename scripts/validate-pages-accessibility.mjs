@@ -130,7 +130,8 @@ function sampleReport() {
   };
 }
 
-function createParentServer({ populated = false } = {}) {
+function createParentServer({ populated = false, unlocked = populated, hasReport = populated,
+                              backupConfirmed = populated } = {}) {
   const assets = {
     '/': 'index.html',
     '/app.css': 'app.css',
@@ -151,7 +152,7 @@ function createParentServer({ populated = false } = {}) {
     }
     if (pathname === '/api/status') {
       const body = Buffer.from(JSON.stringify({
-        has_key: populated, unlocked: populated, has_report: populated, backup_confirmed: populated,
+        has_key: unlocked, unlocked, has_report: hasReport, backup_confirmed: backupConfirmed,
       }));
       response.writeHead(200, {
         'Content-Type': 'application/json; charset=utf-8',
@@ -161,17 +162,17 @@ function createParentServer({ populated = false } = {}) {
       response.end(request.method === 'HEAD' ? undefined : body);
       return;
     }
-    if (populated && pathname === '/api/settings') {
+    if (unlocked && pathname === '/api/settings') {
       response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
       response.end(JSON.stringify({ retention_days: 30 }));
       return;
     }
-    if (populated && pathname === '/api/schedule') {
+    if (unlocked && pathname === '/api/schedule') {
       response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
       response.end(JSON.stringify({ schedule: { timezone: 'Europe/Vienna', start: '08:30', end: '15:00', days: [1, 2, 3, 4, 5] } }));
       return;
     }
-    if (populated && new URL(request.url || '/', 'http://localhost').pathname === '/api/report') {
+    if (hasReport && new URL(request.url || '/', 'http://localhost').pathname === '/api/report') {
       response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
       response.end(JSON.stringify(sampleReport()));
       return;
@@ -290,6 +291,7 @@ async function main() {
   const profile = await mkdtemp(path.join(tmpdir(), 'family-pages-axe-'));
   const server = createStaticServer();
   const parentServer = createParentServer();
+  const parentPinChangeServer = createParentServer({ unlocked: true, backupConfirmed: true });
   const parentReportServer = createParentServer({ populated: true });
   let browser;
   let socket;
@@ -303,11 +305,16 @@ async function main() {
       parentServer.listen(0, '127.0.0.1', resolve);
     });
     await new Promise((resolve, reject) => {
+      parentPinChangeServer.once('error', reject);
+      parentPinChangeServer.listen(0, '127.0.0.1', resolve);
+    });
+    await new Promise((resolve, reject) => {
       parentReportServer.once('error', reject);
       parentReportServer.listen(0, '127.0.0.1', resolve);
     });
     const address = server.address();
     const parentAddress = parentServer.address();
+    const parentPinAddress = parentPinChangeServer.address();
     const reportAddress = parentReportServer.address();
     const browserArgs = [
       '--headless=new', '--disable-gpu', '--no-first-run', '--disable-background-networking',
@@ -331,6 +338,7 @@ async function main() {
     const targets = [
       ...pages.map((page) => ({ name: page, url: `http://127.0.0.1:${address.port}/${page}`, path: `/${page}` })),
       { name: 'parent dashboard setup', url: `http://127.0.0.1:${parentAddress.port}/`, path: '/' },
+      { name: 'parent dashboard change parent PIN', url: `http://127.0.0.1:${parentPinAddress.port}/`, path: '/' },
       { name: 'parent dashboard report', url: `http://127.0.0.1:${reportAddress.port}/`, path: '/' },
     ];
     for (const viewport of viewports) {
@@ -353,6 +361,15 @@ async function main() {
             await new Promise((resolve) => setTimeout(resolve, 50));
           }
           if (!ready) throw new Error('The parent setup screen did not reach its initial state.');
+        }
+        if (target.name === 'parent dashboard change parent PIN') {
+          const ready = await evaluate(send, `(() => {
+            const details = document.querySelector('#change-pin');
+            if (!details || details.hidden) return false;
+            details.open = true;
+            return true;
+          })()`);
+          if (!ready) throw new Error('The unlocked parent PIN change screen did not render.');
         }
         if (target.name === 'parent dashboard report') {
           const deadline = Date.now() + 5000;
@@ -453,6 +470,7 @@ async function main() {
     }
     await new Promise((resolve) => server.close(resolve));
     await new Promise((resolve) => parentServer.close(resolve));
+    await new Promise((resolve) => parentPinChangeServer.close(resolve));
     await new Promise((resolve) => parentReportServer.close(resolve));
     await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   }

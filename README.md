@@ -4,9 +4,9 @@
 
 <p align="center"><img src="docs/assets/ruffster-mascot.webp" alt="Ruffster golden retriever mascot" width="190"></p>
 
-**Ruffster for Mac 0.1.15 is available for families.** Start on the parent Mac, then set up each child's Mac together and bring encrypted reports back to the parent dashboard. The Ruffster app can stay in the shared Applications folder; sign in to the child's account before setup, which installs monitoring for that account only. Setup waits for the first encrypted sample, and if nearby-computer pairing fails it offers a direct retry or connection-file choice with Wi-Fi permission help. Windows setup and packaging pass automated checks, and still need review on a logged-in Windows computer before a Windows download is offered.
+**Ruffster for Mac 0.1.16 is available for families.** Start on the parent Mac, then set up each child's Mac together and bring encrypted reports back to the parent dashboard. The Ruffster app can stay in the shared Applications folder; sign in to the child's account before setup, which installs monitoring for that account only. Setup waits for the first encrypted sample, and if nearby-computer pairing fails it offers a direct retry or connection-file choice with Wi-Fi permission help. Parents can change the PIN on an unlocked parent computer without disconnecting child computers or replacing reports; the other parent computers and saved recovery copies keep their existing PIN. Windows setup and packaging pass automated checks, and still need review on a logged-in Windows computer before a Windows download is offered.
 
-[Download Ruffster for Mac 0.1.15 (.dmg)](https://github.com/mikeymckay/ruffster/releases/download/mac-family-0.1.15/Ruffster-Mac-Family-App-Apple-Silicon.dmg) · [Release notes and checksum](https://github.com/mikeymckay/ruffster/releases/tag/mac-family-0.1.15) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
+[Download Ruffster for Mac 0.1.16 (.dmg)](https://github.com/mikeymckay/ruffster/releases/download/mac-family-0.1.16/Ruffster-Mac-Family-App-Apple-Silicon.dmg) · [Release notes and checksum](https://github.com/mikeymckay/ruffster/releases/tag/mac-family-0.1.16) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
 
 [Project website](https://mikeymckay.github.io/ruffster/) · [Install guide](https://mikeymckay.github.io/ruffster/install.html) · [Progress page](https://mikeymckay.github.io/ruffster/progress.html) · [FAQ](https://mikeymckay.github.io/ruffster/faq.html) · [Privacy and children's rights](PRIVACY-AND-CHILDREN.md) · [Implementation plan](PLAN.md)
 
@@ -47,7 +47,7 @@ The school-hours view uses a schedule chosen by the parent; it does not prove th
 
 ## Privacy and encryption
 
-Ruffster encrypts each activity report for the parent. The parent keeps the private key and a six-digit PIN; the child's computer can send a report but cannot open it. Save the encrypted recovery copy so you can restore parent access on another computer. No cloud account is required.
+Ruffster encrypts each activity report for the parent. The parent keeps the private key and a six-digit PIN; the child's computer can send a report but cannot open it. You can change the PIN on an unlocked parent computer without disconnecting child computers or replacing reports. Then save and confirm a fresh recovery copy before setting up another child. Other parent computers and recovery copies keep their existing PIN until you update them. No cloud account is required.
 
 To connect computers, the sending computer shows two digits and the receiving computer enters them. This helps the devices find each other on the same Wi-Fi; the report itself stays encrypted. Some Wi-Fi networks keep devices separate. If that happens, save an encrypted report file on the child's computer and open it in the parent's dashboard. The dashboard can keep reports from several computers separate and lets the parent name each one.
 

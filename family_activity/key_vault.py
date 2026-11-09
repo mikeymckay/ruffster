@@ -7,6 +7,8 @@ offline. Keep the recovery copy somewhere only the parent can access.
 import os
 from pathlib import Path
 import re
+import stat
+import tempfile
 from nacl import pwhash, secret, utils
 from nacl.public import PrivateKey
 
@@ -56,5 +58,38 @@ def create_new(path, contents):
         try:
             path.unlink()
         except OSError:
+            pass
+        raise
+
+
+def replace_existing_private(path, contents):
+    """Atomically replace an existing private vault without exposing a partial file."""
+    path = Path(path).expanduser()
+    info = path.lstat()
+    if not stat.S_ISREG(info.st_mode):
+        raise ValueError('parent key file must be a regular file')
+    fd, temporary = tempfile.mkstemp(prefix='.parent-vault-', dir=path.parent)
+    try:
+        if os.name == 'posix':
+            os.fchmod(fd, 0o600)
+        with os.fdopen(fd, 'wb') as stream:
+            stream.write(contents)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        if os.name == 'posix':
+            directory = os.open(path.parent, os.O_RDONLY)
+            try:
+                os.fsync(directory)
+            finally:
+                os.close(directory)
+    except BaseException:
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
             pass
         raise

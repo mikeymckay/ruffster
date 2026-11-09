@@ -56,3 +56,7 @@ Before describing Ruffster as a supported family release, complete hands-on Mac 
 ## Latest shipped step — 2026-11-09
 
 Mac 0.1.15 is published. Parent reports now show monitoring runtime, observable gaps, and restarts after a session without a clean stop; the UI says these counts do not explain why the session ended. CI passed on Linux, macOS, and Windows, including Mac and Windows package smoke builds. The DMG checksum was verified against its release sidecar. Annika's Mac is currently unreachable over SSH, so the requested child-account setup and real school-day collection still need the Mac awake and reachable.
+
+## Unreleased candidate — parent PIN change
+
+An unlocked parent can change the PIN saved on that computer without changing the parent key, reports, or child computers. The dashboard explains that old recovery copies and other parent computers keep their current PIN, and asks the parent to save and confirm a fresh recovery copy before another child setup. This is versioned as 0.1.16 in the working tree. The local 300-test suite and desktop/phone accessibility scans pass; hosted CI and the Mac package are pending. Annika's Mac remains offline, so family setup is still unverified.

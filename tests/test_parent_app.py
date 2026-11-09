@@ -81,6 +81,8 @@ class ParentAppTests(unittest.TestCase):
         self.assertEqual(page.count(b'class="step-number"'), 4)
         self.assertIn(b'id="next-step"', page)
         self.assertIn(b'id="key-state"', page)
+        self.assertIn(b'id="change-pin-form"', page)
+        self.assertIn('Change this computer’s parent PIN'.encode(), page)
         self.assertIn(b'id="child-setup" hidden', page)
         self.assertIn(b'id="backup-required"', page)
         self.assertIn(b'id="download-backup-required"', page)
@@ -115,6 +117,8 @@ class ParentAppTests(unittest.TestCase):
         self.assertIn(b'function updateSetupProgress()', script)
         self.assertIn(b"$('key-form').hidden = status.unlocked", script)
         self.assertIn(b"$('key-state').hidden = !status.unlocked", script)
+        self.assertIn(b"$('change-pin').hidden = !status.unlocked", script)
+        self.assertIn(b"post('/api/change-pin'", script)
         self.assertIn(b"$('child-setup').hidden = !(status.unlocked && status.backup_confirmed)", script)
         self.assertIn(b"$('backup-required').hidden = !(status.unlocked && !status.backup_confirmed)", script)
         self.assertIn(b"post('/api/public-key-share', {})", script)
@@ -168,6 +172,8 @@ class ParentAppTests(unittest.TestCase):
         self.login()
         self.assertEqual(self.request('GET', '/api/status')[0], 200)
         self.assertEqual(self.request('GET', '/api/settings')[0], 403)
+        self.assertEqual(self.request('POST', '/api/change-pin', {
+            'current_pin': '638204', 'new_pin': '741905', 'confirm_pin': '741905'})[0], 403)
         self.assertEqual(self.request('GET', '/api/status', headers={'Host':'evil.example'})[0], 403)
         self.assertEqual(self.request('POST', '/api/login', {'token':self.server.token})[0], 403)
         self.assertEqual(self.request('POST', '/api/lock', {}, {'Origin':'https://evil.example'})[0], 403)
@@ -218,6 +224,63 @@ class ParentAppTests(unittest.TestCase):
                 self.assertEqual(self.request('POST', '/api/create',
                                               {'passphrase':pin, 'confirm':pin})[0], 400)
         self.assertFalse(self.server.vault.exists())
+
+    def test_parent_can_change_pin_without_changing_key_and_must_save_new_backup(self):
+        from nacl.exceptions import CryptoError
+        from family_activity.key_vault import unlock
+        self.login()
+        old_pin, new_pin = '638204', '741905'
+        old_backup = self.create_parent_key(old_pin)
+        private_bytes = bytes(self.server.private_key)
+        public_bytes = bytes(self.server.private_key.public_key)
+
+        self.assertEqual(self.request('POST', '/api/change-pin', {
+            'current_pin': 'wrong!', 'new_pin': new_pin, 'confirm_pin': new_pin})[0], 400)
+        self.assertEqual(self.server.vault.read_bytes(), old_backup)
+        self.assertTrue(self.server.backup_confirmed)
+        self.assertEqual(bytes(unlock(old_backup, old_pin)), private_bytes)
+        self.assertEqual(self.request('POST', '/api/change-pin', {
+            'current_pin': old_pin, 'new_pin': new_pin, 'confirm_pin': '000000'})[0], 400)
+        self.assertEqual(self.server.vault.read_bytes(), old_backup)
+
+        status, _, body = self.request('POST', '/api/change-pin', {
+            'current_pin': old_pin, 'new_pin': new_pin, 'confirm_pin': new_pin})
+        self.assertEqual(status, 200, body)
+        self.assertEqual(bytes(self.server.private_key), private_bytes)
+        self.assertEqual(bytes(self.server.private_key.public_key), public_bytes)
+        self.assertFalse(self.server.backup_confirmed)
+        self.assertEqual(self.request('GET', '/api/public')[0], 403)
+        with self.assertRaises(CryptoError): unlock(self.server.vault.read_bytes(), old_pin)
+        self.assertEqual(bytes(unlock(self.server.vault.read_bytes(), new_pin)), private_bytes)
+        reopened = ParentServer(self.folder)
+        try:
+            self.assertFalse(reopened.backup_confirmed)
+        finally:
+            reopened.server_close()
+
+        new_backup = self.request('GET', '/api/backup')[2]
+        self.assertNotEqual(new_backup, old_backup)
+        self.assertEqual(self.request('POST', '/api/confirm-key-backup', {'confirmed': True})[0], 200)
+        self.assertTrue(self.server.backup_confirmed)
+        self.assertEqual(self.request('GET', '/api/public')[0], 200)
+
+    def test_failed_pin_rewrap_keeps_old_pin_and_requires_backup_reconfirmation(self):
+        from unittest.mock import patch
+        self.login()
+        old_pin, new_pin = '638204', '741905'
+        old_backup = self.create_parent_key(old_pin)
+        with patch('family_activity.parent_app.key_vault.replace_existing_private',
+                   side_effect=OSError('simulated vault replacement failure')):
+            status, _, body = self.request('POST', '/api/change-pin', {
+                'current_pin': old_pin, 'new_pin': new_pin, 'confirm_pin': new_pin})
+        self.assertEqual(status, 400, body)
+        self.assertEqual(self.server.vault.read_bytes(), old_backup)
+        self.assertTrue(self.server.key_unlocked)
+        self.assertFalse(self.server.backup_confirmed)
+        self.assertEqual(self.request('GET', '/api/public')[0], 403)
+        self.assertEqual(self.request('GET', '/api/backup')[2], old_backup)
+        self.assertEqual(self.request('POST', '/api/confirm-key-backup', {'confirmed': True})[0], 200)
+        self.assertEqual(self.request('GET', '/api/public')[0], 200)
 
     def test_parent_key_backup_restores_on_empty_parent_install_without_overwrite(self):
         import base64

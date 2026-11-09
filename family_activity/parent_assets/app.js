@@ -53,6 +53,7 @@ async function refresh() {
   }
   $('confirm-wrap').hidden = status.has_key;
   $('confirm').required = !status.has_key;
+  $('change-pin').hidden = !status.unlocked;
   $('backup-required').hidden = !(status.unlocked && !status.backup_confirmed);
   $('download-backup').hidden = !status.unlocked || !status.backup_confirmed;
   $('download-public').hidden = !status.unlocked || !status.backup_confirmed;
@@ -405,6 +406,30 @@ $('key-form').addEventListener('submit', async e => {
   $('password').value=''; $('confirm').value='';
   try { await post(status.has_key ? '/api/unlock' : '/api/create', {passphrase,confirm}); show('Parent access is ready.'); await refresh(); }
   catch (error) { show(error.message); }
+});
+$('change-pin-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const currentPin = $('current-pin').value;
+  const newPin = $('new-pin').value;
+  const confirmPin = $('confirm-new-pin').value;
+  if (!/^[0-9]{6}$/.test(newPin)) { $('change-pin-note').textContent = 'Choose exactly six digits for the new PIN.'; return; }
+  if (newPin !== confirmPin) { $('change-pin-note').textContent = 'The new PINs do not match.'; return; }
+  if (newPin === currentPin) { $('change-pin-note').textContent = 'Choose a different six-digit PIN.'; return; }
+  $('change-pin-button').disabled = true;
+  try {
+    await post('/api/change-pin', {current_pin:currentPin, new_pin:newPin, confirm_pin:confirmPin});
+    $('change-pin-note').textContent = 'PIN changed on this computer. Save and confirm a new recovery copy before setting up another child computer.';
+    $('change-pin').open = false;
+    show('Parent PIN changed. Your reports and connected child computers still use the same parent key.');
+    await refresh();
+  } catch (error) {
+    $('change-pin-note').textContent = error.message;
+  } finally {
+    $('current-pin').value = '';
+    $('new-pin').value = '';
+    $('confirm-new-pin').value = '';
+    $('change-pin-button').disabled = false;
+  }
 });
 $('lock').addEventListener('click', async () => { try { await post('/api/lock', {}); show('Parent access locked.'); await refresh(); } catch(error) { show(error.message); } });
 $('connection-code').addEventListener('input', () => {
