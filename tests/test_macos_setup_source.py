@@ -20,7 +20,7 @@ class MacSetupSourceTests(unittest.TestCase):
         root = Path(__file__).parents[1]
         builder = (root / 'scripts' / 'build-macos-preview.sh').read_text(encoding='utf-8')
         workflow = (root / '.github' / 'workflows' / 'release-macos-unsigned-preview.yml').read_text(encoding='utf-8')
-        self.assertIn('VERSION=${RUFFSTER_VERSION:-0.1.21}', builder)
+        self.assertIn('VERSION=${RUFFSTER_VERSION:-0.1.22}', builder)
         self.assertIn("'CFBundleShortVersionString':sys.argv[2]", builder)
         self.assertIn("'CFBundleVersion':sys.argv[2]", builder)
         self.assertIn("'CFBundleIconFile':'Ruffster.icns'", builder)
