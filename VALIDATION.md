@@ -1,5 +1,9 @@
 # Real-machine validation
 
+## 2026-11-09: Publish Ruffster for Mac 0.1.21
+
+The Mac setup confirmation now names the signed-in account and says to cancel if it is not the child's account. Main CI `42633412497` passed Linux, macOS, Windows test groups, both package checks, and the accessibility scan. Release workflow `42634245096` published `mac-family-0.1.21`. Downloaded its 17,656,636-byte DMG and verified it matches the published SHA-256 sidecar (`6368d168bef7864c33a15640cbf6075aa39d622f720f7cba4bb270ee71fcd7bf`). The local suite ran 302 tests (297 passed; five platform/tool checks skipped), and the 16 desktop/phone accessibility scans found zero Axe violations. The family Mac still has 0.1.20 in shared Applications. SSH uses its admin account and cannot open setup in the child's GUI account; 0.1.21 has not been installed there. No monitoring or family activity is verified.
+
 ## 2026-11-09: Refresh progress page with current validation
 
 The full local regression suite ran 301 tests: 296 passed and five platform/tool checks were skipped on Linux. The 33 focused documentation tests passed. The desktop and phone Axe scan covered all four public pages and four parent-dashboard states with zero violations or horizontal overflow. GitHub Actions run `42625310484` passed Linux, macOS, Windows test groups, and both package builds. Updated the public Progress page to show the current test count and checked the live page after deployment. No family activity was used.
