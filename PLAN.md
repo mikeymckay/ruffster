@@ -20,6 +20,8 @@ The Apple-silicon app includes a native welcome/setup screen, visible menu-bar s
 
 The Mac welcome and confirmation screens now state that setup monitors only the signed-in account, and the install guide, FAQ, and README tell families to sign in to the child's account first. Source checks, the Pages accessibility scan, and hosted Mac build/test run `42576369127` passed. The family Mac was asleep/unreachable for a read-only native UI compile, so this account-scope clarification has not been reviewed interactively on that device. No family agent is installed or collecting activity.
 
+Mac family release 0.1.14 is published from commit `89bcb1f`. Release workflow `42578080858` passed the Mac suite and packaged the Apple-silicon DMG; its SHA-256 matched the release sidecar. Main CI `42578080836` passed all Linux, macOS, Windows, and package smoke checks. The updated install guide points to 0.1.14. The family Mac remains unreachable, so first-run setup and report exchange remain unverified.
+
 **Next:** walk through setup and report return together on family Macs; review sleep/wake, local-network prompts, VoiceOver, recovery, update, and removal.
 
 ### 2. Windows family app — implementation and automated checks in place

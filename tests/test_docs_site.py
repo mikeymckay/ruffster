@@ -218,8 +218,8 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('Open parent dashboard', guide)
         self.assertIn('Set up this Mac together', guide)
         self.assertIn('background monitoring, a visible menu-bar status', guide)
-        self.assertIn('https://github.com/mikeymckay/ruffster/releases/download/mac-family-0.1.13/Ruffster-Mac-Family-App-Apple-Silicon.dmg', guide)
-        self.assertIn('https://github.com/mikeymckay/ruffster/releases/tag/mac-family-0.1.13', guide)
+        self.assertIn('https://github.com/mikeymckay/ruffster/releases/download/mac-family-0.1.14/Ruffster-Mac-Family-App-Apple-Silicon.dmg', guide)
+        self.assertIn('https://github.com/mikeymckay/ruffster/releases/tag/mac-family-0.1.14', guide)
         self.assertIn('Open Anyway</strong> for Ruffster', guide)
         self.assertIn('your Mac’s general app protections stay on', guide)
         self.assertIn('VoiceOver', guide)
@@ -479,9 +479,9 @@ class DocumentationSiteTests(unittest.TestCase):
 
     def test_progress_page_reports_current_family_release_and_validation_gates(self):
         status = (SITE / 'progress.html').read_text(encoding='utf-8')
-        self.assertIn('Ruffster for Mac 0.1.13 is available for families', status)
+        self.assertIn('Ruffster for Mac 0.1.14 is available for families', status)
         self.assertIn('What we’re improving next', status)
-        self.assertIn('Download Ruffster for Mac 0.1.13', status)
+        self.assertIn('Download Ruffster for Mac 0.1.14', status)
         self.assertIn('Mac-to-Mac setup and the first family report review are still to try together', status)
         self.assertIn('the published parent dashboard opened a synthetic encrypted report', status)
         self.assertIn('Mac parent key sharing worked over the home LAN with a synthetic client', status)
