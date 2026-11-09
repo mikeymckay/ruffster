@@ -6,11 +6,16 @@ deltas only; it does not collect remote addresses, ports, or website names.
 import csv
 from dataclasses import dataclass
 import os
-import pty
 import re
 import threading
-import tty
 import time
+
+try:  # These helpers exist only on Unix; this sampler is macOS-only.
+    import pty
+    import tty
+except ImportError:  # Keep the parser and accumulator usable on Windows.
+    pty = None
+    tty = None
 
 
 _ROW = re.compile(r'^(?P<name>.+)\.(?P<pid>[0-9]+)$')
@@ -103,6 +108,8 @@ class MacProcessNetworkSampler:
 
         if sys.platform != 'darwin':
             raise RuntimeError('per-process network sampling is available only on macOS')
+        if pty is None or tty is None:
+            raise RuntimeError('macOS process sampling needs Unix pseudo-terminal support')
         executable = shutil.which('nettop')
         if not executable:
             raise RuntimeError('macOS nettop is unavailable')

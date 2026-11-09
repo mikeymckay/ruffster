@@ -223,7 +223,9 @@ def encrypt_legacy_database(source_path, public_key_path, output_path, retention
         retained = writer.db.execute('SELECT count(*) FROM encrypted_events').fetchone()[0]
         writer.close()
         writer = None
-        with temp_path.open('rb') as stream:
+        # Windows requires a writable handle for fsync; the completed database
+        # is closed above, so this cannot change its contents.
+        with temp_path.open('rb+') as stream:
             os.fsync(stream.fileno())
         os.link(temp_path, output_path)
         temp_path.unlink()

@@ -17,6 +17,22 @@ from nacl.public import PrivateKey
 from family_activity import encrypted_store, store
 from family_activity.encrypted_agent_store import EncryptedAgentStore
 
+
+def agent_bootstrap_that_stops_after(delay):
+    """Stop through the agent's shutdown handler on hosts without POSIX SIGTERM."""
+    return (
+        'import signal, threading\n'
+        'from family_activity.__main__ import main\n'
+        'register = signal.signal\n'
+        'def register_and_stop(signum, handler):\n'
+        '    previous = register(signum, handler)\n'
+        '    if signum == signal.SIGTERM:\n'
+        f'        threading.Timer({delay!r}, lambda: handler(signum, None)).start()\n'
+        '    return previous\n'
+        'signal.signal = register_and_stop\n'
+        'main()\n'
+    )
+
 class EncryptedAgentTests(unittest.TestCase):
     def test_device_identity_is_stable_across_agent_restarts_and_encrypted(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -148,12 +164,14 @@ class EncryptedAgentTests(unittest.TestCase):
             parent = PrivateKey.generate()
             public = Path(tmp)/'parent.pub'; public.write_bytes(bytes(parent.public_key))
             path = Path(tmp)/'db'
-            proc = subprocess.Popen([sys.executable, '-m', 'family_activity', 'agent', '--db', str(path), '--interval', '.1', '--experimental-public-key', str(public)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            proc = subprocess.Popen([sys.executable, '-c', agent_bootstrap_that_stops_after(.8),
+                                     'agent', '--db', str(path), '--interval', '.1',
+                                     '--experimental-public-key', str(public)],
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             try:
                 line = proc.stdout.readline()
                 self.assertIn('Monitoring heartbeat active', line)
-                time.sleep(.25)
-                proc.terminate(); proc.wait(timeout=5)
+                proc.wait(timeout=5)
                 self.assertEqual(proc.returncode, 0)
                 con = sqlite3.connect(path)
                 events = [encrypted_store.open_event(parent, row[0]) for row in con.execute('SELECT ciphertext FROM encrypted_events ORDER BY id')]
@@ -222,17 +240,21 @@ class EncryptedAgentTests(unittest.TestCase):
         from family_activity.encrypted_view import open_projection
         bootstrap = ("import sys; from family_activity import network; calls=0; "
                     "def_gap=None; exec('def gap(a,b,c,d,e):\\n global calls\\n calls += 1\\n return (a,c) if calls == 2 else None'); "
-                    "network.coverage_gap=gap; from family_activity.__main__ import main; main()")
+                    "network.coverage_gap=gap; from family_activity.__main__ import main; ")
         with tempfile.TemporaryDirectory() as tmp:
             folder=Path(tmp); db_path=folder/'activity.sqlite3'
             parent=PrivateKey.generate(); public=folder/'parent.pub'; public.write_bytes(bytes(parent.public_key))
+            bootstrap += 'import signal,threading; _register=signal.signal; '
+            bootstrap += 'signal.signal=lambda sig,handler: (_register(sig,handler), '
+            bootstrap += 'threading.Timer(.8,lambda: handler(sig,None)).start() '
+            bootstrap += 'if sig==signal.SIGTERM else None)[0]; main()'
             argv=[sys.executable,'-c',bootstrap,'agent','--db',str(db_path),'--interval','.1',
                   '--experimental-public-key',str(public)]
             proc=subprocess.Popen(argv,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
             try:
-                self.assertIn('Monitoring heartbeat active',proc.stdout.readline())
-                time.sleep(.4)
-                proc.terminate(); proc.wait(timeout=5)
+                startup = proc.stdout.readline()
+                self.assertIn('Monitoring heartbeat active', startup, proc.stderr.read())
+                proc.wait(timeout=5)
                 self.assertEqual(proc.returncode,0,proc.stderr.read())
                 event_db=sqlite3.connect(db_path)
                 events=[encrypted_store.open_event(parent,row[0]) for row in event_db.execute('SELECT ciphertext FROM encrypted_events ORDER BY id')]

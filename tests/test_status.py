@@ -7,7 +7,8 @@ class StatusTests(unittest.TestCase):
     def test_successful_status_is_stopped(self):
         import subprocess
         real = subprocess.Popen
-        with patch('family_activity.__main__.subprocess.Popen', side_effect=lambda *a, **kw: real([sys.executable, '-u', '-c', 'import time; print("READY"); time.sleep(30)'], **kw)) as popen:
+        with patch('family_activity.__main__.sys.platform', 'linux'), \
+             patch('family_activity.__main__.subprocess.Popen', side_effect=lambda *a, **kw: real([sys.executable, '-u', '-c', 'import time; print("READY"); time.sleep(30)'], **kw)) as popen:
             child = start_status('ignored', interval=7)
             self.assertEqual(popen.call_args.kwargs['stdin'], subprocess.PIPE)
             self.assertEqual(popen.call_args.kwargs['env']['FAMILY_ACTIVITY_SAMPLE_INTERVAL'], '7')
@@ -22,7 +23,8 @@ class StatusTests(unittest.TestCase):
             stdin = io.BytesIO()
             def poll(self): return None
         process = Process()
-        status_heartbeat(process)
+        with patch('family_activity.__main__.sys.platform', 'linux'):
+            status_heartbeat(process)
         self.assertEqual(process.stdin.getvalue(), b'HEARTBEAT\n')
 
     def test_status_heartbeat_fails_closed_when_indicator_stops(self):
@@ -30,13 +32,15 @@ class StatusTests(unittest.TestCase):
         class Process:
             stdin = None
             def poll(self): return 0
-        with self.assertRaisesRegex(RuntimeError, 'Status indicator stopped'):
+        with patch('family_activity.__main__.sys.platform', 'linux'), \
+             self.assertRaisesRegex(RuntimeError, 'Status indicator stopped'):
             status_heartbeat(Process())
 
     def test_failed_status_is_rejected(self):
         import subprocess
         real = subprocess.Popen
-        with patch('family_activity.__main__.subprocess.Popen', side_effect=lambda *a, **kw: real([sys.executable, '-u', '-c', 'print("ERROR")'], **kw)):
+        with patch('family_activity.__main__.sys.platform', 'linux'), \
+             patch('family_activity.__main__.subprocess.Popen', side_effect=lambda *a, **kw: real([sys.executable, '-u', '-c', 'print("ERROR")'], **kw)):
             with self.assertRaises(RuntimeError):
                 start_status('ignored')
 

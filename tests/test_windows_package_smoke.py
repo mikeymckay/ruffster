@@ -1,4 +1,5 @@
 import importlib.util
+import os
 from pathlib import Path
 import sys
 import tempfile
@@ -13,6 +14,7 @@ SPEC.loader.exec_module(VALIDATOR)
 
 
 class WindowsPackageSmokeTests(unittest.TestCase):
+    @unittest.skipIf(os.name == 'nt', 'the synthetic shebang executable is Unix-only; CI validates the real Windows package')
     def test_validator_checks_local_dashboard_with_an_executable_core(self):
         with tempfile.TemporaryDirectory() as temporary:
             package = Path(temporary)
