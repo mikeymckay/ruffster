@@ -18,7 +18,7 @@ class MacSetupSourceTests(unittest.TestCase):
         root = Path(__file__).parents[1]
         builder = (root / 'scripts' / 'build-macos-preview.sh').read_text(encoding='utf-8')
         workflow = (root / '.github' / 'workflows' / 'release-macos-unsigned-preview.yml').read_text(encoding='utf-8')
-        self.assertIn('VERSION=${RUFFSTER_VERSION:-0.1.11}', builder)
+        self.assertIn('VERSION=${RUFFSTER_VERSION:-0.1.12}', builder)
         self.assertIn("'CFBundleShortVersionString':sys.argv[2]", builder)
         self.assertIn("'CFBundleVersion':sys.argv[2]", builder)
         self.assertIn("'CFBundleIconFile':'Ruffster.icns'", builder)
@@ -96,6 +96,17 @@ class MacSetupSourceTests(unittest.TestCase):
         self.assertIn('installConfirmationButton = installButton', review)
         self.assertIn('installConfirmationButton?.isEnabled = false', review)
         self.assertIn('response == .alertFirstButtonReturn, acknowledgement.state == .on', review)
+
+    def test_mac_setup_waits_for_first_sample_and_offers_friendly_next_steps(self):
+        root = Path(__file__).parents[1]
+        source = (root / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')
+        installer = (root / 'family_activity' / 'macos_install.py').read_text(encoding='utf-8')
+        self.assertIn('Starting monitoring and saving the first encrypted sample', source)
+        self.assertIn('The first encrypted sample is saved', source)
+        self.assertIn('Look for the Ruffster paw in the menu bar', source)
+        self.assertIn('Settings and removal…', source)
+        self.assertIn('_wait_for_ready_session(database, previous_event_count)', installer)
+        self.assertIn('current_event_count > previous_event_count', installer)
 
     def test_parent_pairing_calls_fallback_a_connection_file(self):
         source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')

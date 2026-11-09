@@ -8,7 +8,10 @@ from types import SimpleNamespace
 import tempfile
 import unittest
 from nacl.public import PrivateKey
-from family_activity.macos_install import install, restart_after_update, uninstall
+from family_activity.macos_install import (
+    _agent_running, _retained_event_count, _wait_for_ready_session,
+    install, restart_after_update, uninstall,
+)
 
 class FakeLaunchctl:
     def __init__(self, fail_bootstrap=False, fail_bootout=False):
@@ -33,8 +36,41 @@ class MacInstallTests(unittest.TestCase):
         self.exe=self.root/'executable'; self.exe.write_text('#!/bin/sh\n'); self.exe.chmod(0o700)
         self.launch=FakeLaunchctl()
     def tearDown(self): self.tmp.cleanup()
-    def perform(self, launch=None):
-        return install(self.key,self.exe,self.source,self.exe,self.exe,self.home,123,runner=launch or self.launch)
+    def perform(self, launch=None, readiness_check=None, **options):
+        readiness_check = readiness_check or (lambda database, previous_count: True)
+        return install(self.key,self.exe,self.source,self.exe,self.exe,self.home,123,
+                       runner=launch or self.launch, readiness_check=readiness_check, **options)
+
+    def test_readiness_requires_a_new_encrypted_event_and_live_agent_lock(self):
+        from family_activity import locking
+        from family_activity.encrypted_agent_store import EncryptedAgentStore
+        from nacl.public import PublicKey
+
+        database = self.home / 'activity.sqlite3'
+        writer = EncryptedAgentStore(database, PublicKey(self.key.read_bytes()), 30)
+        writer.event('start')
+        writer.close()
+        previous = _retained_event_count(database)
+        lock_path = Path(str(database) + '.lock')
+        with lock_path.open('a+') as lock:
+            locking.lock_file(lock)
+            self.assertTrue(_agent_running(database))
+            self.assertFalse(_wait_for_ready_session(database, previous, timeout=0.01))
+            writer = EncryptedAgentStore(database, PublicKey(self.key.read_bytes()), 30)
+            writer.event('tick', application=['Synthetic Parent App', 'org.example.synthetic'])
+            writer.close()
+            self.assertTrue(_wait_for_ready_session(database, previous, timeout=0.1))
+        self.assertFalse(_agent_running(database))
+
+    def test_install_waits_for_ready_sample_and_preserves_uncertain_live_agent(self):
+        with self.assertRaisesRegex(RuntimeError, 'first encrypted sample did not become ready'):
+            self.perform(readiness_check=lambda database, previous_count: False)
+        self.assertTrue(self.launch.loaded)
+        data = self.home / 'Library' / 'Application Support' / 'Family Activity'
+        self.assertTrue((data / 'install.json').is_file())
+        self.assertTrue((self.home / 'Library' / 'LaunchAgents' / 'org.familyactivity.agent.plist').is_file())
+        removed = uninstall(self.home, 123, runner=self.launch)
+        self.assertTrue(removed['data_retained'])
 
     def test_install_uninstall_retain_data_and_reinstall(self):
         result=self.perform(); self.assertTrue(self.launch.loaded)
@@ -135,15 +171,13 @@ class MacInstallTests(unittest.TestCase):
         self.assertEqual((data/'network.key').read_bytes(), b'too short')
 
     def test_install_uses_selected_retention(self):
-        result=install(self.key,self.exe,self.source,self.exe,self.exe,self.home,123,
-                       runner=self.launch,retention_days=7)
+        result=self.perform(retention_days=7)
         import plistlib
         args=plistlib.loads(Path(result['plist']).read_bytes())['ProgramArguments']
         self.assertEqual(args[args.index('--retention-days')+1],'7')
 
     def test_process_network_install_is_opt_in(self):
-        result = install(self.key, self.exe, self.source, self.exe, self.exe, self.home, 123,
-                         runner=self.launch, collect_process_network=True)
+        result = self.perform(collect_process_network=True)
         definition = plistlib.loads(Path(result['plist']).read_bytes())
         self.assertIn('--experimental-process-network', definition['ProgramArguments'])
         self.assertEqual(definition['EnvironmentVariables']['FAMILY_ACTIVITY_PROCESS_NETWORK'], '1')
@@ -156,14 +190,12 @@ class MacInstallTests(unittest.TestCase):
         (package / '__main__.py').write_text('')
         (bundle_contents / 'Info.plist').write_bytes(plistlib.dumps({'CFBundleIdentifier': 'org.example.family'}))
         result = install(self.key, self.exe, runtime, self.exe, self.exe, self.home, 123,
-                         runner=self.launch)
+                         runner=self.launch, readiness_check=lambda database, previous_count: True)
         definition = plistlib.loads(Path(result['plist']).read_bytes())
         self.assertEqual(definition['AssociatedBundleIdentifiers'], ['org.example.family'])
 
     def test_installer_supports_synthetic_only_collection_validation(self):
-        result = install(self.key, self.exe, self.source, self.exe, self.exe, self.home, 123,
-                         runner=self.launch, collect_network=False,
-                         collect_network_settings=False)
+        result = self.perform(collect_network=False, collect_network_settings=False)
         arguments = plistlib.loads(Path(result['plist']).read_bytes())['ProgramArguments']
         self.assertNotIn('--experimental-network', arguments)
         self.assertNotIn('--experimental-network-settings', arguments)

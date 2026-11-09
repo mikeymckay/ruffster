@@ -536,11 +536,16 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if processNetwork.state == .on { arguments.append("--process-network") }
         cleanupWhenComplete = temporaryDirectory != nil
         runWithProgress(arguments, title: "Setting up this Mac…",
-                        detail: "Registering monitoring for this account. Keep Ruffster open.") { [weak self] succeeded, detail in
+                        detail: "Starting monitoring and saving the first encrypted sample. Keep Ruffster open.") { [weak self] succeeded, detail in
             if let temporaryDirectory { try? FileManager.default.removeItem(at: temporaryDirectory) }
             guard let self else { return }
             if succeeded {
-                self.message("Ruffster is set up", "Check that the menu-bar status is visible. It shows when monitoring is on or paused. You can open Ruffster settings any time to review or remove monitoring.")
+                let complete = NSAlert()
+                complete.messageText = "Ruffster is ready on this Mac"
+                complete.informativeText = "The first encrypted sample is saved. Look for the Ruffster paw in the menu bar and check that it says “Monitoring is on.” Reports become more useful as the day goes on. You can open settings any time to review or remove monitoring."
+                complete.addButton(withTitle: "Done")
+                complete.addButton(withTitle: "Settings and removal…")
+                if complete.runModal() == .alertSecondButtonReturn { self.showMoreOptions() }
             } else {
                 self.message("Installation did not complete", self.failureText(detail, fallback: "Check the selected connection file and try again. No existing report was intentionally removed."))
             }

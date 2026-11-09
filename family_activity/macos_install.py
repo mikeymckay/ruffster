@@ -12,7 +12,9 @@ import re
 import sqlite3
 import subprocess
 import time
-from . import macos_launchd, parent_settings, public_key_file
+from contextlib import closing
+from datetime import datetime, timezone
+from . import locking, macos_launchd, parent_settings, public_key_file
 from .key_vault import create_new
 
 DEFAULT_LABEL = 'org.familyactivity.agent'
@@ -24,6 +26,52 @@ def _run(args):
 
 def _check_process(domain, label, runner):
     return runner(['/bin/launchctl', 'print', f'{domain}/{label}']).returncode == 0
+
+
+def _agent_running(database):
+    """Check the agent's exclusive lock before treating a new sample as ready."""
+    lock_path = Path(str(database) + '.lock')
+    if not lock_path.exists():
+        return False
+    try:
+        with lock_path.open('a+') as stream:
+            try:
+                locking.lock_file(stream)
+            except BlockingIOError:
+                return True
+        return False
+    except OSError:
+        # An unreadable lock is not proof that the agent is stopped.
+        return True
+
+
+def _retained_event_count(database):
+    """Count unexpired encrypted rows without reading any event contents."""
+    database = Path(database)
+    if not database.is_file():
+        return 0
+    uri = database.resolve().as_uri() + '?mode=ro'
+    with closing(sqlite3.connect(uri, uri=True, timeout=1)) as db:
+        day = datetime.now(timezone.utc).date().isoformat()
+        return db.execute('SELECT COUNT(*) FROM encrypted_events WHERE expires_on > ?',
+                          (day,)).fetchone()[0]
+
+
+def _wait_for_ready_session(database, previous_event_count, timeout=30):
+    """Wait until launchd's live agent has saved a new encrypted sample."""
+    if not isinstance(timeout, (int, float)) or not 0 < timeout <= 120:
+        raise ValueError('readiness timeout must be greater than zero and at most 120 seconds')
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        try:
+            current_event_count = _retained_event_count(database)
+        except (OSError, sqlite3.Error):
+            current_event_count = None
+        if (current_event_count is not None and current_event_count > previous_event_count
+                and _agent_running(database)):
+            return True
+        time.sleep(0.2)
+    return False
 
 
 def _paths(home, label):
@@ -52,7 +100,7 @@ def _has_symlink_component(path, home):
     return False
 
 
-def install(public_key, python, source, foreground, status, home, uid, *, label=DEFAULT_LABEL, runner=_run, frozen=False, retention_days=30, collect_network=True, collect_network_settings=True, collect_process_network=False):
+def install(public_key, python, source, foreground, status, home, uid, *, label=DEFAULT_LABEL, runner=_run, frozen=False, retention_days=30, collect_network=True, collect_network_settings=True, collect_process_network=False, readiness_check=None):
     """Install a launch agent only after the caller has obtained disclosure.
 
     Does not overwrite an existing agent, key, or report. Previously retained
@@ -93,6 +141,7 @@ def install(public_key, python, source, foreground, status, home, uid, *, label=
             raise ValueError('existing data is not an encrypted activity database') from None
         finally:
             db.close()
+    previous_event_count = _retained_event_count(database)
     domain = f'gui/{uid}'
     if _check_process(domain, label, runner): raise FileExistsError('a launch agent with this label is already loaded')
     data.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -104,6 +153,7 @@ def install(public_key, python, source, foreground, status, home, uid, *, label=
     created_network_key = False
     created_plist = False
     created_metadata = False
+    registered = False
     try:
         if not key_path.exists():
             create_new(key_path, public); created_key = True
@@ -115,9 +165,16 @@ def install(public_key, python, source, foreground, status, home, uid, *, label=
         result = runner(['/bin/launchctl', 'bootstrap', domain, str(plist)])
         if result.returncode:
             raise RuntimeError('launchd could not start the agent')
+        registered = True
+        ready = (readiness_check(database, previous_event_count) if readiness_check is not None
+                 else _wait_for_ready_session(database, previous_event_count))
+        if not ready:
+            raise RuntimeError('monitoring was registered, but the menu-bar status and first encrypted sample did not become ready in time; open Ruffster settings to check or remove setup')
     except BaseException:
         # If bootstrap reported failure but the label is live, leave the files
         # intact for explicit removal rather than creating an orphaned service.
+        if registered:
+            raise
         if created_plist and _check_process(domain, label, runner):
             raise RuntimeError('installation state is uncertain; remove the launch agent explicitly') from None
         if created_metadata: metadata.unlink(missing_ok=True)
