@@ -95,6 +95,16 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('[ENCRYPTION.md](ENCRYPTION.md) for encryption details and practical limits', readme)
         self.assertNotIn('threat model', readme.lower())
 
+    def test_encryption_guide_explains_the_family_data_flow_and_limits(self):
+        encryption = (ROOT / 'ENCRYPTION.md').read_text(encoding='utf-8')
+        self.assertIn('encrypts activity on the child\'s Mac before it is saved', encryption)
+        self.assertIn('The PIN is meant to be simple for a parent to remember and unknown to the child', encryption)
+        self.assertIn('The two-digit number helps the computers find each other on the same Wi-Fi', encryption)
+        self.assertIn('The number and order of encrypted records', encryption)
+        self.assertIn('Use reports as a helpful family picture, not as a forensic record', encryption)
+        self.assertIn('Ruffster does not silently convert or delete them', encryption)
+        self.assertNotIn('threat model', encryption.lower())
+
     def test_parent_screenshots_have_a_temporary_synthetic_capture_tool(self):
         capture = (ROOT / 'scripts/capture-parent-demo-screenshots.py').read_text(encoding='utf-8')
         self.assertIn('TemporaryDirectory', capture)
