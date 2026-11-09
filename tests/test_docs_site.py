@@ -243,6 +243,8 @@ class DocumentationSiteTests(unittest.TestCase):
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
         self.assertIn('sign in to the child\'s account before setup, which installs monitoring for that account only', readme)
         self.assertIn('app can stay in the shared Applications folder', readme)
+        self.assertIn('coarse expiry day beside each encrypted record; that day reveals roughly when it was recorded', readme)
+        self.assertIn('exact event times stay encrypted for the parent', readme)
         faq = (SITE / 'faq.html').read_text(encoding='utf-8')
         self.assertIn('setup installs the background monitor for the signed-in account only', faq)
         self.assertIn('explicit screen-reader labels and help', readme)
