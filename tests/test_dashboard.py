@@ -79,7 +79,7 @@ class DashboardTests(unittest.TestCase):
         html = (assets / 'index.html').read_text(encoding="utf-8")
         script = (assets / 'app.js').read_text(encoding="utf-8")
         self.assertIn('id="child-setup"', html)
-        self.assertIn("On the child's computer, open Ruffster", html)
+        self.assertIn("On one child's Mac, open Ruffster", html)
         self.assertIn('The Mac app is ready for a first family setup', html)
         self.assertIn('Windows setup is still being built and checked on Windows', html)
         self.assertNotIn('not yet ready for family deployment', html)
