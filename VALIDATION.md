@@ -1,5 +1,9 @@
 # Real-machine validation
 
+## 2026-11-09: Update GitHub Actions to Node 24 releases
+
+The latest CI run passed but reported that the older checkout, Python, Node, and .NET setup actions were being forced from Node 20 to Node 24. Updated them across CI, Pages, Mac release, and release-note sync workflows to their maintained Node 24-compatible major releases (`checkout@v7`, `setup-python@v6`, `setup-node@v7`, and `setup-dotnet@v6`). Their upstream action definitions declare the Node 24 runtime. Added a regression check against stale major versions. Local documentation/workflow checks pass (33 tests) and `git diff --check` passes. Hosted validation is pending; no family-device behavior changed.
+
 ## 2026-11-09: Clarify the unsigned Mac family release path
 
 Reworked `MACOS-DISTRIBUTION.md` so the first task is the real per-account family install and current unsigned GitHub release. The release steps explicitly require no Developer ID or signing secrets, describe Apple's per-app first-open approval, and keep family usability checks separate from automated package checks. Moved signing and notarization to an optional future note. Updated contributor conventions and documentation tests to preserve this policy instead of requiring an unused Developer ID build path. Focused docs and Mac setup/install checks pass (68 tests), and `git diff --check` passes. Initial hosted CI caught a stale expected phrase in the synthetic-agent instructions; restored the wording and included the validator's cleanup detail. No app release was rebuilt, and no family Mac was available for interactive installation.
