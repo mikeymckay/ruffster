@@ -22,9 +22,9 @@ The Apple-silicon app includes a native welcome/setup screen, visible menu-bar s
 
 ### 2. Windows family app — implementation and automated checks in place
 
-The per-user installer, tray status, background startup, parent dashboard launcher, collection adapters, and report sharing are implemented. The latest hosted CI run passed all four Windows test groups and package checks.
+The per-user installer, tray status, background startup, parent dashboard launcher, collection adapters, and report sharing are implemented. Hosted Windows CI now runs the packaged agent through synthetic Task Scheduler install, encrypted sampling, forced restart and gap recording, update, and removal, with network collection disabled. The latest hosted CI passed all Windows test groups and package checks.
 
-**Next:** install and exercise the full setup, visible status, report handoff, update, recovery, and removal on a Windows computer. Keep Windows marked as not yet family-validated until that is done.
+**Next:** review the full setup, visible tray status, report handoff, recovery, and removal on a Windows computer; keep family usability marked unverified until then. Keep Windows marked as not yet family-validated until that is done.
 
 ### 3. Family reports and guidance — implemented; learn from real use
 
