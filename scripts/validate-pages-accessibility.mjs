@@ -198,7 +198,8 @@ function createParentServer({ populated = false, unlocked = populated, hasReport
 
 async function waitForDebugger(profile, browser) {
   const marker = path.join(profile, 'DevToolsActivePort');
-  const deadline = Date.now() + 15000;
+  // Cold Chrome startup can be slow on shared CI runners.
+  const deadline = Date.now() + 30000;
   while (Date.now() < deadline) {
     if (browser.exitCode !== null) throw new Error(`Chrome exited with status ${browser.exitCode}`);
     try {
