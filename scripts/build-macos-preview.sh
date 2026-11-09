@@ -9,13 +9,13 @@ if [ "$#" -ne 2 ]; then
 fi
 PYTHON=$1
 OUTPUT=$2
-VERSION=${RUFFSTER_VERSION:-0.1.16}
+VERSION=${RUFFSTER_VERSION:-0.1.17}
 case "$PYTHON:$OUTPUT" in /*:/*) ;; *) printf '%s\n' 'Use absolute paths.' >&2; exit 1;; esac
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 "$PYTHON" - "$VERSION" <<'PY'
 import re, sys
 if not re.fullmatch(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)", sys.argv[1]):
-    raise SystemExit('Ruffster version must use three numeric components, such as 0.1.16.')
+    raise SystemExit('Ruffster version must use three numeric components, such as 0.1.17.')
 PY
 "$PYTHON" -c 'import PyInstaller, nacl, cryptography'
 mkdir -p "$OUTPUT"
