@@ -46,6 +46,7 @@ internal static class SetupApplication
             !disclosure.Text.Contains("It samples the foreground application name", StringComparison.Ordinal) ||
             !disclosure.Text.Contains("pseudonymous default-router hint", StringComparison.Ordinal) ||
             !disclosure.Text.Contains("raw router address is not saved", StringComparison.Ordinal) ||
+            !disclosure.Text.Contains("rough day marker beside each encrypted record", StringComparison.Ordinal) ||
             !disclosure.Text.Contains("It does not record resolver addresses", StringComparison.Ordinal) ||
             confirmation is null || confirmation.Checked ||
             retention is null || retention.Items.Count != 5 || retention.SelectedIndex != 1 ||
@@ -196,6 +197,7 @@ internal static class SetupApplication
                 stack.Controls.Add(new Label { Text = "This is the maximum time to keep detailed records here. Records are removed while monitoring runs; calendar-day rounding may remove them up to a day before that limit.", AutoSize = true, MaximumSize = new Size(510, 0) });
                 stack.Controls.Add(new Label { Text = "What this preview records", Font = new Font(Font, FontStyle.Bold), AutoSize = true, Margin = new Padding(0, 12, 0, 4) });
                 disclosureText.Text = "It samples the foreground application name about every 15 seconds, total network bytes for each interface, a pseudonymous default-router hint when one is available, and whether Windows reports IPv4/IPv6 DNS resolver settings or Internet Settings proxy configuration. The hint helps you label familiar networks; the raw router address is not saved, and the hint does not prove where the computer is. Reports are locked on this computer and can be opened on the parent's computer. It does not record resolver addresses, proxy addresses, screenshots, keystrokes, window titles, websites, audio, camera, or messages. VPN status is unknown. It starts only after this Windows account signs in, and a visible indicator should remain in the notification area.";
+                disclosureText.Text += " To remove old records automatically without the parent's private key, the local report keeps a rough day marker beside each encrypted record. It can hint at when a record was added; app names, network details, and exact times stay encrypted for the parent.";
                 disclosureText.Text += " The parent report may show when a new session followed an earlier session without a recorded stop. It cannot tell whether that was a crash, sleep, power-off, or another interruption.";
                 disclosureText.AccessibleName = "Monitoring collection and limits";
                 disclosureText.Margin = new Padding(0, 0, 0, 6);

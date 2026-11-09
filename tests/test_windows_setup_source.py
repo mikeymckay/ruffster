@@ -75,6 +75,7 @@ class WindowsSetupDisclosureTests(unittest.TestCase):
         self.assertIn('disclosureText.AccessibleName = "Monitoring collection and limits"', source)
         self.assertIn('disclosed.Text = "I have explained this monitoring to the child, and they understand it will run on this account."', source)
         self.assertIn('The parent report may show when a new session followed an earlier session without a recorded stop', source)
+        self.assertIn('rough day marker beside each encrypted record', source)
         self.assertIn('It cannot tell whether that was a crash, sleep, power-off, or another interruption', source)
         self.assertIn('if (!disclosed.Checked)', source)
         self.assertNotIn('disclosed.Text = "I have explained this monitoring to the child. It samples', source)

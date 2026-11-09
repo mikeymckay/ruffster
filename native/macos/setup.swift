@@ -499,6 +499,8 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         The parent report may show when a new session followed an earlier session without a recorded stop. It cannot tell whether that was a crash, sleep, power-off, or another interruption.
 
         Choose the maximum time to keep detailed records here. Records are removed while monitoring runs; calendar-day rounding may remove them up to a day before that limit. Removing monitoring keeps the encrypted report and Ruffster connection details unless you choose to delete them. Reports already shared elsewhere and other copies are not affected.
+
+        To remove old records automatically without the parent's private key, the local report keeps a rough day marker beside each encrypted record. It can hint at when a record was added; app names, network details, and exact times stay encrypted for the parent.
         """
         disclosureText.setAccessibilityLabel("Ruffster collection and retention details")
         let disclosureScroll = NSScrollView(frame: NSRect(x: 0, y: 0, width: 460, height: 190))
