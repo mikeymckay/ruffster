@@ -1,5 +1,9 @@
 # Real-machine validation
 
+## 2026-11-09: Publish Ruffster 0.1.19 with a clearer child setup disclosure
+
+Shortened the Mac collection dialog and removed its repeated explanation of optional app network totals. It still says what the Mac records, what remains private, how optional process totals work, that reports stay locked on the child Mac, and that session gaps cannot establish a cause. Focused Mac setup and website tests passed (47 tests). Main CI `42612496249` passed Linux, macOS, all Windows groups, both package checks, and the desktop/phone accessibility scan. Tag release workflow `42613083914` passed the Mac tests, bundle seal, and packaged dashboard/report checks. Downloaded the Apple-silicon DMG and confirmed its SHA-256 (`c1e316f9e72ff8ebad01c1db8b695823740beb9304d5abb5da138d43942768fd`) matches the release sidecar. Annika's Mac remained offline and the app was not installed in her account; no family data was collected.
+
 ## 2026-11-09: Publish the Ruffster 0.1.18 family app
 
 Published tag `mac-family-0.1.18`. Release workflow `42609532664` passed its Mac tests, ad-hoc bundle seal and strict signature verification, and packaged dashboard/report smoke checks. Downloaded the Apple-silicon DMG and confirmed its SHA-256 (`15584c7af8730eb3529e25d5ff0301363cc9577ad7ce9b5a23d322d2a0eb0836`) matches the release sidecar. Updated the README and GitHub Pages install/progress guides; Pages deployment `42610120968` passed, and the public Pages content was checked directly. Main CI `42610121011` passed Linux, macOS, all Windows groups, both package checks, and the accessibility scan. The 32 focused documentation tests passed locally. Annika's Mac was offline during the latest install attempt, so 0.1.18 has not been installed in her account; no family report or activity was collected.
