@@ -184,12 +184,14 @@ class ParentAppTests(unittest.TestCase):
     @unittest.skipUnless(shutil.which('google-chrome'), 'requires Google Chrome')
     def test_chrome_launcher_session_can_read_same_origin_parent_api(self):
         with tempfile.TemporaryDirectory() as profile:
+            # A hosted Ubuntu cold start exceeded the old 20-second bound;
+            # keep the browser check bounded with room for runner load.
             result = subprocess.run([
                 shutil.which('google-chrome'), '--headless=new', '--no-sandbox',
                 '--disable-gpu', '--disable-dev-shm-usage', '--no-first-run',
                 '--disable-background-networking', '--virtual-time-budget=3000',
                 f'--user-data-dir={profile}', '--dump-dom', self.server.url,
-            ], capture_output=True, text=True, timeout=20, check=False)
+            ], capture_output=True, text=True, timeout=60, check=False)
         self.assertEqual(result.returncode, 0, result.stderr)
         message = re.search(r'<p id="message"[^>]*>(.*?)</p>', result.stdout, re.S)
         self.assertIsNotNone(message, 'dashboard status message was not rendered')

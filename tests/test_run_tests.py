@@ -16,7 +16,17 @@ SPEC.loader.exec_module(RUNNER)
 class TestRunnerShardTests(unittest.TestCase):
     def test_selects_only_the_requested_test_files(self):
         suite = RUNNER.load_suite(["test_docs_site.py", "test_windows_setup_source.py"])
-        self.assertEqual(suite.countTestCases(), 41)
+        def flatten(group):
+            for test in group:
+                if isinstance(test, unittest.TestSuite):
+                    yield from flatten(test)
+                else:
+                    yield test
+
+        tests = list(flatten(suite))
+        modules = {test.id().split(".", 1)[0] for test in tests}
+        self.assertEqual(modules, {"test_docs_site", "test_windows_setup_source"})
+        self.assertGreater(len(tests), 0)
 
     def test_rejects_paths_and_non_test_files(self):
         for filename in ("../test_docs_site.py", "tests/test_docs_site.py", "helper.py"):
