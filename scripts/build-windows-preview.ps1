@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
   [Parameter(Mandatory=$true)][string]$OutputDirectory,
-  [string]$Python = 'python'
+  [string]$Python = 'python',
+  [switch]$SkipLiveWindowsInstallCheck
 )
 $ErrorActionPreference = 'Stop'
 if ($env:OS -ne 'Windows_NT') { throw 'Build this preview on Windows; PyInstaller does not cross-compile Python applications.' }
@@ -42,8 +43,12 @@ try {
   if ($LASTEXITCODE -ne 0) { throw 'The packaged application core did not start.' }
   & $Python (Join-Path $Root 'scripts\validate-windows-preview-bundle.py') $Output
   if ($LASTEXITCODE -ne 0) { throw 'The packaged Windows loopback dashboard smoke check failed.' }
-  & $Python (Join-Path $Root 'scripts\validate-windows-install-flow.py') $Output
-  if ($LASTEXITCODE -ne 0) { throw 'The live synthetic Windows install, restart, or removal check failed.' }
+  if ($SkipLiveWindowsInstallCheck) {
+    Write-Host 'Skipping the live Task Scheduler lifecycle on this non-interactive runner; run validate-windows-install-flow.py from a logged-in Windows session before a Windows family release.'
+  } else {
+    & $Python (Join-Path $Root 'scripts\validate-windows-install-flow.py') $Output
+    if ($LASTEXITCODE -ne 0) { throw 'The live synthetic Windows install, restart, or removal check failed.' }
+  }
   $Bundle = Join-Path $Stage 'FamilyActivityBundle.zip'
   Compress-Archive -Path (Join-Path $Output '*') -DestinationPath $Bundle -CompressionLevel Optimal
   & dotnet publish (Join-Path $Root 'native\windows\bootstrapper\FamilyActivityInstaller.csproj') -c Release -r win-x64 --self-contained true `

@@ -77,4 +77,4 @@ Uninstall keeps the encrypted report by default. `family_activity windows-uninst
 
 ## Continuous integration
 
-The GitHub Actions workflow runs the Python test suite on Linux, macOS, and Windows, then builds and smoke-checks both platform previews on native Mac and Windows runners. It removes generated previews and does not upload or publish a Windows family download. A successful Windows runner check verifies the build and synthetic lifecycle only; it does not validate interactive family setup on a physical computer.
+The GitHub Actions workflow runs the Python test suite on Linux, macOS, and Windows, then builds and smoke-checks both platform previews on native Mac and Windows runners. It removes generated previews and does not upload or publish a Windows family download. Hosted Windows runners are non-interactive, so the package check verifies the frozen dashboard, setup UI, and installer extraction but skips the live Task Scheduler lifecycle. A local build from a logged-in Windows session keeps that check enabled. Before offering a Windows family download, run the full synthetic lifecycle and review setup and report sharing on a real Windows computer.

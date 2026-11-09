@@ -162,6 +162,8 @@ class WindowsSetupDisclosureTests(unittest.TestCase):
         self.assertIn('the update changed the saved parent connection key', validator)
         self.assertIn('preserve temporary data', validator)
         self.assertIn('validate-windows-install-flow.py', builder)
+        self.assertIn('[switch]$SkipLiveWindowsInstallCheck', builder)
+        self.assertIn('Skipping the live Task Scheduler lifecycle on this non-interactive runner', builder)
 
     def test_windows_setup_requests_immediate_start_and_validator_does_not_start_twice(self):
         root = Path(__file__).parents[1]
