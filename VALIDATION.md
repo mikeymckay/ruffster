@@ -1,5 +1,9 @@
 # Real-machine validation
 
+## 2026-11-09: Refresh progress page with current validation
+
+The full local regression suite ran 301 tests: 296 passed and five platform/tool checks were skipped on Linux. The 33 focused documentation tests passed. The desktop and phone Axe scan covered all four public pages and four parent-dashboard states with zero violations or horizontal overflow. GitHub Actions run `42625310484` passed Linux, macOS, Windows test groups, and both package builds. Updated the public Progress page to show the current test count and checked the live page after deployment. No family activity was used.
+
 ## 2026-11-09: Install Mac family app for a child account
 
 The family Mac was reachable over SSH with the child's account signed in at the console. Downloaded the published Mac 0.1.20 DMG on the Mac, verified its SHA-256 against the release sidecar, mounted it, and copied the app to `/Applications/Ruffster.app`. `codesign --verify --deep --strict` passed on the installed bundle. The app is shared, as supported by the install guide; its monitoring setup remains per signed-in account.
