@@ -75,7 +75,7 @@
     </p>
     <div class="notice">
      <strong>Get the Mac app.</strong>
-     <a href="https://github.com/mikeymckay/ruffster/releases/download/mac-preview-0.1.7/Ruffster-Mac-Family-App-Apple-Silicon.dmg">Download Ruffster for Mac 0.1.7 (Apple silicon, .dmg)</a>. See the <a href="https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.7">release notes, source, and SHA-256 checksum</a>. On first open, macOS asks you to confirm because this open-source app has not yet been signed by Apple. Follow <a href="https://support.apple.com/en-us/102445">Apple’s steps to open an app you downloaded</a>, then continue with family setup. You do not need to change your Mac's security settings.
+     <a href="https://github.com/mikeymckay/ruffster/releases/download/mac-preview-0.1.8/Ruffster-Mac-Family-App-Apple-Silicon.dmg">Download Ruffster for Mac 0.1.8 (Apple silicon, .dmg)</a>. See the <a href="https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.8">release notes, source, and SHA-256 checksum</a>. On first open, macOS asks you to confirm because this open-source app has not yet been signed by Apple. Follow <a href="https://support.apple.com/en-us/102445">Apple’s steps to open an app you downloaded</a>, then continue with family setup. You do not need to change your Mac's security settings.
     </div>
     <h3>Install it on each Mac</h3>
     <ol class="steps">
@@ -84,6 +84,7 @@
      <li>Open Ruffster from Applications. If macOS asks you to confirm the first launch, follow Apple’s linked steps above.</li>
      <li>On your Mac, choose <strong>Open parent dashboard</strong>. Set your parent PIN and save the recovery copy. On each child’s Mac, choose <strong>Set up this Mac together…</strong> and read the collection choices together.</li>
     </ol>
+    <p>After setup, Ruffster starts automatically whenever the child signs in to that Mac. macOS restarts it if the background agent stops unexpectedly; the menu-bar paw shows when fresh samples are arriving or monitoring is paused.</p>
     <p>
      Once both Macs are set up, connect them and share a report:
     </p>
@@ -116,7 +117,7 @@
      macOS
     </h3>
     <p>
-     Mac 0.1.7 includes background monitoring, a visible menu-bar status, parent-encrypted activity, and a local dashboard. Its setup guide explains how to add each child's Mac and name reports separately. On an Apple-silicon family Mac, 280 current-source tests passed and 8 platform/dependency checks were skipped. The real launchd setup, restart after a stop, update restart, removal, and encrypted sample reports were checked with made-up activity. Mac 0.1.6 built on macOS 26.6; its setup layout and frozen dashboard checks passed. The 0.1.7 app is built and checked by the hosted Mac release workflow. The next step is to walk through family setup and report sharing together; VoiceOver and physical sleep/wake still need review.
+     Mac 0.1.8 includes background monitoring, a visible menu-bar status, parent-encrypted activity, and a local dashboard. Its setup guide explains how to add each child's Mac, name reports separately, and know when monitoring starts. On an Apple-silicon family Mac, 280 current-source tests passed and 8 platform/dependency checks were skipped. The real launchd setup, restart after a stop, update restart, removal, and encrypted sample reports were checked with made-up activity. Mac 0.1.6 built on macOS 26.6; its setup layout and frozen dashboard checks passed. The 0.1.8 app is built and checked by the hosted Mac release workflow. The next step is to walk through family setup and report sharing together; VoiceOver and physical sleep/wake still need review.
     </p>
     <h3>
      Windows

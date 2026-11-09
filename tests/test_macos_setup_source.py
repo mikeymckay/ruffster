@@ -18,7 +18,7 @@ class MacSetupSourceTests(unittest.TestCase):
         root = Path(__file__).parents[1]
         builder = (root / 'scripts' / 'build-macos-preview.sh').read_text(encoding='utf-8')
         workflow = (root / '.github' / 'workflows' / 'release-macos-unsigned-preview.yml').read_text(encoding='utf-8')
-        self.assertIn('VERSION=${RUFFSTER_VERSION:-0.1.7}', builder)
+        self.assertIn('VERSION=${RUFFSTER_VERSION:-0.1.8}', builder)
         self.assertIn("'CFBundleShortVersionString':sys.argv[2]", builder)
         self.assertIn("'CFBundleVersion':sys.argv[2]", builder)
         self.assertIn("'CFBundleIconFile':'Ruffster.icns'", builder)
@@ -109,6 +109,8 @@ class MacSetupSourceTests(unittest.TestCase):
         setup = (root / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')
         status = (root / 'native' / 'macos' / 'status.swift').read_text(encoding='utf-8')
         self.assertIn("Reports are locked on this Mac and can be opened on the parent's computer", setup)
+        self.assertIn('Ruffster starts automatically when this account signs in', setup)
+        self.assertIn('macOS restarts it if it stops unexpectedly', setup)
         self.assertIn("Reports are locked on this Mac and can be opened on your parent's computer", status)
         self.assertNotIn("Activity is encrypted to the parent's key", setup)
         self.assertNotIn('Reports are encrypted to a key held by the parent', status)

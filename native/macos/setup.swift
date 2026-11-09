@@ -474,6 +474,8 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         disclosureText.textContainer?.containerSize = NSSize(width: 430, height: CGFloat.greatestFiniteMagnitude)
         disclosureText.textContainerInset = NSSize(width: 6, height: 6)
         disclosureText.string = """
+        Ruffster starts automatically when this account signs in, and macOS restarts it if it stops unexpectedly. The menu-bar paw stays visible and shows whether recent samples are ready.
+
         While this account is signed in, Ruffster samples foreground app names, network-interface traffic totals, a pseudonymous hint when the default router changes, and basic DNS, proxy, and VPN settings. Network-interface totals are not attributed to apps or websites. You can separately opt into experimental process-level totals below; these may list helper services, miss brief connections, and do not identify websites. The router hint is not a location, and the raw router address is not saved.
 
         It does not record screenshots, keystrokes, message contents, microphone, camera, or full website addresses. Website domains are not included in this Mac setup. If selected below, experimental network totals are grouped by the process that owns a connection. Some traffic may appear under a helper service, brief connections may be missed, and this does not identify websites.
