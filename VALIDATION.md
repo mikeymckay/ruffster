@@ -8,7 +8,7 @@ The SSH identity is the family Mac's admin account. macOS denied access to the c
 
 The same session checked the Mac's power settings: automatic system sleep is disabled on AC power, and `ttyskeepawake` is enabled so an active SSH session prevents idle sleep. A `caffeinate -s` process is also active, which requests no system sleep while on AC power. The charger was disconnected during this check, so AC behavior was confirmed from configuration only, not observed under load. No power setting was changed.
 
-The installed 0.1.20 bundle passed its built-in bundle check, frozen `agent`, `share`, and `export-report` help checks, and the status helper state self-test. A smoke check ran the bundled parent dashboard with an empty temporary data directory: it bound to `127.0.0.1`, served the dashboard page, returned 403 for an unauthenticated API request, and exited cleanly. It did not open the GUI, install a LaunchAgent, or collect activity. No Ruffster process remained afterward.
+The installed 0.1.20 bundle passed its built-in bundle check, frozen `agent`, `share`, and `export-report` help checks, the status helper state self-test, and the native welcome-layout self-test (disclosure fits and all three setup actions are present). A smoke check ran the bundled parent dashboard with an empty temporary data directory: it bound to `127.0.0.1`, served the dashboard page, returned 403 for an unauthenticated API request, and exited cleanly. It did not open the GUI, install a LaunchAgent, or collect activity. No Ruffster process remained afterward.
 
 ## 2026-11-09: Update GitHub Actions to Node 24 releases
 
