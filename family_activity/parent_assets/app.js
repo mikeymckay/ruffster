@@ -338,11 +338,11 @@ async function render() {
   list('process-traffic-week', processTraffic.week, formatProcessTraffic,
        'No process-based network measurements were recorded for these seven days.');
   const networks = $('networks'); networks.replaceChildren();
-  if (!data.networks.length) networks.textContent = 'No identified routers in this report.';
+  if (!data.networks.length) networks.textContent = 'No network changes could be identified in this report.';
   for (const network of data.networks) {
     const row = document.createElement('div'), label = document.createElement('label'), select = document.createElement('select');
     const id = `network-${network.identifier}`;
-    label.htmlFor = id; label.textContent = `Router ${network.identifier.slice(0, 8)}… · last seen ${formatUtcTimestamp(network.last_seen)}`; select.id = id;
+    label.htmlFor = id; label.textContent = `Network ${network.identifier.slice(0, 8)}… · last seen ${formatUtcTimestamp(network.last_seen)}`; select.id = id;
     for (const [value, text] of [['','Unknown'], ['home','Home'], ['school','School'], ['other','Other']]) {
       const option = document.createElement('option'); option.value=value; option.textContent=text; select.appendChild(option);
     }

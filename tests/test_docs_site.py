@@ -163,7 +163,8 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn("'mac-family-*'", release)
         self.assertIn('--prerelease', release)
         self.assertIn('.github/MAC-FAMILY-RELEASE-NOTES.md', release)
-        self.assertIn('Ruffster for Mac 0.1.24', family_release_notes)
+        self.assertIn('Ruffster for Mac 0.1.25', family_release_notes)
+        self.assertIn('location checks', family_release_notes)
         self.assertIn('Setup shows which account it will monitor', family_release_notes)
         self.assertIn('A real family setup and report exchange remain the next hands-on checks', family_release_notes)
         self.assertIn('scripts/run-tests.py', release)
@@ -295,11 +296,21 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('do not confirm the computer\'s location', faq)
         self.assertIn('traffic', readme)
         self.assertIn('Estimated bytes', dashboard)
-        self.assertIn('last observed router label', dashboard)
+        self.assertIn('family network labels you set below', dashboard)
+        self.assertIn('These are family labels, not location checks', dashboard)
+        self.assertIn('Network ${network.identifier.slice(0, 8)}', script)
         self.assertIn('id="school-network-traffic"', dashboard)
         self.assertIn('id="other-network-traffic"', dashboard)
         self.assertIn("data.traffic_contexts.school_network", script)
         self.assertIn("data.traffic_contexts.other_network", script)
+
+    def test_network_labels_use_plain_family_language(self):
+        dashboard = (ROOT / 'family_activity/parent_assets/index.html').read_text(encoding='utf-8')
+        script = (ROOT / 'family_activity/parent_assets/app.js').read_text(encoding='utf-8')
+        self.assertIn('Family network labels', dashboard)
+        self.assertIn('These are family labels, not location checks', dashboard)
+        self.assertIn('Network ${network.identifier.slice(0, 8)}', script)
+        self.assertIn('No network changes could be identified in this report.', script)
 
     def test_home_screenshot_caption_uses_light_background_text_color(self):
         css = (SITE / 'assets/site.css').read_text(encoding='utf-8')
