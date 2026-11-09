@@ -65,12 +65,16 @@ Source repository: https://github.com/mikeymckay/ruffster
 Source commit: $SOURCE_COMMIT
 Build architecture: Apple silicon (arm64)
 
-This app is not signed or notarized by Apple, so macOS asks you to confirm
-before opening it. Open it only if you downloaded it from the Ruffster release
-page. Follow Apple's first-open steps here:
-https://support.apple.com/en-us/102445
-Keep macOS security settings as they are. The checksum alongside the download
-checks that the file arrived unchanged.
+This open-source app is not signed or notarized by Apple. Download it only
+from the Ruffster release page. If macOS says Apple cannot check Ruffster,
+choose Done. Open System Settings > Privacy & Security and, under Security,
+choose Open Anyway for Ruffster. Open Ruffster again and choose Open. This
+approves Ruffster only; it does not lower your Mac's general app protections.
+If macOS says Ruffster will damage your computer or is damaged, stop and
+contact the Ruffster project instead of opening it.
+
+Apple's current instructions: https://support.apple.com/en-us/102445
+The adjacent checksum checks that the download arrived unchanged.
 
 The setup explains what Ruffster records before monitoring begins. Read it
 together and choose the options that fit your family.

@@ -4,7 +4,7 @@ Ruffster currently ships as an unsigned Apple-silicon Mac family app. GitHub Act
 
 ## Opening Ruffster on Mac
 
-Because this project does not yet have an Apple Developer ID, macOS asks you to confirm the first time Ruffster opens. Follow [Apple's current steps for an app from an identified developer](https://support.apple.com/en-us/102445) for Ruffster; keep your Mac's built-in security settings as they are. The release notes include the source commit and checksum so families can see which build they downloaded. A checksum checks that the file arrived unchanged; it is not a publisher signature.
+Because this project does not yet have an Apple Developer ID, macOS asks you to confirm the first time Ruffster opens. If macOS cannot verify Ruffster, choose Done, then open System Settings > Privacy & Security > Open Anyway for Ruffster, and open Ruffster again. This adds an exception for Ruffster only; the Mac's general app protections stay on. If macOS says the app will damage the computer or is damaged, stop and contact the project. See [Apple's current instructions](https://support.apple.com/en-us/102445). The release notes include the source commit and checksum so families can see which build they downloaded. A checksum checks that the file arrived unchanged; it is not a publisher signature.
 
 ## How the family app is published
 
@@ -26,7 +26,7 @@ scripts/package-macos-unsigned-preview.sh \
   "$(git rev-parse HEAD)"
 ```
 
-This creates a `.dmg` and adjacent `.sha256` file. It never installs the monitoring agent. Follow [Apple's current first-open instructions](https://support.apple.com/en-us/102445); the package does not change your Mac's built-in security settings.
+This creates a `.dmg` and adjacent `.sha256` file. It never installs the monitoring agent. The packaged note explains Apple's per-app Open Anyway step; it does not change your Mac's built-in security settings.
 
 ## Prerequisites
 

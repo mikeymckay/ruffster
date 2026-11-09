@@ -4,9 +4,9 @@
 
 <p align="center"><img src="docs/assets/ruffster-mascot.webp" alt="Ruffster golden retriever mascot" width="190"></p>
 
-**Ruffster for Mac 0.1.10 is available for families.** Start on the parent Mac, then set up Marcus's and Annika's Macs together and bring encrypted reports back to the parent dashboard. The visible status explains when Ruffster is running. The first-open guide explains macOS's confirmation for an app that has not yet been signed by Apple. Automated and synthetic checks are complete; the first family setup and report exchange are the next hands-on checks. Windows setup and packaging pass automated checks, and still need review on a logged-in Windows computer before a Windows download is offered.
+**Ruffster for Mac 0.1.11 is available for families.** Start on the parent Mac, then set up Marcus's and Annika's Macs together and bring encrypted reports back to the parent dashboard. The visible status explains when Ruffster is running. The getting-started guide has exact first-open steps for macOS. Automated and synthetic checks are complete; the first family setup and report exchange are the next hands-on checks. Windows setup and packaging pass automated checks, and still need review on a logged-in Windows computer before a Windows download is offered.
 
-[Download Ruffster for Mac 0.1.10 (.dmg)](https://github.com/mikeymckay/ruffster/releases/download/mac-family-0.1.10/Ruffster-Mac-Family-App-Apple-Silicon.dmg) · [Release notes and checksum](https://github.com/mikeymckay/ruffster/releases/tag/mac-family-0.1.10) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
+[Download Ruffster for Mac 0.1.11 (.dmg)](https://github.com/mikeymckay/ruffster/releases/download/mac-family-0.1.11/Ruffster-Mac-Family-App-Apple-Silicon.dmg) · [Release notes and checksum](https://github.com/mikeymckay/ruffster/releases/tag/mac-family-0.1.11) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
 
 [Project website](https://mikeymckay.github.io/ruffster/) · [Install guide](https://mikeymckay.github.io/ruffster/install.html) · [Progress page](https://mikeymckay.github.io/ruffster/progress.html) · [FAQ](https://mikeymckay.github.io/ruffster/faq.html) · [Privacy and children's rights](PRIVACY-AND-CHILDREN.md) · [Implementation plan](PLAN.md)
 

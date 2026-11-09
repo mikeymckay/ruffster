@@ -1,10 +1,10 @@
-## Ruffster for Mac 0.1.10
+## Ruffster for Mac 0.1.11
 
 Ruffster helps parents and children understand everyday computer use together, including during the school day. This Mac family app keeps its monitoring status visible, encrypts activity reports for the parent, and includes a local dashboard.
 
 ### Download and open
 
-Download `Ruffster-Mac-Family-App-Apple-Silicon.dmg`, open it, and drag Ruffster into Applications. This Apple-silicon build is not signed or notarized by Apple, so macOS asks you to confirm the first open. Follow [Apple's instructions](https://support.apple.com/en-us/102445); keep your Mac's built-in security settings as they are. The adjacent `.sha256` file checks that the download arrived unchanged. It is not a publisher signature.
+Download `Ruffster-Mac-Family-App-Apple-Silicon.dmg`, open it, and drag Ruffster into Applications. This Apple-silicon build is not signed or notarized by Apple. If macOS says it cannot check Ruffster, choose Done, then open System Settings > Privacy & Security and choose Open Anyway for Ruffster under Security. Open Ruffster again and choose Open. This approves Ruffster only and keeps your Mac's general app protections on. If macOS says the app will damage your computer or is damaged, stop and contact the Ruffster project. See [Apple's instructions](https://support.apple.com/en-us/102445). The adjacent `.sha256` file checks that the download arrived unchanged; it is not a publisher signature.
 
 ### Set up together
 

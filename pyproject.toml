@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "family-activity-prototype"
-version = "0.1.10"
+version = "0.1.11"
 description = "Experimental, local-first family activity prototype"
 license = {file = "LICENSE"}
 requires-python = ">=3.10"
