@@ -28,6 +28,16 @@ async function writeStepSummary(lines) {
   if (summaryPath) await appendFile(summaryPath, `${lines.join('\n')}\n`, 'utf8');
 }
 
+function annotateGitHubFailure(title, message) {
+  if (process.env.GITHUB_ACTIONS !== 'true') return;
+  const safeTitle = title.replace(/[\r\n:]/g, ' ');
+  const safeMessage = String(message)
+    .replace(/%/g, '%25')
+    .replace(/\r/g, '%0D')
+    .replace(/\n/g, '%0A');
+  console.log(`::error title=${safeTitle}::${safeMessage}`);
+}
+
 function chromeCandidates() {
   if (process.env.CHROME_BIN) return [process.env.CHROME_BIN];
   if (process.platform === 'darwin') return [
@@ -246,6 +256,11 @@ async function main() {
     }
     if (failures.length) {
       console.error(JSON.stringify(failures, null, 2));
+      const findings = failures.map((failure) => {
+        const rules = failure.violations.map((violation) => `${violation.id} (${violation.impact})`).join(', ');
+        return `${failure.page} at ${failure.viewport}: ${rules || 'no Axe violations'}${failure.overflow ? `; width ${failure.documentWidth}px exceeds ${failure.viewportWidth}px` : ''}`;
+      }).join('; ');
+      annotateGitHubFailure('Pages accessibility findings', findings);
       process.exitCode = 1;
     }
     const summary = [
@@ -290,6 +305,7 @@ async function main() {
 
 main().catch(async (error) => {
   console.error(error);
+  annotateGitHubFailure('Pages accessibility scan could not finish', error?.stack || error);
   try {
     await writeStepSummary([
       '## Ruffster Pages accessibility scan failed before completion',
