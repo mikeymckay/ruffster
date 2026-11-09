@@ -10,8 +10,8 @@ from pathlib import Path
 class DashboardTests(unittest.TestCase):
     def test_new_parent_pin_uses_six_digit_validation_but_old_phrase_login_is_allowed(self):
         root = Path(__file__).parents[1] / 'family_activity' / 'parent_assets'
-        html = (root / 'index.html').read_text()
-        script = (root / 'app.js').read_text()
+        html = (root / 'index.html').read_text(encoding="utf-8")
+        script = (root / 'app.js').read_text(encoding="utf-8")
         self.assertIn("Child computers can send encrypted reports, but can't open them", html)
         self.assertIn('The PIN keeps reports for the parent in your family', html)
         self.assertIn("Choose six digits your child doesn't know. Keep the recovery copy somewhere you control.", html)
@@ -25,15 +25,15 @@ class DashboardTests(unittest.TestCase):
 
     def test_report_handoff_waits_for_two_digits_and_sanitizes_input(self):
         root = Path(__file__).parents[1] / 'family_activity' / 'parent_assets'
-        html = (root / 'index.html').read_text()
-        script = (root / 'app.js').read_text()
+        html = (root / 'index.html').read_text(encoding="utf-8")
+        script = (root / 'app.js').read_text(encoding="utf-8")
         self.assertIn('Digits shown on the child\'s computer', html)
         self.assertIn('id="connect" type="button" disabled', html)
         self.assertIn("input.value.replace(/[^0-9]/g, '').slice(0, 2)", script)
         self.assertIn("!status.unlocked || !/^[0-9]{2}$/.test($('connection-code').value)", script)
 
     def test_report_explains_optional_child_side_browser_add_on(self):
-        html = (Path(__file__).parents[1] / 'family_activity' / 'parent_assets' / 'index.html').read_text()
+        html = (Path(__file__).parents[1] / 'family_activity' / 'parent_assets' / 'index.html').read_text(encoding="utf-8")
         self.assertIn("Website estimates are optional and experimental", html)
         self.assertIn("need a separate add-on on the child's computer", html)
         self.assertIn("not the parent's", html)
@@ -44,14 +44,14 @@ class DashboardTests(unittest.TestCase):
         self.assertIn('report still shows app and network summaries without website details', html)
         self.assertIn("domain names only, not full addresses or page contents", html)
         self.assertIn('id="website-status"', html)
-        script = (Path(__file__).parents[1] / 'family_activity' / 'parent_assets' / 'app.js').read_text()
+        script = (Path(__file__).parents[1] / 'family_activity' / 'parent_assets' / 'app.js').read_text(encoding="utf-8")
         self.assertIn('No website details were recorded in this report', script)
         self.assertIn('Website sharing is optional', script)
         self.assertIn('How website information works', html)
 
     def test_report_shows_measured_network_usage_per_interface_by_period(self):
-        html = (Path(__file__).parents[1] / 'family_activity' / 'parent_assets' / 'index.html').read_text()
-        script = (Path(__file__).parents[1] / 'family_activity' / 'parent_assets' / 'app.js').read_text()
+        html = (Path(__file__).parents[1] / 'family_activity' / 'parent_assets' / 'index.html').read_text(encoding="utf-8")
+        script = (Path(__file__).parents[1] / 'family_activity' / 'parent_assets' / 'app.js').read_text(encoding="utf-8")
         self.assertIn('Measured interface bytes', html)
         self.assertIn('interfaces can overlap', html)
         self.assertIn('Labels such as en0 are computer-generated connection IDs', html)
@@ -76,8 +76,8 @@ class DashboardTests(unittest.TestCase):
 
     def test_parent_pairing_guidance_is_platform_neutral_and_cautious(self):
         assets = Path(__file__).parents[1] / 'family_activity' / 'parent_assets'
-        html = (assets / 'index.html').read_text()
-        script = (assets / 'app.js').read_text()
+        html = (assets / 'index.html').read_text(encoding="utf-8")
+        script = (assets / 'app.js').read_text(encoding="utf-8")
         self.assertIn('id="child-setup"', html)
         self.assertIn("On the child's computer, open Ruffster", html)
         self.assertIn('The Mac family preview is ready for families to use together', html)
@@ -94,7 +94,7 @@ class DashboardTests(unittest.TestCase):
 
     def test_vpn_status_uses_plain_language_and_keeps_coverage_limit_visible(self):
         assets = Path(__file__).parents[1] / 'family_activity' / 'parent_assets'
-        script = (assets / 'app.js').read_text()
+        script = (assets / 'app.js').read_text(encoding="utf-8")
         self.assertIn('VPN connection:', script)
         self.assertIn('a supported VPN connection appears active', script)
         self.assertIn('no built-in VPN connection appeared active', script)
@@ -132,7 +132,7 @@ class DashboardTests(unittest.TestCase):
                 while not url_file.exists() and proc.poll() is None and time.monotonic() < deadline:
                     time.sleep(0.05)
                 self.assertTrue(url_file.exists(), 'parent launcher URL was not published')
-                url = url_file.read_text()
+                url = url_file.read_text(encoding="utf-8")
                 self.assertTrue(url.startswith('http://127.0.0.1:'))
                 with urllib.request.urlopen(url, timeout=3) as response:
                     self.assertEqual(response.status, 200)

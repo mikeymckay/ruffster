@@ -6,7 +6,7 @@
 
 **Mac family app:** ready for a first try together. Install Ruffster on the parent Mac, then set up each child's Mac together and bring encrypted reports back to the parent dashboard. The visible status explains when Ruffster is running. The first-open guide explains macOS's confirmation for an app that has not yet been signed by Apple. On an Apple-silicon Mac, 278 tests passed and 8 platform/dependency checks were skipped; the real launchd setup, restart, update, report sampling, and removal flows passed with made-up activity. Windows tests and package checks pass; its interactive family setup still needs a Windows-computer review.
 
-[Get the Apple-silicon Mac preview 0.1.5](https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.5) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
+[Get the Apple-silicon Mac app 0.1.6](https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.6) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
 
 [Project website](https://mikeymckay.github.io/ruffster/) · [Install guide](https://mikeymckay.github.io/ruffster/install.html) · [Progress page](https://mikeymckay.github.io/ruffster/progress.html) · [FAQ](https://mikeymckay.github.io/ruffster/faq.html) · [Privacy and children's rights](PRIVACY-AND-CHILDREN.md) · [Implementation plan](PLAN.md)
 

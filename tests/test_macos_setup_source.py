@@ -18,7 +18,7 @@ class MacSetupSourceTests(unittest.TestCase):
         root = Path(__file__).parents[1]
         builder = (root / 'scripts' / 'build-macos-preview.sh').read_text(encoding='utf-8')
         workflow = (root / '.github' / 'workflows' / 'release-macos-unsigned-preview.yml').read_text(encoding='utf-8')
-        self.assertIn('VERSION=${RUFFSTER_VERSION:-0.1.5}', builder)
+        self.assertIn('VERSION=${RUFFSTER_VERSION:-0.1.6}', builder)
         self.assertIn("'CFBundleShortVersionString':sys.argv[2]", builder)
         self.assertIn("'CFBundleVersion':sys.argv[2]", builder)
         self.assertIn("'CFBundleIconFile':'Ruffster.icns'", builder)
@@ -27,7 +27,7 @@ class MacSetupSourceTests(unittest.TestCase):
         self.assertIn('export RUFFSTER_VERSION="${GITHUB_REF_NAME#mac-preview-}"', workflow)
 
     def test_status_menu_can_save_encrypted_report_for_offline_transfer(self):
-        source = (Path(__file__).parents[1] / 'native' / 'macos' / 'status.swift').read_text()
+        source = (Path(__file__).parents[1] / 'native' / 'macos' / 'status.swift').read_text(encoding="utf-8")
         self.assertIn('Save an encrypted report file…', source)
         self.assertIn('This option does not use the local network.', source)
         self.assertIn('export-report', source)
@@ -35,7 +35,7 @@ class MacSetupSourceTests(unittest.TestCase):
         self.assertIn('Open a report file instead', source)
 
     def test_welcome_screen_separates_release_status_privacy_and_next_actions(self):
-        source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text()
+        source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding="utf-8")
         launch = source[source.index('func applicationDidFinishLaunching'):source.index('private func showWelcomeWindow')]
         welcome = source[source.index('private func showWelcomeWindow'):source.index('@objc private func openDashboardFromWelcome')]
 
@@ -51,7 +51,7 @@ class MacSetupSourceTests(unittest.TestCase):
         self.assertIn('More options…', welcome)
 
     def test_status_menu_does_not_claim_the_unintegrated_browser_add_on_collects(self):
-        source = (Path(__file__).parents[1] / 'native' / 'macos' / 'status.swift').read_text()
+        source = (Path(__file__).parents[1] / 'native' / 'macos' / 'status.swift').read_text(encoding="utf-8")
         details = source[source.index('private func showDetails'):source.index('// Choose a local IPv4 address')]
 
         self.assertIn('alert.messageText = "About Ruffster"', details)
@@ -114,7 +114,7 @@ class MacSetupSourceTests(unittest.TestCase):
         self.assertNotIn('Reports are encrypted to a key held by the parent', status)
 
     def test_parent_key_pairing_is_cancelable_and_reads_off_the_ui_thread(self):
-        source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text()
+        source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding="utf-8")
         start = source.index('private func fetchParentKey()')
         end = source.index('private func reviewAndInstall', start)
         pairing = source[start:end]
@@ -133,7 +133,7 @@ class MacSetupSourceTests(unittest.TestCase):
         self.assertIn('stopModal(withCode: .continue)', pairing)
 
     def test_install_and_removal_progress_drain_subprocess_output_off_ui_thread(self):
-        source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text()
+        source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding="utf-8")
         runner = source[source.index('private func runWithProgress'):source.index('private func failureText')]
         self.assertIn('runWithProgress(arguments, title: "Setting up this Mac…"', source)
         self.assertIn('runWithProgress(arguments, title: "Removing Ruffster…"', source)

@@ -89,7 +89,7 @@ assert.equal(domainFromTab({focused:true}, {url:'file:///private'}), null);
     def test_extension_popup_explains_and_controls_domain_visibility(self):
         import shutil
         import subprocess
-        manifest = json.loads((Path(__file__).parents[1] / 'browser/chromium/manifest.json').read_text())
+        manifest = json.loads((Path(__file__).parents[1] / 'browser/chromium/manifest.json').read_text(encoding="utf-8"))
         self.assertIn('storage', manifest['permissions'])
         self.assertEqual(manifest['action']['default_popup'], 'popup.html')
         root = Path(__file__).parents[1] / 'browser/chromium'
@@ -179,4 +179,4 @@ async function message(value){let result;onMessage.handlers[0](value,{},response
             self.assertFalse(Path(path).exists())
             Path(path).write_text('do not remove')
             with self.assertRaises(FileExistsError): Receiver(path)
-            self.assertEqual(Path(path).read_text(), 'do not remove')
+            self.assertEqual(Path(path).read_text(encoding="utf-8"), 'do not remove')
