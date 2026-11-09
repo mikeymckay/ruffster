@@ -97,8 +97,10 @@ jobs:
         include:
           - shard: Parent report API
             files: test_parent_app.py
-          - shard: Parent dashboard and key access
-            files: test_dashboard.py test_key_vault.py
+          - shard: Parent dashboard
+            files: test_dashboard.py
+          - shard: Parent key access
+            files: test_key_vault.py
           - shard: Local report sharing
             files: test_local_share.py
           - shard: Website and contributor docs
