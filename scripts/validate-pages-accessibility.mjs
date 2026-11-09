@@ -101,7 +101,36 @@ function createStaticServer() {
   });
 }
 
-function createParentSetupServer() {
+function sampleReport() {
+  const now = new Date().toISOString();
+  const appRows = [['Safari', 3540], ['Pages', 1080]];
+  const siteRows = [['example.edu', 1800], ['wikipedia.org', 900]];
+  const trafficRows = [['en0', 125000000, 14000000]];
+  const empty = [];
+  const byContext = rows => ({ school: rows, home: rows, school_network: rows, other_network: empty, schedule_uncertain: false });
+  const byPeriod = rows => ({ today: rows, week: rows });
+  return {
+    incomplete: false,
+    devices: [{ device_id: 'sample1234', label: 'Sample computer', last_seen: now }],
+    selected_device: 'sample1234',
+    apps: byPeriod(appRows), sites: byPeriod(siteRows),
+    website_observations: { count: 12, latest_at: now },
+    site_categories: byPeriod([['Learning', 1800], ['Reference', 900]]),
+    category_contexts: { school: appRows, home: appRows, school_network: appRows, other_network: empty },
+    gaps: [[now, now]], sessions: [[now, now, null]],
+    agent_runtime: { seconds: 21600, sessions: 3, gaps: 1, days: 7 },
+    traffic: [[now, 'en0', 125000000, 14000000]],
+    traffic_usage: byPeriod(trafficRows), traffic_contexts: byContext(trafficRows),
+    process_traffic: { status: 'enabled', status_at: now, today: [['Safari', 86000000, 8000000]], week: [['Safari', 86000000, 8000000]] },
+    networks: [{ identifier: 'sample-router-identifier', last_seen: now, label: 'home' }],
+    network_settings: { sampled_at: now, dns_observed: true, proxy_indicator: false, vpn_indicator: false },
+    contexts: { apps: byContext(appRows), sites: byContext(siteRows), schedule_configured: true },
+    recorded_through: now, generated_at: now, report_timezone: 'Europe/Vienna',
+    conversation_prompts: ['What was useful about this activity?', 'Is there anything you would like help with?'],
+  };
+}
+
+function createParentServer({ populated = false } = {}) {
   const assets = {
     '/': 'index.html',
     '/app.css': 'app.css',
@@ -122,7 +151,7 @@ function createParentSetupServer() {
     }
     if (pathname === '/api/status') {
       const body = Buffer.from(JSON.stringify({
-        has_key: false, unlocked: false, has_report: false, backup_confirmed: false,
+        has_key: populated, unlocked: populated, has_report: populated, backup_confirmed: populated,
       }));
       response.writeHead(200, {
         'Content-Type': 'application/json; charset=utf-8',
@@ -130,6 +159,21 @@ function createParentSetupServer() {
         'Cache-Control': 'no-store',
       });
       response.end(request.method === 'HEAD' ? undefined : body);
+      return;
+    }
+    if (populated && pathname === '/api/settings') {
+      response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+      response.end(JSON.stringify({ retention_days: 30 }));
+      return;
+    }
+    if (populated && pathname === '/api/schedule') {
+      response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+      response.end(JSON.stringify({ schedule: { timezone: 'Europe/Vienna', start: '08:30', end: '15:00', days: [1, 2, 3, 4, 5] } }));
+      return;
+    }
+    if (populated && new URL(request.url || '/', 'http://localhost').pathname === '/api/report') {
+      response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+      response.end(JSON.stringify(sampleReport()));
       return;
     }
     const relative = assets[pathname];
@@ -245,7 +289,8 @@ async function main() {
   const chromeVersion = spawnSync(chrome, ['--version'], { encoding: 'utf8' }).stdout?.trim() || 'unknown';
   const profile = await mkdtemp(path.join(tmpdir(), 'family-pages-axe-'));
   const server = createStaticServer();
-  const parentServer = createParentSetupServer();
+  const parentServer = createParentServer();
+  const parentReportServer = createParentServer({ populated: true });
   let browser;
   let socket;
   try {
@@ -257,8 +302,13 @@ async function main() {
       parentServer.once('error', reject);
       parentServer.listen(0, '127.0.0.1', resolve);
     });
+    await new Promise((resolve, reject) => {
+      parentReportServer.once('error', reject);
+      parentReportServer.listen(0, '127.0.0.1', resolve);
+    });
     const address = server.address();
     const parentAddress = parentServer.address();
+    const reportAddress = parentReportServer.address();
     const browserArgs = [
       '--headless=new', '--disable-gpu', '--no-first-run', '--disable-background-networking',
       '--remote-debugging-port=0', '--remote-allow-origins=*', `--user-data-dir=${profile}`,
@@ -281,6 +331,7 @@ async function main() {
     const targets = [
       ...pages.map((page) => ({ name: page, url: `http://127.0.0.1:${address.port}/${page}`, path: `/${page}` })),
       { name: 'parent dashboard setup', url: `http://127.0.0.1:${parentAddress.port}/`, path: '/' },
+      { name: 'parent dashboard report', url: `http://127.0.0.1:${reportAddress.port}/`, path: '/' },
     ];
     for (const viewport of viewports) {
       await send('Emulation.setDeviceMetricsOverride', {
@@ -302,6 +353,17 @@ async function main() {
             await new Promise((resolve) => setTimeout(resolve, 50));
           }
           if (!ready) throw new Error('The parent setup screen did not reach its initial state.');
+        }
+        if (target.name === 'parent dashboard report') {
+          const deadline = Date.now() + 5000;
+          let ready = false;
+          while (Date.now() < deadline) {
+            ready = await evaluate(send,
+              'document.querySelector("#report").hidden === false && document.querySelector("#apps li")?.textContent.includes("Safari")');
+            if (ready) break;
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
+          if (!ready) throw new Error('The populated parent report did not render its sample data.');
         }
         const axeSource = JSON.stringify(axe.source);
         const result = await evaluate(send, `(() => {
@@ -391,6 +453,7 @@ async function main() {
     }
     await new Promise((resolve) => server.close(resolve));
     await new Promise((resolve) => parentServer.close(resolve));
+    await new Promise((resolve) => parentReportServer.close(resolve));
     await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   }
 }

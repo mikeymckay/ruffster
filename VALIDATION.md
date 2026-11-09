@@ -1,5 +1,9 @@
 # Real-machine validation
 
+## 2026-11-09: Scan the populated parent report for accessibility issues
+
+Extended the local Chrome/Axe scan to render both first-run setup and a populated dashboard using synthetic report data. The four public Pages and both dashboard states each passed at desktop and phone widths: zero Axe violations and no horizontal overflow. The focused documentation suite passed 32 tests. This automated scan does not replace keyboard, screen-reader, or family usability review. The family Mac was unreachable by SSH during this work, so no new device setup or activity collection was performed.
+
 ## 2026-11-09: Build and validate the Ruffster 0.1.6 family app
 
 Commit `44f87a1` was copied to the test Mac's Apple-silicon Mac (macOS 26.6, Python 3.15.2, PyInstaller 6.22.3). The complete source suite ran 288 tests: 280 passed and 8 host/dependency checks were skipped. The local app bundle built as `Ruffster.app`, reported bundle ID `org.ruffster.app` and version 0.1.6, and included the golden retriever icon. Native welcome layout and frozen dashboard checks passed, including unauthenticated API rejection and encrypted synthetic report export/import. The app was not installed and no family activity was collected.

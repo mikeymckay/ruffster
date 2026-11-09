@@ -185,7 +185,8 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('horizontal overflow', script)
         self.assertIn('await waitForPageReady(send, target.name, target.path)', script)
         self.assertIn("name: 'parent dashboard setup'", script)
-        self.assertIn('has_key: false, unlocked: false, has_report: false, backup_confirmed: false', script)
+        self.assertIn("name: 'parent dashboard report'", script)
+        self.assertIn('has_key: populated, unlocked: populated, has_report: populated, backup_confirmed: populated', script)
         self.assertIn('GITHUB_STEP_SUMMARY', script)
         self.assertIn('chromeVersion', script)
         self.assertIn('Axe violations | Horizontal overflow', script)
@@ -196,6 +197,8 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('repository is public, and its Pages source is configured to use GitHub Actions', guide)
         self.assertIn('The live site and install guide are at <https://mikeymckay.github.io/ruffster/>', guide)
         self.assertIn('progress page', guide)
+        self.assertIn('first-run setup and populated report screens', guide)
+        self.assertIn('Both dashboard states use synthetic data only', guide)
 
     def test_local_reports_and_key_material_are_ignored_by_source_control(self):
         ignored = (ROOT / '.gitignore').read_text(encoding='utf-8').splitlines()
