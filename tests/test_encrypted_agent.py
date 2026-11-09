@@ -326,7 +326,10 @@ class EncryptedAgentTests(unittest.TestCase):
                 line = first if 'Monitoring heartbeat active' in first else process.stdout.readline()
                 self.assertIn('Monitoring heartbeat active', line)
                 time.sleep(.25)
-                process.terminate(); process.wait(timeout=5)
+                # Network sampling can be in a bounded OS subprocess when SIGTERM
+                # arrives. Give that operation and the visible helper shutdown
+                # time to finish on a busy hosted macOS runner.
+                process.terminate(); process.wait(timeout=15)
                 self.assertEqual(process.returncode, 0, process.stderr.read())
                 connection = sqlite3.connect(database)
                 events = [encrypted_store.open_event(parent, row[0]) for row in
