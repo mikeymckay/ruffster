@@ -101,7 +101,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn("The PIN is for simple family access: a parent can open the reports, and the child doesn't need to know the PIN", encryption)
         self.assertIn('The two-digit number helps the computers find each other on the same Wi-Fi', encryption)
         self.assertIn('The number and order of encrypted records', encryption)
-        self.assertIn('Use reports as a helpful family picture, not as a forensic record', encryption)
+        self.assertIn('Use reports as a helpful picture to discuss together, not as a perfect log', encryption)
         self.assertIn('Ruffster does not silently convert or delete them', encryption)
         self.assertNotIn('threat model', encryption.lower())
 
@@ -163,7 +163,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn("'mac-family-*'", release)
         self.assertIn('--prerelease', release)
         self.assertIn('.github/MAC-FAMILY-RELEASE-NOTES.md', release)
-        self.assertIn('Ruffster for Mac 0.1.23', family_release_notes)
+        self.assertIn('Ruffster for Mac 0.1.24', family_release_notes)
         self.assertIn('Setup shows which account it will monitor', family_release_notes)
         self.assertIn('A real family setup and report exchange remain the next hands-on checks', family_release_notes)
         self.assertIn('scripts/run-tests.py', release)
@@ -281,6 +281,10 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('school wi-fi', faq.lower())
         self.assertIn('hotspot', faq.lower())
         self.assertIn('school-hours schedule', dashboard.lower())
+        self.assertIn("These clues don't tell us whether a content filter is working", dashboard)
+        self.assertIn('A filter on your home router usually works only while the computer is on home Wi-Fi', dashboard)
+        self.assertIn('NextDNS explains router and device setup', dashboard)
+        self.assertIn('if anything is unclear, ask before changing it', dashboard)
 
     def test_contextual_network_traffic_is_labeled_as_an_estimate(self):
         faq = (SITE / 'faq.html').read_text(encoding='utf-8')

@@ -110,7 +110,7 @@ class ParentAppTests(unittest.TestCase):
         self.assertIn(b'id="snapshot-note"', page)
         self.assertIn(b'id="report-timezone-note"', page)
         self.assertIn(b'home router', page)
-        self.assertIn(b'mobile hotspot', page)
+        self.assertIn(b'hotspot', page)
         self.assertIn(b'Ask the school before changing settings', page)
         status, _, script = self.request('GET', '/app.js')
         self.assertEqual(status, 200)

@@ -27,8 +27,8 @@ Ruffster removes expired records when monitoring starts and while it is running.
 
 ## Practical limits
 
-- The six-digit PIN is easy to try if someone gets a copy of the parent's key file. The design goal is that the child does not know the PIN; the PIN is not meant to withstand an attacker who has copied that file. There is no master recovery key. If the PIN and every usable recovery copy are lost, the encrypted reports cannot be opened.
-- Ruffster checks that a record was encrypted for the right parent key and detects changed ciphertext. It cannot prove which program wrote a record, or detect if someone removes, reorders, repeats, or replaces records. Use reports as a helpful family picture, not as a forensic record.
+- The six-number PIN is a simple family step: parents choose it, and the child doesn't need to know it. It isn't a long password for computer security. Keep the parent key and recovery copy in places the adults can reach. If you forget the PIN and lose every recovery copy, there isn't another way to open the reports.
+- Ruffster checks that reports are for the right parent setup and detects changed records. It cannot tell whether an observation was missed or a record was removed. Use reports as a helpful picture to discuss together, not as a perfect log.
 - A computer has to see activity before it can encrypt it. Someone with full access to the child's computer or its software could inspect activity before encryption or change the app. Ruffster does not claim to detect that.
 - The parent dashboard keeps report contents in memory while showing them. The operating system may also use memory, backups, or snapshots; retention settings do not control those copies. The parent key is not yet stored in a platform keychain.
 - Older developer prototypes and low-level tools may have created plaintext databases. Ruffster does not silently convert or delete them. A developer-only `encrypt-legacy` command supports one known older format, writes a new encrypted copy, and leaves the old file untouched. Check existing prototype data before sharing or retaining it.
