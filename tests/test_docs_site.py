@@ -111,7 +111,15 @@ class DocumentationSiteTests(unittest.TestCase):
         workflow = (ROOT / '.github/workflows/ci.yml').read_text(encoding='utf-8')
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
         project = (ROOT / 'native/windows/FamilyActivityStatus.csproj').read_text(encoding='utf-8')
-        self.assertIn('os: [ubuntu-latest, macos-latest, windows-latest]', workflow)
+        self.assertIn('os: [ubuntu-latest, macos-latest]', workflow)
+        self.assertIn('windows-tests:', workflow)
+        self.assertIn('timeout-minutes: 12', workflow)
+        self.assertIn('run: python scripts/run-tests.py --files ${{ matrix.files }}', workflow)
+        sharded_files = set()
+        for line in workflow.splitlines():
+            if line.strip().startswith('files:'):
+                sharded_files.update(line.split(':', 1)[1].split())
+        self.assertEqual(sharded_files, {path.name for path in (ROOT / 'tests').glob('test_*.py')})
         self.assertIn('windows-package-check', workflow)
         self.assertIn('windows-bundle-extractor', workflow)
         self.assertIn('native/windows/bundle-extractor-tests/FamilyActivity.BundleExtractor.Tests.csproj', workflow)

@@ -73,7 +73,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -87,11 +87,40 @@ jobs:
       - name: Run tests
         run: python scripts/run-tests.py
 
+  windows-tests:
+    name: Tests (Windows — ${{ matrix.shard }})
+    runs-on: windows-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shard: Parent setup and report flow
+            files: test_parent_app.py test_dashboard.py test_key_vault.py test_local_share.py test_docs_site.py
+          - shard: Agent and network sampling
+            files: test_encrypted_agent.py test_encrypted_view.py test_encrypted_store.py test_browser_channel.py test_process_network.py test_status.py test_network_labels.py test_network_identity.py test_device_identity.py test_device_labels.py test_public_key_file.py
+          - shard: Native setup and install
+            files: test_windows.py test_windows_setup_source.py test_windows_package_smoke.py test_macos_install.py test_macos_launchd.py test_macos_setup_source.py
+          - shard: Reports and shared foundations
+            files: test_reports.py test_store.py test_school_schedule.py test_network.py test_network_settings.py test_parent_settings.py test_plaintext_migration.py test_macos.py test_website_categories.py test_run_tests.py
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install project
+        run: python -m pip install -e .
+      - name: Run this Windows test shard
+        run: python scripts/run-tests.py --files ${{ matrix.files }}
+
   windows-package-check:
     name: Build Windows preview (no artifact published)
     runs-on: windows-latest
     timeout-minutes: 15
-    needs: [tests, windows-bundle-extractor]
+    needs: [tests, windows-tests, windows-bundle-extractor]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
