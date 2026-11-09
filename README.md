@@ -65,7 +65,7 @@ python -m family_activity encrypt-legacy \
 
 The command applies retention to original event times and omits expired rows. Verify the encrypted copy before deciding what to do with the old source file. Encrypted collection and parent setup continue to improve with family use.
 
-See [ENCRYPTION.md](ENCRYPTION.md) for the threat model and known limitations, and [AGENTS.md](AGENTS.md) for development rules.
+See [ENCRYPTION.md](ENCRYPTION.md) for encryption details and practical limits, and [AGENTS.md](AGENTS.md) for development rules.
 
 The engineering requirements and open European privacy and children's-rights questions are recorded in [PRIVACY-AND-CHILDREN.md](PRIVACY-AND-CHILDREN.md). This is not a legal compliance determination; review by qualified counsel is needed before broader distribution.
 

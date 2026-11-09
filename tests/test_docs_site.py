@@ -90,6 +90,11 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('## Delivery priorities', readme)
         self.assertIn('public project experience', readme)
 
+    def test_readme_describes_encryption_notes_in_plain_language(self):
+        readme = (ROOT / 'README.md').read_text(encoding='utf-8')
+        self.assertIn('[ENCRYPTION.md](ENCRYPTION.md) for encryption details and practical limits', readme)
+        self.assertNotIn('threat model', readme.lower())
+
     def test_parent_screenshots_have_a_temporary_synthetic_capture_tool(self):
         capture = (ROOT / 'scripts/capture-parent-demo-screenshots.py').read_text(encoding='utf-8')
         self.assertIn('TemporaryDirectory', capture)
