@@ -454,4 +454,6 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('Ready for a first family try on Mac', status)
         self.assertIn('What we’re improving next', status)
         self.assertIn('Get the Mac app and see the first-open steps', status)
-        self.assertIn('all four Windows test groups passed', status)
+        self.assertIn('Six of seven Windows test groups passed in the latest run', status)
+        self.assertIn('dashboard and key access group reached GitHub\'s 12-minute limit', status)
+        self.assertIn('the Windows package check did not start', status)
