@@ -39,6 +39,18 @@ def write_result_summary(file, result: unittest.TestResult) -> None:
         file.write("All selected tests passed.\n")
 
 
+def write_failure_annotations(result: unittest.TestResult, output=None) -> None:
+    if os.environ.get("GITHUB_ACTIONS") != "true":
+        return
+    output = output or sys.stdout
+    failures = result.failures + result.errors
+    for test, detail in failures:
+        lines = [line.strip() for line in detail.splitlines() if line.strip()]
+        message = " ".join(lines[-3:]) or "Test failed; see the job summary for details."
+        message = message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+        output.write(f"::error title=Test failure::{test.id()}: {message}\n")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -65,6 +77,8 @@ def main() -> int:
             if result is not None:
                 write_result_summary(summary_file, result)
             summary_file.close()
+        if result is not None:
+            write_failure_annotations(result)
 
 
 if __name__ == "__main__":
