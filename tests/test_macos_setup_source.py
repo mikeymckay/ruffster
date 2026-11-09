@@ -20,7 +20,7 @@ class MacSetupSourceTests(unittest.TestCase):
         root = Path(__file__).parents[1]
         builder = (root / 'scripts' / 'build-macos-preview.sh').read_text(encoding='utf-8')
         workflow = (root / '.github' / 'workflows' / 'release-macos-unsigned-preview.yml').read_text(encoding='utf-8')
-        self.assertIn('VERSION=${RUFFSTER_VERSION:-0.1.18}', builder)
+        self.assertIn('VERSION=${RUFFSTER_VERSION:-0.1.19}', builder)
         self.assertIn("'CFBundleShortVersionString':sys.argv[2]", builder)
         self.assertIn("'CFBundleVersion':sys.argv[2]", builder)
         self.assertIn("'CFBundleIconFile':'Ruffster.icns'", builder)
@@ -78,7 +78,8 @@ class MacSetupSourceTests(unittest.TestCase):
         self.assertIn('processNetwork.state = .off', source)
         self.assertIn('Include network totals by app or service (experimental)', source)
         self.assertIn('helper service', source)
-        self.assertIn('does not identify websites', source)
+        self.assertIn('these totals still do not show websites', source)
+        self.assertEqual(source.count('Some short connections may be missed'), 1)
         self.assertIn('FAMILY_ACTIVITY_PROCESS_NETWORK', status)
 
     def test_scrollable_disclosure_uses_explicit_cgfloat_height(self):

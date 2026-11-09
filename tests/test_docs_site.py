@@ -148,7 +148,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn("'mac-family-*'", release)
         self.assertIn('--prerelease', release)
         self.assertIn('.github/MAC-FAMILY-RELEASE-NOTES.md', release)
-        self.assertIn('Ruffster for Mac 0.1.18', family_release_notes)
+        self.assertIn('Ruffster for Mac 0.1.19', family_release_notes)
         self.assertIn('A real family setup and report exchange are the next validation step', family_release_notes)
         self.assertIn('scripts/run-tests.py', release)
         self.assertIn('shasum -a 256', packager)
@@ -302,7 +302,7 @@ class DocumentationSiteTests(unittest.TestCase):
         faq = (SITE / 'faq.html').read_text(encoding='utf-8')
         native_setup = (ROOT / 'native/macos/setup.swift').read_text(encoding='utf-8')
         self.assertIn('simple DNS, proxy, and VPN indicators', faq)
-        self.assertIn('The router hint is not a location', native_setup)
+        self.assertIn('The hint does not show a location', native_setup)
 
     def test_browser_extension_pause_and_data_limits_are_disclosed(self):
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')

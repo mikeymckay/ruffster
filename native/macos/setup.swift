@@ -490,13 +490,15 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         disclosureText.string = """
         Ruffster starts automatically when this account signs in, and macOS restarts it if it stops unexpectedly. The menu-bar paw stays visible and shows whether recent samples are ready.
 
-        While this account is signed in, Ruffster samples foreground app names, network-interface traffic totals, a pseudonymous hint when the default router changes, and basic DNS, proxy, and VPN settings. Network-interface totals are not attributed to apps or websites. You can separately opt into experimental process-level totals below; these may list helper services, miss brief connections, and do not identify websites. The router hint is not a location, and the raw router address is not saved.
+        While this account is signed in, Ruffster records the app in front, overall network traffic, a private hint when the usual router changes, and whether a few DNS, proxy, or VPN settings are on. The hint does not show a location, and the router address is not saved. Network traffic is not linked to apps or websites.
 
-        It does not record screenshots, keystrokes, message contents, microphone, camera, or full website addresses. Website domains are not included in this Mac setup. If selected below, experimental network totals are grouped by the process that owns a connection. Some traffic may appear under a helper service, brief connections may be missed, and this does not identify websites.
+        Ruffster never records screenshots, keystrokes, message contents, microphone, camera, website names, or full web addresses on this Mac.
 
-        The menu-bar status icon must stay visible to the child. Reports are locked on this Mac and can be opened on the parent's computer. Keep this app in its current location; moving it may stop monitoring.
+        You can optionally include experimental network totals by app or helper service. Some short connections may be missed, and these totals still do not show websites.
 
-        The parent report may show when a new session followed an earlier session without a recorded stop. It cannot tell whether that was a crash, sleep, power-off, or another interruption.
+        The menu-bar paw stays visible while Ruffster runs. Reports are locked on this Mac and can be opened on the parent's computer. Keep Ruffster where it is; moving it may pause monitoring.
+
+        The parent report may show a new session followed an earlier session without a recorded stop. It cannot tell whether that was a crash, sleep, power-off, or something else.
 
         Choose the maximum time to keep detailed records here. Records are removed while monitoring runs; calendar-day rounding may remove them up to a day before that limit. Removing monitoring keeps the encrypted report and Ruffster connection details unless you choose to delete them. Reports already shared elsewhere and other copies are not affected.
 
