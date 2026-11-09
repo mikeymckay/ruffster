@@ -130,13 +130,14 @@ class ParentAppTests(unittest.TestCase):
         self.assertTrue(mascot.startswith(b'RIFF'))
         self.assertIn(b'RUFFSTER', page)
 
-    def test_parent_cli_closes_loopback_server_on_termination(self):
+    def test_parent_cli_closes_loopback_server_on_stop_request(self):
         import socket
         import subprocess
         import sys
         with tempfile.TemporaryDirectory() as folder:
+            stop_file = Path(folder) / 'stop-parent'
             process=subprocess.Popen([sys.executable,'-m','family_activity','parent','--no-browser',
-                                      '--data-dir',str(Path(folder)/'parent')],
+                                      '--data-dir',str(Path(folder)/'parent'), '--stop-file',str(stop_file)],
                                      stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
             try:
                 process.stdout.readline()
@@ -146,7 +147,7 @@ class ParentAppTests(unittest.TestCase):
                 parsed=urlsplit(url)
                 with socket.create_connection(('127.0.0.1',parsed.port),timeout=2):
                     pass
-                process.terminate()
+                stop_file.write_text('stop', encoding='utf-8')
                 self.assertEqual(process.wait(timeout=5),0)
                 with self.assertRaises(OSError):
                     socket.create_connection(('127.0.0.1',parsed.port),timeout=1)

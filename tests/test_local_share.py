@@ -249,13 +249,17 @@ class LocalShareTests(unittest.TestCase):
         import subprocess
         import sys
         environment = os.environ.copy(); environment['TMPDIR'] = self.tmp.name
-        proc = subprocess.Popen([sys.executable, '-m', 'family_activity', 'share', '--db', str(self.path), '--lifetime', '30'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=environment, text=True)
+        cancel_file = Path(self.tmp.name) / 'cancel-share'
+        proc = subprocess.Popen([sys.executable, '-m', 'family_activity', 'share', '--db', str(self.path),
+                                 '--lifetime', '30', '--cancel-file', str(cancel_file)],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=environment, text=True)
         try:
             self.assertIn('Temporary encrypted report transfer', proc.stdout.readline())
             code = proc.stdout.readline().strip()
             self.assertTrue(code)
             self.assertTrue(list(Path(self.tmp.name).glob('family-share-*')))
-            proc.terminate(); proc.wait(timeout=5)
+            cancel_file.touch()
+            proc.wait(timeout=5)
             self.assertEqual(proc.returncode, 0)
             self.assertFalse(list(Path(self.tmp.name).glob('family-share-*')))
         finally:

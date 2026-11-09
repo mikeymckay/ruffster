@@ -1,5 +1,9 @@
 # Real-machine validation
 
+## 2026-11-09: Build and validate the Ruffster 0.1.6 family app
+
+Commit `44f87a1` was copied to Annika's Apple-silicon Mac (macOS 26.6, Python 3.15.2, PyInstaller 6.22.3). The complete source suite ran 288 tests: 280 passed and 8 host/dependency checks were skipped. The local app bundle built as `Ruffster.app`, reported bundle ID `org.ruffster.app` and version 0.1.6, and included the golden retriever icon. Native welcome layout and frozen dashboard checks passed, including unauthenticated API rejection and encrypted synthetic report export/import. The app was not installed and no family activity was collected.
+
 ## 2026-11-09: Build and verify Mac 0.1.5
 
 Commit `f6592bc` was published as the unsigned Mac prerelease [`mac-preview-0.1.5`](https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.5). On an Apple-silicon Mac running macOS 26.6 and Python 3.15.2, PyInstaller 6.22.3 built the app and disk image. The native welcome layout fit its window; the frozen setup and dashboard smoke checks passed, including encrypted file export/import. The bundle reported version 0.1.5. The current-source Mac suite ran 286 tests: 278 passed and 8 host/dependency checks were skipped. The exact published DMG was downloaded, its SHA-256 sidecar matched, `hdiutil verify` passed, and its app bundle reported version 0.1.5 when mounted read-only. The app was not installed and no family activity was collected. The setup copy was checked by automated layout validation, but not by VoiceOver or a family usability session.
