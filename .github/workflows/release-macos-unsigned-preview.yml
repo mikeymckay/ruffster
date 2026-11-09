@@ -1,4 +1,4 @@
-name: Publish Mac family development preview
+name: Publish Mac family preview
 
 on:
   push:
@@ -35,7 +35,7 @@ jobs:
           source_commit="$(git rev-parse HEAD)"
           ./scripts/package-macos-unsigned-preview.sh "$python_executable" "$output_directory" "$source_commit"
           echo "PREVIEW_OUTPUT=$output_directory" >> "$GITHUB_ENV"
-      - name: Publish clearly labeled GitHub prerelease
+      - name: Publish GitHub family prerelease
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -44,5 +44,5 @@ jobs:
             "$PREVIEW_OUTPUT/Ruffster-Mac-Family-Preview-Apple-Silicon.dmg.sha256" \
             --verify-tag \
             --prerelease \
-            --title "Ruffster Mac family development preview ($GITHUB_REF_NAME)" \
+            --title "Ruffster for Mac family preview ($GITHUB_REF_NAME)" \
             --notes-file .github/UNSIGNED-MAC-PREVIEW-RELEASE-NOTES.md

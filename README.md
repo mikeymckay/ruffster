@@ -6,7 +6,7 @@
 
 **Mac family preview:** ready for families to try together. Install Ruffster on the parent Mac, then set up each child's Mac together and bring encrypted reports back to the parent dashboard. The visible status explains when Ruffster is running. The first-open guide explains macOS's confirmation for an app that has not yet been signed by Apple. Windows is next; the interactive family setup still needs a Windows-computer review.
 
-[Get the Apple-silicon Mac preview](https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.3) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
+[Get the Apple-silicon Mac preview](https://github.com/mikeymckay/ruffster/releases/tag/mac-preview-0.1.4) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
 
 [Project website](https://mikeymckay.github.io/ruffster/) · [Install guide](https://mikeymckay.github.io/ruffster/install.html) · [Progress page](https://mikeymckay.github.io/ruffster/progress.html) · [FAQ](https://mikeymckay.github.io/ruffster/faq.html) · [Privacy and children's rights](PRIVACY-AND-CHILDREN.md) · [Implementation plan](PLAN.md)
 
@@ -73,7 +73,7 @@ The engineering requirements and open European privacy and children's-rights que
 
 1. **Make macOS dependable first.** Validate setup and removal, visible status, sleep/wake, permissions, user changes, restart recovery, encrypted reports, and key recovery on real Macs. Keep the unsigned preview easy to identify and include its source, checksum, and a short note about Apple's first-open prompt. Revisit signing and notarization as the project grows.
 2. **Bring the family flow to Windows.** Test installation, startup and recovery, visible tray status, network and app observations, encrypted report handoff, parent dashboard, updates, and removal on real Windows computers.
-3. **Make the public project experience excellent.** Keep this README useful to a parent arriving for the first time and to a contributor; publish a polished GitHub Pages home page, family installation guide, progress page, and plain-language FAQ. Include current synthetic screenshots, clear readiness status, accessible responsive layouts, and clearly distinguish the unsigned family development preview from a signed and notarized release.
+3. **Make the public project experience excellent.** Keep this README useful to a parent arriving for the first time and to a contributor; publish a polished GitHub Pages home page, family installation guide, progress page, and plain-language FAQ. Include current synthetic screenshots, clear readiness status, accessible responsive layouts, and clearly distinguish the unsigned family preview from a signed and notarized release.
 4. **Validate with families and reviewers.** Observe nontechnical parents and children using the whole flow; complete accessibility, security, privacy, and European children's rights reviews.
 
 Linux remains a low-priority development and test host. It is not a student-facing platform target. The task list and release gates are in [PLAN.md](PLAN.md); the Pages design and launch checklist is in [GITHUB-PAGES.md](GITHUB-PAGES.md).

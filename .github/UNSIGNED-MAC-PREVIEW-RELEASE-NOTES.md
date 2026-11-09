@@ -1,13 +1,15 @@
-## Ruffster for Mac — first family development preview
+## Ruffster for Mac — family preview
 
-Ruffster helps parents and children understand computer use together, including school-day patterns. This Apple-silicon app has visible monitoring, encrypted activity reports, and a local parent dashboard.
+Ruffster helps parents and children understand everyday computer use together, including during the school day. The Mac app keeps its status visible, encrypts activity reports for the parent, and opens the local parent dashboard.
 
-This family development preview is ready for families who want to try Ruffster together. Read the collection choices with your child, keep the menu-bar status visible, and use the report as a shared starting point for conversation. Setup, accessibility, and the experience on Windows continue to improve as families use Ruffster.
+To get started, install Ruffster on the parent Mac, choose six numbers your child does not know, and save the recovery copy. Then set up each child's Mac together, read the collection choices, and make sure the status menu is visible. Both computers need to be on the same Wi-Fi to share a report. A two-digit code helps them find each other. The report is a shared starting point for a family conversation.
+
+See the [step-by-step family guide](https://mikeymckay.github.io/ruffster/install.html) before installing. Ruffster is set up by families; the school does not need to install or run anything.
 
 ### Opening on Mac
 
-This app is not signed or notarized by Apple, so macOS asks you to confirm before opening it. Open it only from the Ruffster release page. If macOS shows the first-open prompt, follow [Apple's steps to open an app from an unidentified developer](https://support.apple.com/en-us/102445). Keep macOS security settings as they are.
+This open-source app has not yet been signed or notarized by Apple, so macOS asks you to confirm before opening it the first time. Follow [Apple's steps to open an app you downloaded](https://support.apple.com/en-us/102445). You do not need to change your Mac's security settings.
 
-### About the download
+### About this version
 
-The release tag identifies the source version, and the adjacent `.sha256` file checks that the download arrived unchanged. It is a simple integrity check. The GitHub Actions build and test run is linked from this release.
+The release tag identifies the source version. The adjacent `.sha256` file lets you check that the download arrived unchanged. The GitHub Actions build and test run is linked from this release.
