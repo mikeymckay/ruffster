@@ -1,5 +1,9 @@
 # Real-machine validation
 
+## 2026-11-09: Validate the current Mac family flow
+
+On an Apple-silicon Mac running macOS 26.6, the current source suite ran 285 tests: 277 passed and 8 platform/dependency checks were skipped. The real LaunchAgent lifecycle validator confirmed startup, restart after `SIGKILL`, and removal while retaining local setup data. The encrypted-agent validator created a temporary parent key, sampled three synthetic foreground-app values, recorded a 9-second coverage gap after suspending the test process, exercised restart after an app update and launchd recovery, then removed the temporary installation and report. No family activity was collected and Ruffster was not installed as a family monitor. The Mac was on AC power with system sleep disabled; this check does not establish behavior during physical sleep or wake. The latest hosted CI run passed all Linux, Mac, four Windows test groups, and package checks. The local Pages accessibility scan passed all four pages at desktop and mobile sizes. GitHub Pages run 27 stopped in its accessibility-check step; the scan passes locally, so that hosted-runner failure remains to be diagnosed.
+
 ## 2026-11-08: Remove one computer from a multi-computer parent report
 
 The parent dashboard can now delete one selected computer's encrypted observations and its parent-authenticated display name from the local combined report. It rebuilds into a temporary encrypted database and atomically replaces the current report only after validation. Other computers' events and labels stay; the child database, earlier report exports, and the parent key are unchanged. Regression coverage verifies failed unknown-device deletion leaves the report byte-for-byte unchanged, selected-device removal keeps another computer's activity, and a previously exported backup still decrypts with both computers and the original name.
