@@ -47,7 +47,7 @@ The school-hours view uses a schedule chosen by the parent; it does not prove th
 
 ## Privacy and encryption
 
-Ruffster encrypts each activity report for the parent. The parent keeps the private key and a six-digit PIN; the child's computer can send a report but cannot open it. You can change the PIN on an unlocked parent computer without disconnecting child computers or replacing reports. Then save and confirm a fresh recovery copy before setting up another child. Other parent computers and recovery copies keep their existing PIN until you update them. No cloud account is required.
+Ruffster encrypts reports so only parent access can open them. Choose six numbers your child doesn't know to open the parent dashboard on this computer. Save the recovery copy somewhere you can find it if you change parent computers. You can change the PIN on an unlocked parent computer without disconnecting child computers or replacing reports; save a fresh recovery copy before setting up another child. No cloud account is required.
 
 To connect computers, the sending computer shows two digits and the receiving computer enters them. This helps the devices find each other on the same Wi-Fi; the report itself stays encrypted. Some Wi-Fi networks keep devices separate. If that happens, save an encrypted report file on the child's computer and open it in the parent's dashboard. The dashboard can keep reports from several computers separate and lets the parent name each one.
 

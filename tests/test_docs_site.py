@@ -97,8 +97,8 @@ class DocumentationSiteTests(unittest.TestCase):
 
     def test_encryption_guide_explains_the_family_data_flow_and_limits(self):
         encryption = (ROOT / 'ENCRYPTION.md').read_text(encoding='utf-8')
-        self.assertIn('encrypts activity on the child\'s Mac before it is saved', encryption)
-        self.assertIn('The PIN is meant to be simple for a parent to remember and unknown to the child', encryption)
+        self.assertIn('encrypts activity on the child\'s Mac before saving it', encryption)
+        self.assertIn("The PIN is for simple family access: a parent can open the reports, and the child doesn't need to know the PIN", encryption)
         self.assertIn('The two-digit number helps the computers find each other on the same Wi-Fi', encryption)
         self.assertIn('The number and order of encrypted records', encryption)
         self.assertIn('Use reports as a helpful family picture, not as a forensic record', encryption)
@@ -163,7 +163,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn("'mac-family-*'", release)
         self.assertIn('--prerelease', release)
         self.assertIn('.github/MAC-FAMILY-RELEASE-NOTES.md', release)
-        self.assertIn('Ruffster for Mac 0.1.22', family_release_notes)
+        self.assertIn('Ruffster for Mac 0.1.23', family_release_notes)
         self.assertIn('Setup shows which account it will monitor', family_release_notes)
         self.assertIn('A real family setup and report exchange remain the next hands-on checks', family_release_notes)
         self.assertIn('scripts/run-tests.py', release)
@@ -385,7 +385,7 @@ class DocumentationSiteTests(unittest.TestCase):
         script = (ROOT / 'family_activity/parent_assets/app.js').read_text(encoding='utf-8')
         product = (ROOT / 'PRODUCT-DESIGN.md').read_text(encoding='utf-8')
         self.assertIn('Your parent access PIN', dashboard)
-        self.assertIn('six-digit PIN your child doesn\'t know', dashboard)
+        self.assertIn("Choose six numbers your child doesn't know", dashboard)
         self.assertIn('Repeat these steps for each child\'s Mac', dashboard)
         self.assertIn('Show two digits', dashboard)
         self.assertIn('Download connection file', dashboard)

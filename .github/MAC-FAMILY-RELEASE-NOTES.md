@@ -1,12 +1,12 @@
-## Ruffster for Mac 0.1.22
+## Ruffster for Mac 0.1.23
 
 Ruffster helps parents and children understand computer use together, including during the school day. This Mac family app keeps its monitoring status visible, encrypts activity reports for the parent, and includes a local dashboard. Setup shows which account it will monitor before monitoring begins.
 
 ### What changed
 
-- The two-digit setup prompts now explain how to ask for another pair if the first one stops working. The app avoids technical wording about expired or already-used codes.
-- The Mac setup waiting screen now gives a simple next step if the parent connection takes too long.
-- The parent dashboard explains that both computers should be on the same Wi-Fi and how to show another pair if setup takes too long.
+- Parent access now uses simpler family language: choose six numbers your child doesn't know, and keep the recovery copy somewhere you can find it.
+- The parent dashboard and website screenshots now describe the PIN as a simple way for parents to open reports.
+- The dashboard keeps its two-digit computer connection and report sharing steps.
 
 Ruffster still records the app in front and network measurements, keeps its menu-bar status visible, and stores activity encrypted for the parent. It does not record screenshots, keystrokes, messages, audio, or camera data. The Mac app remains unsigned by Apple; follow the install guide's app-specific first-open steps and keep macOS protections on.
 

@@ -1,8 +1,8 @@
 # How family reports are encrypted
 
-Ruffster encrypts activity on the child's Mac before it is saved. The parent creates the matching private key on the parent computer; the child's Mac receives only the part needed to lock reports. The parent key and the six-digit PIN stay with the parent. Ruffster does not use a cloud service to read reports.
+Ruffster encrypts activity on the child's Mac before saving it. The parent sets up access on the parent computer; the child's Mac receives only what it needs to protect reports. Choose six numbers your child doesn't know, and keep the recovery copy somewhere you can find it. Ruffster does not use a cloud service to read reports.
 
-The PIN is meant to be simple for a parent to remember and unknown to the child. It is not a long password or a strong defense against someone who copies the parent's encrypted key file. Keep the PIN and recovery copy on the parent computer, and save the recovery copy somewhere you control.
+The PIN is for simple family access: a parent can open the reports, and the child doesn't need to know the PIN. It is not a long technical password. Keep the PIN and recovery copy somewhere you can find them.
 
 ## Setting up and sharing
 

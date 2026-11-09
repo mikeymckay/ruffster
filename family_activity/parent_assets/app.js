@@ -48,7 +48,7 @@ async function refresh() {
     $('password').pattern = '[0-9]{6}'; $('password').title = 'Enter six digits.';
     $('confirm').pattern = '[0-9]{6}'; $('confirm').title = 'Enter six digits.';
     $('access-label').textContent = 'Your parent access PIN';
-    $('phrase-help').textContent = "Choose six digits your child doesn't know. Keep the recovery copy somewhere they can't access.";
+    $('phrase-help').textContent = "Choose six numbers your child doesn't know. Keep the recovery copy somewhere you can find it.";
     $('confirm-label').textContent = 'Enter the PIN again';
   }
   $('confirm-wrap').hidden = status.has_key;

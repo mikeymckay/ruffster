@@ -12,15 +12,16 @@ class DashboardTests(unittest.TestCase):
         root = Path(__file__).parents[1] / 'family_activity' / 'parent_assets'
         html = (root / 'index.html').read_text(encoding="utf-8")
         script = (root / 'app.js').read_text(encoding="utf-8")
-        self.assertIn("Child computers can send encrypted reports, but can't open them", html)
-        self.assertIn('The PIN keeps reports for the parent in your family', html)
-        self.assertIn("Choose six digits your child doesn't know. Keep the recovery copy somewhere you control.", html)
+        self.assertIn('Ruffster protects reports so only parent access can open them', html)
+        self.assertIn('<h2>1. Parent access</h2>', html)
+        self.assertIn('The PIN keeps the parent dashboard for the adults in your family. Keep your PIN and recovery copy somewhere you can find them.', html)
+        self.assertIn("Choose six numbers your child doesn't know. Keep the recovery copy somewhere you can find it.", html)
         self.assertNotIn('separate public part', html)
         self.assertIn('pattern="[0-9]{6}" title="Enter six digits."', html)
         self.assertIn("$('password').pattern = '[0-9]{6}'", script)
         self.assertIn("$('password').removeAttribute('pattern')", script)
         self.assertIn('longer phrase from an older setup', script)
-        self.assertIn("Choose six digits your child doesn't know. Keep the recovery copy somewhere they can't access.", script)
+        self.assertIn("Choose six numbers your child doesn't know. Keep the recovery copy somewhere you can find it.", script)
         self.assertNotIn('not strong protection if someone copies the recovery file', script)
 
     def test_report_handoff_waits_for_two_digits_and_sanitizes_input(self):
