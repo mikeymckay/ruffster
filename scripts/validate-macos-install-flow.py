@@ -67,7 +67,8 @@ def validate():
         public_key = root / 'parent.pub'
         public_key.write_bytes(public_key_file.encode(PrivateKey.generate().public_key))
         result = macos_install.install(public_key, sleeper, source, sleeper, sleeper,
-                                       home, uid, label=label)
+                                       home, uid, label=label,
+                                       readiness_check=lambda database, previous_count: True)
         installed = True
         deadline = time.monotonic() + 20
         state = _service_state(domain, label)

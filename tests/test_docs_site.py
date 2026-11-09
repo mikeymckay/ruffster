@@ -466,6 +466,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('no valid code-signing identities', guide)
         self.assertIn('FAMILY_ACTIVITY_VERSION=\'0.1.0\'', guide)
         self.assertIn('macos_install.install', lifecycle_check)
+        self.assertIn('readiness_check=lambda database, previous_count: True', lifecycle_check)
         self.assertIn('macos_install.uninstall', lifecycle_check)
         self.assertIn("_launchctl('kill', 'SIGKILL'", lifecycle_check)
         self.assertIn('exec /bin/sleep 60', lifecycle_check)
