@@ -522,7 +522,7 @@ class DocumentationSiteTests(unittest.TestCase):
         self.assertIn('Ruffster for Mac 0.1.20 is available for families', status)
         self.assertIn('What we’re improving next', status)
         self.assertIn('Download Ruffster for Mac 0.1.20', status)
-        self.assertIn('Mac-to-Mac setup and the first family report review are still to try together', status)
+        self.assertIn('visible child-account setup, parent-key pairing, and the first family report remain outstanding', status)
         self.assertIn('the published parent dashboard opened a synthetic encrypted report', status)
         self.assertIn('Mac parent key sharing worked over the home LAN with a synthetic client', status)
         self.assertIn('the packaged Mac client completed a same-Mac key handoff', status)

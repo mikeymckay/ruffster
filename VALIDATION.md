@@ -1,5 +1,11 @@
 # Real-machine validation
 
+## 2026-11-09: Install Mac family app for a child account
+
+The family Mac was reachable over SSH with the child's account signed in at the console. Downloaded the published Mac 0.1.20 DMG on the Mac, verified its SHA-256 against the release sidecar, mounted it, and copied the app to `/Applications/Ruffster.app`. `codesign --verify --deep --strict` passed on the installed bundle. The app is shared, as supported by the install guide; its monitoring setup remains per signed-in account.
+
+The SSH identity is the family Mac's admin account. macOS denied access to the child's home directory and denied switching this SSH process into the child's GUI session (`launchctl asuser`: Operation not permitted). The app was not opened as the child, and no child disclosure, parent pairing, LaunchAgent, or first encrypted sample was completed or verified. Do not assume monitoring is active; no family activity has been collected. Finish setup visibly from the child's account with the parent dashboard available before expecting school-day data.
+
 ## 2026-11-09: Update GitHub Actions to Node 24 releases
 
 The latest CI run passed but reported that the older checkout, Python, Node, and .NET setup actions were being forced from Node 20 to Node 24. Updated them across CI, Pages, Mac release, and release-note sync workflows to Node 24-compatible major releases (`checkout@v7`, `setup-python@v7`, `setup-node@v7`, and `setup-dotnet@v6`). Their upstream action definitions declare the Node 24 runtime. Added a regression check against stale major versions. Local documentation/workflow checks pass (33 tests). The first hosted run with the new versions hit a Windows loopback `ConnectionAbortedError` in parent setup; the parent request handler had a 15-second server timeout despite a 30-second client bound. Raised the server bound to 60 seconds and verified all parent API tests pass locally (23 tests). The follow-up hosted run passed all workflows without Node 20 deprecation warnings. No family-device behavior changed.
