@@ -246,6 +246,7 @@ class EncryptedAgentTests(unittest.TestCase):
                 if proc.poll() is None: proc.kill(); proc.wait()
                 proc.stdout.close(); proc.stderr.close()
 
+    @unittest.skipIf(os.name == 'nt', 'Mac helper executable cannot run on a Windows host')
     def test_network_settings_only_mode_starts_required_visible_status(self):
         with tempfile.TemporaryDirectory() as tmp:
             parent=PrivateKey.generate(); public=Path(tmp)/'parent.pub'; public.write_bytes(bytes(parent.public_key))
@@ -274,6 +275,7 @@ class EncryptedAgentTests(unittest.TestCase):
                 if proc.poll() is None: proc.kill(); proc.wait()
                 proc.stdout.close(); proc.stderr.close()
 
+    @unittest.skipIf(os.name == 'nt', 'Mac helper executable cannot run on a Windows host')
     def test_agent_records_pseudonymous_network_identity_with_device_key(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)

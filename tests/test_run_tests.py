@@ -1,5 +1,7 @@
 import importlib.util
+import io
 from pathlib import Path
+from types import SimpleNamespace
 import unittest
 
 
@@ -18,6 +20,20 @@ class TestRunnerShardTests(unittest.TestCase):
         for filename in ("../test_docs_site.py", "tests/test_docs_site.py", "helper.py"):
             with self.subTest(filename=filename), self.assertRaises(ValueError):
                 RUNNER.load_suite([filename])
+
+    def test_failure_summary_includes_test_name_and_traceback(self):
+        test = unittest.FunctionTestCase(lambda: None)
+        result = SimpleNamespace(
+            testsRun=3,
+            failures=[(test, "AssertionError: expected value\n")],
+            errors=[],
+            skipped=[(test, "platform")],
+        )
+        output = io.StringIO()
+        RUNNER.write_result_summary(output, result)
+        self.assertIn("3 tests run; 1 failures, 0 errors, 1 skipped", output.getvalue())
+        self.assertIn(test.id(), output.getvalue())
+        self.assertIn("AssertionError: expected value", output.getvalue())
 
 
 if __name__ == "__main__":

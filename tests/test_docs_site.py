@@ -151,6 +151,7 @@ class DocumentationSiteTests(unittest.TestCase):
         runner = (ROOT / 'scripts/run-tests.py').read_text(encoding='utf-8')
         self.assertIn('GITHUB_STEP_SUMMARY', runner)
         self.assertIn('dump_traceback_later(300, repeat=True', runner)
+        self.assertIn('write_result_summary(summary_file, result)', runner)
 
     def test_accessibility_scan_is_pinned_and_runs_in_ci_without_site_runtime_deps(self):
         package = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))

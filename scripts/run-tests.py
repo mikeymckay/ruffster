@@ -26,6 +26,19 @@ def load_suite(files: list[str] | None = None) -> unittest.TestSuite:
     return suite
 
 
+def write_result_summary(file, result: unittest.TestResult) -> None:
+    failures = result.failures + result.errors
+    file.write("## Test results\n\n")
+    file.write(
+        f"{result.testsRun} tests run; {len(result.failures)} failures, "
+        f"{len(result.errors)} errors, {len(result.skipped)} skipped.\n\n"
+    )
+    for test, detail in failures:
+        file.write(f"### Failed test: `{test.id()}`\n\n```text\n{detail.rstrip()}\n```\n\n")
+    if not failures:
+        file.write("All selected tests passed.\n")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -40,6 +53,7 @@ def main() -> int:
         summary_file = open(summary_path, "a", encoding="utf-8")
         summary_file.write("\n### Periodic Python stack traces for stalled tests\n\n```text\n")
     faulthandler.dump_traceback_later(300, repeat=True, file=summary_file or sys.stderr)
+    result = None
     try:
         suite = load_suite(args.files)
         result = unittest.TextTestRunner(verbosity=2).run(suite)
@@ -48,6 +62,8 @@ def main() -> int:
         faulthandler.cancel_dump_traceback_later()
         if summary_file:
             summary_file.write("\n```\n")
+            if result is not None:
+                write_result_summary(summary_file, result)
             summary_file.close()
 
 
