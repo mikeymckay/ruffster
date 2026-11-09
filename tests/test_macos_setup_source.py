@@ -18,7 +18,7 @@ class MacSetupSourceTests(unittest.TestCase):
         root = Path(__file__).parents[1]
         builder = (root / 'scripts' / 'build-macos-preview.sh').read_text(encoding='utf-8')
         workflow = (root / '.github' / 'workflows' / 'release-macos-unsigned-preview.yml').read_text(encoding='utf-8')
-        self.assertIn('VERSION=${RUFFSTER_VERSION:-0.1.12}', builder)
+        self.assertIn('VERSION=${RUFFSTER_VERSION:-0.1.13}', builder)
         self.assertIn("'CFBundleShortVersionString':sys.argv[2]", builder)
         self.assertIn("'CFBundleVersion':sys.argv[2]", builder)
         self.assertIn("'CFBundleIconFile':'Ruffster.icns'", builder)
@@ -107,6 +107,19 @@ class MacSetupSourceTests(unittest.TestCase):
         self.assertIn('Settings and removal…', source)
         self.assertIn('_wait_for_ready_session(database, previous_event_count)', installer)
         self.assertIn('current_event_count > previous_event_count', installer)
+
+    def test_mac_pairing_failure_offers_direct_retry_and_file_fallback(self):
+        source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')
+        start = source.index('private func showPairingFailure()')
+        end = source.index('private func reviewAndInstall', start)
+        failure = source[start:end]
+        self.assertIn('both computers are on the same Wi-Fi', failure)
+        self.assertIn('System Settings > Privacy & Security > Local Network', failure)
+        self.assertIn('Some Wi-Fi networks don\'t let computers connect directly', failure)
+        self.assertIn('alert.addButton(withTitle: "Try again")', failure)
+        self.assertIn('alert.addButton(withTitle: "Choose connection file…")', failure)
+        self.assertIn('case .alertFirstButtonReturn: fetchParentKey()', failure)
+        self.assertIn('case .alertSecondButtonReturn: choosePublicKeyFile()', failure)
 
     def test_parent_pairing_calls_fallback_a_connection_file(self):
         source = (Path(__file__).parents[1] / 'native' / 'macos' / 'setup.swift').read_text(encoding='utf-8')

@@ -1,4 +1,4 @@
-## Ruffster for Mac 0.1.12
+## Ruffster for Mac 0.1.13
 
 Ruffster helps parents and children understand everyday computer use together, including during the school day. This Mac family app keeps its monitoring status visible, encrypts activity reports for the parent, and includes a local dashboard.
 
@@ -11,6 +11,8 @@ Download `Ruffster-Mac-Family-App-Apple-Silicon.dmg`, open it, and drag Ruffster
 Start with the parent Mac, choose a six-digit PIN your child does not know, and save the recovery copy. Then set up each child's Mac together and read the collection choices. Ruffster starts when that account signs in, shows its status in the menu bar, and restarts after an unexpected stop.
 
 Setup now waits for launchd to start the agent, confirm it is still running, and save a fresh encrypted sample before reporting success. The final message points families to the visible menu-bar status and offers a direct route to settings and removal.
+
+If the two-digit nearby-computer connection does not work, the Mac setup screen now offers a direct retry or the connection-file option. It explains the same-Wi-Fi requirement and where to allow Ruffster on the Mac's Local Network settings.
 
 The Mac app has been checked with automated tests and synthetic activity. A real family setup and report exchange are the next validation step. Ruffster records foreground app names and network measurements; network totals do not identify websites. It does not record screenshots, keystrokes, messages, audio, or camera data. Windows setup is not part of this Mac download.
 

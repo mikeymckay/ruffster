@@ -418,7 +418,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
             }
             guard let (finished, keyData) = pairingResult, finished === process else {
                 pairingProcess = nil
-                message("Could not connect to the parent's Mac", "Check that both computers are on the same local network and the two digits are current. The parent can show new digits or share the connection file instead.")
+                showPairingFailure()
                 return
             }
             pairingProcess = nil
@@ -426,7 +426,7 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
             let marker = Data("FAMILY-ACTIVITY-PUBLIC-KEY-V1\n".utf8)
             guard process.terminationStatus == 0, keyData.count == marker.count + 32,
                   keyData.starts(with: marker) else {
-                message("Could not connect to the parent's Mac", "Check that both computers are on the same local network and the two digits are current. The parent can show new digits or share the connection file instead.")
+                showPairingFailure()
                 return
             }
             let temporaryDirectory = FileManager.default.temporaryDirectory
@@ -442,7 +442,21 @@ final class SetupController: NSObject, NSApplicationDelegate, NSWindowDelegate {
             }
         } catch {
             pairingProcess = nil
-            message("Could not connect to the parent's Mac", "Check the two digits and local network, then try again. You can also choose the connection file instead.")
+            showPairingFailure()
+        }
+    }
+
+    private func showPairingFailure() {
+        let alert = NSAlert()
+        alert.messageText = "Could not connect yet"
+        alert.informativeText = "Check that both computers are on the same Wi-Fi. If the child's Mac asks for local network access, allow Ruffster in System Settings > Privacy & Security > Local Network. Some Wi-Fi networks don't let computers connect directly; a connection file works without the local network."
+        alert.addButton(withTitle: "Try again")
+        alert.addButton(withTitle: "Choose connection file…")
+        alert.addButton(withTitle: "Done")
+        switch alert.runModal() {
+        case .alertFirstButtonReturn: fetchParentKey()
+        case .alertSecondButtonReturn: choosePublicKeyFile()
+        default: break
         }
     }
 
