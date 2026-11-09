@@ -31,6 +31,19 @@ fi
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources/helpers" "$APP/Contents/Resources/runtime"
 cp -R "$WORK/dist/FamilyActivityCore/." "$APP/Contents/Resources/runtime/"
 cp "$ROOT/LICENSE" "$APP/Contents/Resources/LICENSE"
+ICONSET="$WORK/Ruffster.iconset"
+mkdir "$ICONSET"
+sips -s format png -z 16 16 "$ROOT/native/macos/ruffster-app-icon.png" --out "$ICONSET/icon_16x16.png" >/dev/null
+sips -s format png -z 32 32 "$ROOT/native/macos/ruffster-app-icon.png" --out "$ICONSET/icon_16x16@2x.png" >/dev/null
+sips -s format png -z 32 32 "$ROOT/native/macos/ruffster-app-icon.png" --out "$ICONSET/icon_32x32.png" >/dev/null
+sips -s format png -z 64 64 "$ROOT/native/macos/ruffster-app-icon.png" --out "$ICONSET/icon_32x32@2x.png" >/dev/null
+sips -s format png -z 128 128 "$ROOT/native/macos/ruffster-app-icon.png" --out "$ICONSET/icon_128x128.png" >/dev/null
+sips -s format png -z 256 256 "$ROOT/native/macos/ruffster-app-icon.png" --out "$ICONSET/icon_128x128@2x.png" >/dev/null
+sips -s format png -z 256 256 "$ROOT/native/macos/ruffster-app-icon.png" --out "$ICONSET/icon_256x256.png" >/dev/null
+sips -s format png -z 512 512 "$ROOT/native/macos/ruffster-app-icon.png" --out "$ICONSET/icon_256x256@2x.png" >/dev/null
+sips -s format png -z 512 512 "$ROOT/native/macos/ruffster-app-icon.png" --out "$ICONSET/icon_512x512.png" >/dev/null
+sips -s format png -z 1024 1024 "$ROOT/native/macos/ruffster-app-icon.png" --out "$ICONSET/icon_512x512@2x.png" >/dev/null
+iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/Ruffster.icns"
 swiftc "$ROOT/native/macos/setup.swift" -o "$APP/Contents/MacOS/FamilyActivitySetup"
 swiftc "$ROOT/native/macos/foreground.swift" -o "$APP/Contents/Resources/helpers/foreground"
 swiftc "$ROOT/native/macos/status.swift" -o "$APP/Contents/Resources/helpers/status"
@@ -40,7 +53,8 @@ import plistlib, sys
 with open(sys.argv[1], 'wb') as file:
     plistlib.dump({'CFBundleName':'Ruffster Preview', 'CFBundleDisplayName':'Ruffster Preview',
                    'CFBundleIdentifier':'org.familyactivity.preview', 'CFBundleExecutable':'FamilyActivitySetup',
-                   'CFBundlePackageType':'APPL', 'CFBundleShortVersionString':sys.argv[2],
+                   'CFBundlePackageType':'APPL', 'CFBundleIconFile':'Ruffster.icns',
+                   'CFBundleShortVersionString':sys.argv[2],
                    'CFBundleVersion':sys.argv[2], 'NSHighResolutionCapable':True,
                    'NSLocalNetworkUsageDescription': 'Ruffster uses your local network when you connect a parent computer or send an encrypted report.'}, file)
 PY

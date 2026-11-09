@@ -21,6 +21,9 @@ class MacSetupSourceTests(unittest.TestCase):
         self.assertIn('VERSION=${RUFFSTER_VERSION:-0.1.5}', builder)
         self.assertIn("'CFBundleShortVersionString':sys.argv[2]", builder)
         self.assertIn("'CFBundleVersion':sys.argv[2]", builder)
+        self.assertIn("'CFBundleIconFile':'Ruffster.icns'", builder)
+        self.assertIn('iconutil -c icns', builder)
+        self.assertIn('native/macos/ruffster-app-icon.png', builder)
         self.assertIn('export RUFFSTER_VERSION="${GITHUB_REF_NAME#mac-preview-}"', workflow)
 
     def test_status_menu_can_save_encrypted_report_for_offline_transfer(self):
