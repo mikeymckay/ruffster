@@ -1,14 +1,16 @@
 # Ruffster
 
-**Make computer use easier to talk about.** Ruffster helps parents and children look at everyday computer use together, especially during school hours. It gives families a clearer picture to discuss, keeps monitoring visible, and encrypts reports for the parent. Our golden retriever mascot is here to make those conversations feel a little easier.
+**Make computer use easier to talk about.** Ruffster helps parents and children look at everyday computer use together, especially during school hours. It gives families a clearer picture to discuss, keeps monitoring visible, and encrypts reports for the parent. Our white Golden Retriever mascot is here to make those conversations feel a little easier.
 
-<p align="center"><img src="docs/assets/ruffster-mascot.webp" alt="Ruffster golden retriever mascot" width="190"></p>
+<p align="center"><img src="docs/assets/ruffster-mascot.webp" alt="Ruffster white Golden Retriever mascot" width="190"></p>
 
 **Ruffster for Mac 0.1.25 is available for families.** Start on the parent Mac, choose six numbers your child doesn't know, and save the recovery copy somewhere you can find it. The app can stay in the shared Applications folder; monitoring is set up for the child's signed-in account only. Sign in to that account, open Ruffster, and set it up together. The setup screen confirms which account it will monitor and waits for the first encrypted sample; the menu-bar paw shows monitoring status. Parents review encrypted reports in the local dashboard and can bring them back over the same Wi-Fi or with a report file. macOS asks families to approve this unsigned Apple-silicon app once in Privacy & Security; the guide walks through it. Windows setup and packaging pass automated checks, and still need review on a logged-in Windows computer before a Windows download is offered.
 
 [Download Ruffster for Mac 0.1.25 (.dmg)](https://github.com/mikeymckay/ruffster/releases/download/mac-family-0.1.25/Ruffster-Mac-Family-App-Apple-Silicon.dmg) · [Release notes and checksum](https://github.com/mikeymckay/ruffster/releases/tag/mac-family-0.1.25) · [How to get started](https://mikeymckay.github.io/ruffster/install.html)
 
 [Project website](https://mikeymckay.github.io/ruffster/) · [Install guide](https://mikeymckay.github.io/ruffster/install.html) · [Progress page](https://mikeymckay.github.io/ruffster/progress.html) · [FAQ](https://mikeymckay.github.io/ruffster/faq.html) · [Privacy and children's rights](PRIVACY-AND-CHILDREN.md) · [Implementation plan](PLAN.md)
+
+The latest [architecture and UX review](ARCHITECTURE-REVIEW.md) summarizes the maintainability and performance findings and the next family-experience improvements.
 
 > **Platform priority:** macOS first, then Windows. Linux is a development and test host only; Linux is not a student-facing target in the current scope.
 
