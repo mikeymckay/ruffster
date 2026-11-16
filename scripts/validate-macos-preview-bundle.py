@@ -6,7 +6,9 @@ directory. It does not open the GUI, install a LaunchAgent, or collect activity.
 """
 import http.client
 import os
+import plistlib
 from pathlib import Path
+import re
 import selectors
 import subprocess
 import sys
@@ -17,6 +19,24 @@ from urllib.parse import urlsplit
 
 def _run(arguments, timeout=30):
     return subprocess.run(arguments, capture_output=True, text=True, timeout=timeout)
+
+
+def _minimum_macos_version(binary):
+    result = _run(['/usr/bin/otool', '-l', str(binary)])
+    if result.returncode:
+        raise RuntimeError(f'could not inspect macOS compatibility for {binary.name}')
+    for block in re.split(r'(?=Load command )', result.stdout):
+        if 'cmd LC_BUILD_VERSION' in block:
+            match = re.search(r'\bminos\s+(\d+(?:\.\d+){1,2})', block)
+            if match:
+                parts = tuple(int(part) for part in match.group(1).split('.'))
+                return (parts + (0, 0, 0))[:3]
+        if 'cmd LC_VERSION_MIN_MACOSX' in block:
+            match = re.search(r'\bversion\s+(\d+(?:\.\d+){1,2})', block)
+            if match:
+                parts = tuple(int(part) for part in match.group(1).split('.'))
+                return (parts + (0, 0, 0))[:3]
+    raise RuntimeError(f'no macOS deployment target found in {binary.name}')
 
 
 def _validate_frozen_file_return(core, connection, port, token, temporary_root):
@@ -93,6 +113,17 @@ def validate(app_path):
     core = app / 'Contents' / 'Resources' / 'runtime' / 'FamilyActivityCore'
     if not setup.is_file() or not core.is_file():
         raise RuntimeError('the app is missing its setup executable or frozen runtime')
+
+    info = plistlib.loads((app / 'Contents' / 'Info.plist').read_bytes())
+    if info.get('LSMinimumSystemVersion') != '12.0':
+        raise RuntimeError('the app must declare macOS 12.0 as its minimum version')
+    executables = [setup, core, app / 'Contents' / 'Resources' / 'helpers' / 'foreground',
+                   app / 'Contents' / 'Resources' / 'helpers' / 'status']
+    maximum_target = (12, 0, 0)
+    for executable in executables:
+        target = _minimum_macos_version(executable)
+        if target > maximum_target:
+            raise RuntimeError(f'{executable.name} requires macOS {".".join(map(str, target[:2]))}; expected 12.0 or older')
 
     checked = _run([str(setup), '--check-bundle'])
     if checked.returncode:

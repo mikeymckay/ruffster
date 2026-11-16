@@ -1,17 +1,19 @@
-## Ruffster for Mac 0.1.25
+## Ruffster for Mac 0.1.26
 
-Ruffster helps parents and children understand computer use together, including during the school day. This Mac family app keeps its monitoring status visible, encrypts activity reports for the parent, and includes a local dashboard. Setup shows which account it will monitor before monitoring begins.
+Ruffster helps parents and children understand computer use together. The app keeps monitoring visible, encrypts reports for the parent, and includes a local parent dashboard.
 
-### What changed
+### Mac compatibility
 
-- Family network choices now use clearer labels. Parents can label a network Home, School, or Other after Ruffster notices a router change. The report says plainly that these family labels are hints, not location checks.
-- Network labels in the report use “Network” instead of asking parents to identify a router by a technical name.
-- The synthetic dashboard screenshot and accessibility checks reflect the updated wording.
+This release supports Apple-silicon Macs running macOS 12 Monterey or newer. The setup app and status helpers are built with macOS 12 as their minimum version, and the app declares the same requirement so Finder can identify compatible Macs correctly.
 
-Ruffster measures byte changes by network interface and labels school-hours and family-network summaries as estimates. It does not identify websites from network traffic. Its standard Mac setup does not include the optional browser add-on.
+### Easier setup
 
-Ruffster keeps monitoring visible and activity reports encrypted for the parent. It does not record screenshots, keystrokes, messages, audio, or camera data. The Mac app remains unsigned by Apple; follow the install guide's app-specific first-open steps and keep macOS protections on.
+- The parent dashboard shows which step is done, what to do now, and what comes later. Updates stay visible instead of disappearing.
+- Step 2 links directly to the family install guide and names the exact Ruffster app to install on the child's Mac.
+- The install guide now focuses on family setup, including the current terminal-based Linux parent-dashboard option.
 
-Automated Mac packaging and synthetic report checks passed. A real family setup and report exchange remain the next hands-on checks.
+Setup applies monitoring only to the signed-in child account. The Mac menu-bar paw shows whether monitoring is on. Ruffster does not collect screenshots, keystrokes, messages, audio, or camera data. Activity is observed while the Mac is awake and the child is signed in; sleep is shown as missing time, without guessing why.
 
-See the [family install guide](https://mikeymckay.github.io/ruffster/install.html), [privacy and children's rights notes](https://github.com/mikeymckay/ruffster/blob/main/PRIVACY-AND-CHILDREN.md), and the release's source commit.
+This app is not signed or notarized by Apple. Follow the app-specific first-open steps in the install guide and keep macOS protections on.
+
+The GitHub release includes this app's source commit and a SHA-256 checksum.

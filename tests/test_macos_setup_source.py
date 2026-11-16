@@ -20,13 +20,25 @@ class MacSetupSourceTests(unittest.TestCase):
         root = Path(__file__).parents[1]
         builder = (root / 'scripts' / 'build-macos-preview.sh').read_text(encoding='utf-8')
         workflow = (root / '.github' / 'workflows' / 'release-macos-unsigned-preview.yml').read_text(encoding='utf-8')
-        self.assertIn('VERSION=${RUFFSTER_VERSION:-0.1.25}', builder)
+        self.assertIn('VERSION=${RUFFSTER_VERSION:-0.1.26}', builder)
         self.assertIn("'CFBundleShortVersionString':sys.argv[2]", builder)
         self.assertIn("'CFBundleVersion':sys.argv[2]", builder)
         self.assertIn("'CFBundleIconFile':'Ruffster.icns'", builder)
         self.assertIn('iconutil -c icns', builder)
         self.assertIn('native/macos/ruffster-app-icon.png', builder)
+        self.assertEqual(builder.count('arm64-apple-macosx$MIN_MACOS_VERSION'), 3)
+        self.assertIn("'LSMinimumSystemVersion':'12.0'", builder)
+        self.assertIn("Minimum macOS version: 12.0 (Monterey)", (root / 'scripts' / 'package-macos-unsigned-preview.sh').read_text())
         self.assertIn('export RUFFSTER_VERSION="${GITHUB_REF_NAME#mac-family-}"', workflow)
+
+    def test_mac_bundle_validator_rejects_newer_deployment_targets(self):
+        root = Path(__file__).parents[1]
+        validator = (root / 'scripts' / 'validate-macos-preview-bundle.py').read_text(encoding='utf-8')
+        builder = (root / 'scripts' / 'build-macos-preview.sh').read_text(encoding='utf-8')
+        self.assertIn('LSMinimumSystemVersion', validator)
+        self.assertIn('otool', validator)
+        self.assertIn('target > maximum_target', validator)
+        self.assertIn('MIN_MACOS_VERSION=12.0', builder)
 
     def test_status_menu_can_save_encrypted_report_for_offline_transfer(self):
         source = (Path(__file__).parents[1] / 'native' / 'macos' / 'status.swift').read_text(encoding="utf-8")

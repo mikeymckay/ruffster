@@ -64,6 +64,7 @@ the menu-bar status visible.
 Source repository: https://github.com/mikeymckay/ruffster
 Source commit: $SOURCE_COMMIT
 Build architecture: Apple silicon (arm64)
+Minimum macOS version: 12.0 (Monterey)
 
 This open-source app is not signed or notarized by Apple. Download it only
 from the Ruffster release page. If macOS says Apple cannot check Ruffster,

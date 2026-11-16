@@ -1,211 +1,53 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
  <head>
   <meta charset="utf-8"/>
-  <meta content="width=device-width,initial-scale=1" name="viewport"/>
-  <meta content="Download Ruffster for Mac, install it, and set up the parent dashboard and child computer together." name="description"/>
-  <meta content="#f5f4ee" name="theme-color"/>
-  <title>
-   Getting started — Ruffster
-  </title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="A short guide to setting up the Ruffster parent dashboard and installing Ruffster on a child's Mac."/>
+  <meta name="theme-color" content="#f5f4ee"/>
+  <title>Install Ruffster — getting started</title>
   <link href="favicon.svg" rel="icon" type="image/svg+xml"/>
- <link href="assets/site.css" rel="stylesheet"/>
+  <link href="assets/site.css" rel="stylesheet"/>
  </head>
  <body>
-  <a class="skip" href="#main">
-   Skip to content
-  </a>
+  <a class="skip" href="#main">Skip to content</a>
   <header class="topbar">
    <div class="wrap topbar-in">
-    <a class="brand" href="index.html">
-     <span aria-hidden="true" class="brand-mark">
-      <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
-       <ellipse cx="6.5" cy="7" rx="2.1" ry="2.7"/><ellipse cx="12" cy="5.3" rx="2.1" ry="2.7"/><ellipse cx="17.5" cy="7" rx="2.1" ry="2.7"/><ellipse cx="4.4" cy="12" rx="1.9" ry="2.4"/><path d="M12 10c-3.9 0-6.7 3.5-6.7 6.3 0 1.9 1.7 2.8 3.2 2.1l2.5-1.1a2.4 2.4 0 0 1 2 0l2.5 1.1c1.5.7 3.2-.2 3.2-2.1C18.7 13.5 15.9 10 12 10z"/>
-      </svg>
-     </span>
-     <span>
-      Ruffster
-      <small>
-       your trusted family companion
-      </small>
-     </span>
-    </a>
+    <a class="brand" href="index.html"><span aria-hidden="true" class="brand-mark">🐾</span><span>Ruffster<small>a trusted family companion</small></span></a>
     <nav aria-label="Main navigation" class="nav">
-     <a href="index.html">
-      Overview
-     </a>
-     <a aria-current="page" href="install.html">
-      Getting started
-     </a>
-     <a href="faq.html">
-      FAQ
-     </a>
-     <a class="nav-cta" href="progress.html">
-      Progress
-     </a>
+     <a href="index.html">Overview</a><a aria-current="page" href="install.html">Getting started</a><a href="faq.html">FAQ</a><a class="nav-cta" href="progress.html">Progress</a>
     </nav>
    </div>
   </header>
   <main id="main">
-   <section class="page-hero">
-    <div class="wrap">
-     <div class="eyebrow">
-      Getting started
-     </div>
-     <h1>
-      Start with a clearer view, together.
-     </h1>
-     <p>
-      Ruffster helps families understand computer use and talk about it constructively, especially during school hours. Start the Mac family setup here; the steps are designed for parents and children to follow together.
-     </p>
-    </div>
-   </section>
+   <section class="page-hero"><div class="wrap">
+    <div class="eyebrow">A simple family setup</div>
+    <h1>Set up Ruffster, one step at a time.</h1>
+    <p>Keep the parent dashboard on your computer. Install one app on the Mac Ruffster will monitor. Set it up together, then bring reports back to review.</p>
+   </div></section>
    <div class="wrap prose">
-    <div class="notice" id="status">
-     <strong>
-      Ruffster for Mac is ready for families.
-     </strong>
-     This is Ruffster's first Mac family release. Automated and synthetic checks are complete; the first family setup and report exchange are the next hands-on checks. macOS asks you to confirm before opening because the app has not yet been signed by Apple. Windows setup is being prepared for a family-computer try.
-    </div>
-    <h2>
-     For parents
-    </h2>
-    <p>
-     The Mac app keeps an encrypted activity report for the parent and shows a menu-bar status while Ruffster is running. Install it on your Mac first, then set up each child's Mac together. Everyone can see what Ruffster records and when it is running. The dashboard helps you look at the week and talk about it together.
-    </p>
-    <div class="notice">
-     <strong>Get the Mac app.</strong>
-     <a href="https://github.com/mikeymckay/ruffster/releases/download/mac-family-0.1.25/Ruffster-Mac-Family-App-Apple-Silicon.dmg">Download Ruffster for Mac 0.1.25 (Apple silicon, .dmg)</a>. See the <a href="https://github.com/mikeymckay/ruffster/releases/tag/mac-family-0.1.25">release notes, source, and SHA-256 checksum</a>.
-    </div>
-    <details>
-     <summary>Opening Ruffster the first time</summary>
-     <p>If your Mac says it cannot check Ruffster or verify its developer, choose <strong>Done</strong>. In <strong>System Settings → Privacy &amp; Security</strong>, scroll to Security and choose <strong>Open Anyway</strong> for Ruffster. Open Ruffster again and choose <strong>Open</strong>. This approves Ruffster as an individual app; your Mac’s general app protections stay on. See <a href="https://support.apple.com/en-us/102445">Apple’s current instructions</a>.</p>
-     <p>If macOS says Ruffster will damage your computer or is damaged, stop and contact the Ruffster project instead of opening it.</p>
-    </details>
-    <h3>Install it on each Mac</h3>
-    <div class="notice" id="child-account">
-     <strong>Set up the account Ruffster should monitor.</strong>
-     Ruffster can stay in the shared Applications folder, but monitoring is set up separately for each account. Only the account you set it up from is monitored. Sign in to the child's Mac account and open Ruffster there. An SSH session signed in as a parent or admin does not set up the child's account. Before monitoring starts, Ruffster shows the account it will monitor so you can check that it's the child's.
-    </div>
+    <div class="notice"><strong>What to install on the child's Mac</strong>Download <a href="https://github.com/mikeymckay/ruffster/releases/download/mac-family-0.1.26/Ruffster-Mac-Family-App-Apple-Silicon.dmg">Ruffster for Mac 0.1.26 · Apple silicon</a>. <a href="https://github.com/mikeymckay/ruffster/releases/tag/mac-family-0.1.26">See release notes and checksum</a>. This is the Ruffster app for your child's Mac. It works on Apple-silicon Macs running macOS 12 Monterey or newer. You do not need a browser extension.</div>
+    <h2 id="status">Start here</h2>
     <ol class="steps">
-     <li>Download Ruffster from the link above and open the downloaded <code>.dmg</code> file.</li>
-     <li>Drag Ruffster into the Applications folder shown in the window.</li>
-     <li>Open Ruffster from Applications. If macOS asks you to confirm the first launch, use the <strong>Opening Ruffster the first time</strong> steps above.</li>
+     <li><strong>Open the parent dashboard.</strong><p>On the parent's computer, open Ruffster. Choose six numbers the child does not know, then save the recovery copy somewhere the child cannot access. That computer keeps the parent access and reports.</p></li>
+     <li><strong>Install Ruffster on the child's Mac.</strong><p>Open the downloaded <code>Ruffster-Mac-Family-App-Apple-Silicon.dmg</code>. Drag Ruffster to <strong>Applications</strong>. Sign in to the child's Mac account, open Ruffster, and choose <strong>Set up this Mac together…</strong>. Check the account name shown before continuing. Ruffster monitors only the account used for setup.</p><p>Read the collection choices together. The menu-bar paw shows whether monitoring is on. Ruffster records only while the Mac is awake and the child is signed in; normal sleep is fine, and the report marks time it could not observe.</p></li>
+     <li><strong>Connect the computers and bring back a report.</strong><p>Keep both computers on the same Wi-Fi. In the parent dashboard choose <strong>Show two digits</strong>; enter them in Ruffster on the child's Mac. If they cannot connect, use the connection file instead. Later, choose <strong>Share an encrypted report</strong> from the menu-bar paw and enter its two digits in the parent dashboard. You can also save a report file and open it on the parent computer.</p></li>
     </ol>
-    <h3>Set up your family</h3>
-    <ol class="steps">
-     <li>
-      <strong>Set up parent access.</strong>
-      On your Mac, choose <strong>Open parent dashboard</strong>. Choose six numbers your child does not know, then save the recovery copy so you can bring your reports to another parent Mac if needed.
-     </li>
-     <li>
-      <strong>Set up each child's account.</strong>
-      Sign in to the child's account, open Ruffster, and choose <strong>Set up this Mac together…</strong>. Read the collection choices, choose how long to keep detailed records, and check the account name Ruffster shows before continuing. Pair each Mac with the parent Mac: in the parent dashboard, choose <strong>Show two digits</strong>, then enter them on the child's Mac. Keep both Macs on the same Wi-Fi and allow Local Network access if macOS asks. If the digits don't connect, download the connection file from the parent dashboard, move it to the child's Mac, and choose <strong>Choose connection file…</strong> during setup. The connection file lets the child send reports; the recovery copy stays with the parent. When setup finishes, check that the menu-bar paw says monitoring is on. Ruffster starts at the child's sign-in and macOS restarts it if it stops unexpectedly.
-     </li>
-     <li>
-      <strong>Bring a report back to the parent Mac.</strong>
-      When both Macs are on the same Wi-Fi, choose <strong>Share an encrypted report</strong> in the child's Ruffster menu. Enter the two digits it shows in the parent dashboard. If the Macs aren't on the same Wi-Fi, choose <strong>Save an encrypted report file</strong> from the child's status menu and open it in the parent dashboard. Name each computer there so you can tell reports apart. Then review the week together as a starting point for conversation.
-     </li>
-    </ol>
-    <p>
-     <strong>About websites:</strong> The main app works without a browser add-on. An optional experiment can share domain names from selected browsers on the child's computer. It is not included in the Mac setup, and reports make clear when website details were not observed.
-    </p>
-    <p>
-     Families set up Ruffster themselves; the school does not install or operate it. macOS comes first, followed by Windows. Linux is for development and testing.
-    </p>
-    <h2>
-     Current Mac app status
-    </h2>
-    <h3>
-     macOS
-    </h3>
-    <p>
-     Mac 0.1.25 includes background monitoring, a visible menu-bar status, parent-encrypted activity, and a local dashboard with monitoring time, observable gaps, and restarts after an unclosed monitoring session. The parent dashboard explains its PIN in simple family terms: choose six numbers your child doesn't know, and keep the recovery copy somewhere you can find it. Parents can change the PIN on an unlocked computer without changing the parent key; they save a fresh recovery copy before the next child setup. Setup names the signed-in account in the confirmation and asks families to cancel if it isn't the child's account. It also explains what is collected and what stays private in shorter, clearer language. The report calls these family network labels rather than location checks, and keeps the school-hour and network traffic views marked as estimates. The parent report says when website details are absent and hides their empty lists while leaving the explanation available. Setup explains that monitoring waits for the first encrypted sample, and that automatic cleanup uses a rough day marker while app names, network details, and exact times stay encrypted for the parent. If nearby-computer pairing does not work, choose a connection file from the same screen. The app bundle is sealed and strictly verified during the Mac build; families still approve this Apple-silicon app once in macOS Privacy & Security. Automated checks and synthetic report flows passed; the first family setup and report exchange are the next hands-on checks. VoiceOver and physical sleep/wake still need review.
-    </p>
-    <h3>
-     Windows
-    </h3>
-    <p>
-     A per-user setup, visible tray indicator, parent dashboard launcher, and update flow are implemented. GitHub Actions builds the package and all four Windows test groups passed. Next we’ll review setup, tray, updates, and report sharing on a family Windows computer.
-    </p>
-    <h2 id="development">
-     For contributors
-    </h2>
-    <p>
-     Use a recent Python 3 and a virtual environment. Linux is supported as a convenient development/test host; tests there do not prove macOS or Windows behavior.
-    </p>
-    <pre><code>python3 -m venv .venv
+    <h2>Using a Linux laptop for the parent dashboard</h2>
+    <p>A one-click Linux parent app is not available yet. For now, the parent dashboard can run from the Ruffster project on your Linux laptop. Open Terminal and run:</p>
+    <pre><code>git clone https://github.com/mikeymckay/ruffster.git
+cd ruffster
+python3 -m venv .venv
 .venv/bin/python -m pip install -e .
-.venv/bin/python -m unittest discover -s tests -v
-node --check family_activity/parent_assets/app.js</code></pre>
-    <p>
-     For a Mac bundle, use a Mac with PyInstaller and the project dependencies installed:
-    </p>
-    <pre><code>./scripts/build-macos-preview.sh \
-  "$(pwd)/.venv/bin/python" \
-  "/absolute/path/to/output-directory"</code></pre>
-    <p>
-     For the Windows preview, build on Windows x64 with Python, PyInstaller, and the .NET 10 LTS SDK. From the repository root, run
-     <code>
-      python -m pip install -e ".[build]"
-     </code>
-     and then
-     <code>
-      ./scripts/build-windows-preview.ps1 -OutputDirectory ./dist/FamilyActivityPreview
-     </code>
-     in PowerShell. The Windows builder also creates a direct-download per-user installer that copies its files and then opens family setup; monitoring still requires family confirmation. Linux cross-compilation checks that executable can be built, but cannot run Windows extraction, setup, or tray behavior.
-    </p>
-    <h2>
-     Contributing to Ruffster
-    </h2>
-    <p>
-     Ruffster for Mac is available for ongoing family use. We’re using first family sessions to make setup, report sharing, and parent help even clearer. The same step-by-step experience will follow on Windows.
-    </p>
-    <div class="notice">
-     <strong>
-      Reports show what Ruffster observed.
-     </strong>
-     When observations pause, Ruffster marks a gap instead of guessing why. You can see when the report has a complete picture and when it has a break.
-    </div>
-    <p>
-     Questions about what Ruffster records?
-     <a href="faq.html">
-      Read the FAQ
-     </a>
-     .
-    </p>
+.venv/bin/python -m family_activity parent</code></pre>
+    <p>Ruffster opens the parent dashboard in your browser and keeps its files in your Linux account. Leave the terminal and dashboard open while connecting the Mac or receiving a report. The dashboard is local to this laptop; Linux is not monitoring the child's activity.</p>
+    <h2>If macOS asks before opening</h2>
+    <p>Ruffster is an open-source app that is not signed by Apple. If macOS says it cannot verify the developer, choose <strong>Done</strong>. Open <strong>System Settings → Privacy &amp; Security</strong>, scroll to Security, and choose <strong>Open Anyway</strong> for Ruffster. Open it again and choose <strong>Open</strong>. This approves Ruffster only; leave the Mac's general protections on. Follow <a href="https://support.apple.com/en-us/102445">Apple's instructions</a>.</p>
+    <p>If macOS says the app will damage the computer or is damaged, stop and contact the Ruffster project.</p>
+    <div class="notice"><strong>That’s all you need to start.</strong> The main Ruffster app does not block websites or apps. It does not take screenshots, record typing or messages, or use the microphone or camera. It helps your family look at observations together; it cannot explain why an observation is missing.</div>
+    <p>Need help? <a href="faq.html">Read the family FAQ</a>, or see the <a href="progress.html">current project progress</a>.</p>
    </div>
   </main>
-  <footer class="footer">
-   <div class="wrap footer-grid">
-    <div>
-     <a class="brand" href="index.html" style="color:#fff">
-      <span aria-hidden="true" class="brand-mark">
-       <svg fill="none" viewBox="0 0 24 24">
-        <path d="M5 13.2c1.7-3.1 4-4.7 7-4.7s5.3 1.6 7 4.7M8.1 16.1c1-1.6 2.3-2.4 3.9-2.4s2.9.8 3.9 2.4M12 19h.01" stroke="currentColor" stroke-linecap="round" stroke-width="2.2">
-        </path>
-       </svg>
-      </span>
-      <span>
-       Ruffster
-       <small>
-        your trusted family companion
-       </small>
-      </span>
-     </a>
-     <p>
-      macOS first · Windows next · Linux for development/testing only
-     </p>
-    </div>
-    <div class="footer-links">
-     <a href="index.html">
-      Overview
-     </a>
-     <a href="faq.html">
-      FAQ
-     </a>
-    </div>
-   </div>
-  </footer>
+  <footer class="footer"><div class="wrap footer-grid"><div><a class="brand" href="index.html" style="color:#fff"><span aria-hidden="true" class="brand-mark">🐾</span><span>Ruffster<small>your trusted family companion</small></span></a><p>macOS for the child's computer · Linux parent dashboard currently uses Terminal</p></div><div class="footer-links"><a href="index.html">Overview</a><a href="faq.html">FAQ</a></div></div></footer>
  </body>
 </html>

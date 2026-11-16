@@ -9,13 +9,14 @@ if [ "$#" -ne 2 ]; then
 fi
 PYTHON=$1
 OUTPUT=$2
-VERSION=${RUFFSTER_VERSION:-0.1.25}
+VERSION=${RUFFSTER_VERSION:-0.1.26}
+MIN_MACOS_VERSION=12.0
 case "$PYTHON:$OUTPUT" in /*:/*) ;; *) printf '%s\n' 'Use absolute paths.' >&2; exit 1;; esac
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 "$PYTHON" - "$VERSION" <<'PY'
 import re, sys
 if not re.fullmatch(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)", sys.argv[1]):
-    raise SystemExit('Ruffster version must use three numeric components, such as 0.1.25.')
+    raise SystemExit('Ruffster version must use three numeric components, such as 0.1.26.')
 PY
 "$PYTHON" -c 'import PyInstaller, nacl, cryptography'
 mkdir -p "$OUTPUT"
@@ -44,9 +45,9 @@ sips -s format png -z 512 512 "$ROOT/native/macos/ruffster-app-icon.png" --out "
 sips -s format png -z 512 512 "$ROOT/native/macos/ruffster-app-icon.png" --out "$ICONSET/icon_512x512.png" >/dev/null
 sips -s format png -z 1024 1024 "$ROOT/native/macos/ruffster-app-icon.png" --out "$ICONSET/icon_512x512@2x.png" >/dev/null
 iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/Ruffster.icns"
-swiftc "$ROOT/native/macos/setup.swift" -o "$APP/Contents/MacOS/FamilyActivitySetup"
-swiftc "$ROOT/native/macos/foreground.swift" -o "$APP/Contents/Resources/helpers/foreground"
-swiftc "$ROOT/native/macos/status.swift" -o "$APP/Contents/Resources/helpers/status"
+swiftc -target "arm64-apple-macosx$MIN_MACOS_VERSION" "$ROOT/native/macos/setup.swift" -o "$APP/Contents/MacOS/FamilyActivitySetup"
+swiftc -target "arm64-apple-macosx$MIN_MACOS_VERSION" "$ROOT/native/macos/foreground.swift" -o "$APP/Contents/Resources/helpers/foreground"
+swiftc -target "arm64-apple-macosx$MIN_MACOS_VERSION" "$ROOT/native/macos/status.swift" -o "$APP/Contents/Resources/helpers/status"
 "$APP/Contents/Resources/helpers/status" --self-test-state
 "$PYTHON" - "$APP/Contents/Info.plist" "$VERSION" <<'PY'
 import plistlib, sys
@@ -55,7 +56,8 @@ with open(sys.argv[1], 'wb') as file:
                    'CFBundleIdentifier':'org.ruffster.app', 'CFBundleExecutable':'FamilyActivitySetup',
                    'CFBundlePackageType':'APPL', 'CFBundleIconFile':'Ruffster.icns',
                    'CFBundleShortVersionString':sys.argv[2],
-                   'CFBundleVersion':sys.argv[2], 'NSHighResolutionCapable':True,
+                   'CFBundleVersion':sys.argv[2], 'LSMinimumSystemVersion':'12.0',
+                   'NSHighResolutionCapable':True,
                    'NSLocalNetworkUsageDescription': 'Ruffster uses your local network when you connect a parent computer or send an encrypted report.'}, file)
 PY
 "$APP/Contents/MacOS/FamilyActivitySetup" --check-bundle

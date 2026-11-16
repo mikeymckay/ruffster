@@ -5,7 +5,11 @@ let keyShareTimer;
 let backupDownloadedThisSession = false;
 let selectedDeviceId;
 let reportDeviceInitialized = false;
-function show(message) { $('message').textContent = message; }
+function show(message) {
+  const region = $('message');
+  region.textContent = message;
+  region.hidden = !message;
+}
 async function api(path, options = {}) {
   const response = await fetch(path, {credentials:'same-origin', ...options});
   const body = await response.json();
@@ -93,21 +97,32 @@ async function refresh() {
 function updateSetupProgress() {
   const current = !status.has_key || !status.unlocked || !status.backup_confirmed ? 0 : !status.has_report ? 1 : 3;
   const titles = [...document.querySelectorAll('#setup-progress li')];
+  const states = current === 0 && status.has_report ? ['current', 'complete', 'complete', 'upcoming']
+    : current === 0 ? ['current', 'upcoming', 'upcoming', 'upcoming']
+    : current === 1 ? ['complete', 'current', 'upcoming', 'upcoming']
+    : ['complete', 'complete', 'complete', 'current'];
+  const badges = states.map((state, index) => state === 'complete' ? 'DONE'
+    : state === 'current' ? (index === 0 ? 'DO THIS FIRST' : 'DO THIS NOW')
+      : current === 0 ? (index === 3 ? 'LATER' : 'WAITING')
+        : index === 2 ? 'AFTER STEP 2' : 'LATER');
   titles.forEach((step, index) => {
-    step.classList.toggle('complete', index < current);
-    step.classList.toggle('current', index === current);
-    if (index === current) step.setAttribute('aria-current', 'step');
+    step.classList.toggle('complete', states[index] === 'complete');
+    step.classList.toggle('current', states[index] === 'current');
+    step.classList.toggle('upcoming', states[index] === 'upcoming');
+    step.querySelector('.step-status').textContent = badges[index];
+    if (states[index] === 'current') step.setAttribute('aria-current', 'step');
     else step.removeAttribute('aria-current');
   });
   $('step-one-title').textContent = !status.has_key ? 'Set up parent access' : !status.unlocked ? 'Unlock parent access' : !status.backup_confirmed ? 'Save your recovery copy' : 'Parent access is ready';
   $('step-one-state').textContent = current > 0 ? 'Ready on this device.' : !status.has_key ? 'Choose a six-digit PIN only you know.' : !status.unlocked ? 'Enter your PIN below to continue.' : 'Save your recovery copy before setting up the child computer.';
-  $('step-two-state').textContent = status.has_report ? 'A report has arrived; add another computer if needed.' : !status.backup_confirmed ? 'Save your recovery copy before setting up a child computer.' : current === 1 ? 'Enter these two digits on one child computer.' : 'Ready after parent access is unlocked.';
-  $('step-three-state').textContent = status.has_report ? 'Encrypted report received on this device.' : 'Later, bring the encrypted report back here.';
+  $('step-two-state').textContent = status.has_report ? `Ruffster received a report from the child's Mac.` : current === 1 ? `Install Ruffster, then set it up in the child's account.` : 'Available after parent access is ready.';
+  $('step-three-state').textContent = status.has_report ? 'First encrypted report received on this computer.' : current === 1 ? `Do this after setting up Ruffster on the child's Mac.` : 'Available after Step 2.';
+  $('step-four-state').textContent = status.has_report ? 'Name the computer, then look through the report together.' : 'This becomes available after the first report arrives.';
   const messages = [
-    !status.has_key ? 'Next: set up parent access with a six-digit PIN only you know.' : !status.unlocked ? 'Next: unlock parent access with your PIN.' : !status.backup_confirmed ? 'Next: save your recovery copy somewhere you control before setting up the child computer.' : 'Parent access is ready. You can continue with child setup.',
-    'Next: set up one child computer together. Repeat for each child, then bring encrypted reports back here.',
-    'Next: set up one child computer together. Repeat for each child, then bring encrypted reports back here.',
-    'Next: name each computer and review its report together. Times are estimates, and missing observations do not explain why they are missing.'
+    !status.has_key ? 'Next: set up parent access below. Choose six numbers the child does not know.' : !status.unlocked ? 'Next: enter your parent access PIN below.' : 'Next: save your recovery copy below. Then set up the child’s Mac.',
+    'Next: install Ruffster on the child’s Mac using the install guide linked in Step 2. Sign in to the child’s account and choose “Set up this Mac together…”. Then connect it here.',
+    'Next: install Ruffster on the child’s Mac using the install guide linked in Step 2. Sign in to the child’s account and choose “Set up this Mac together…”. Then connect it here.',
+    'Next: name the computer below, then review the report together. Times are estimates, and missing observations do not explain why they are missing.'
   ];
   $('next-step').textContent = messages[current];
 }

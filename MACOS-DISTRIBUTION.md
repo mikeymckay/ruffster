@@ -1,6 +1,6 @@
 # Ruffster for Mac: install and release
 
-Ruffster is distributed as an unsigned Apple-silicon Mac app. Families can install it without an Apple Developer account. GitHub Actions builds the app from a reviewed source commit, checks its bundled files, and publishes a drag-to-Applications disk image with the source commit and SHA-256 checksum.
+Ruffster is distributed as an unsigned Apple-silicon Mac app for macOS 12 Monterey or newer. Families can install it without an Apple Developer account. The setup app and its native helpers are built with macOS 12 as the deployment target, the bundle declares that same minimum, and CI checks the compiled binaries to prevent a newer default SDK version from making the download incompatible. GitHub Actions builds the app from a reviewed source commit, checks its bundled files, and publishes a drag-to-Applications disk image with the source commit and SHA-256 checksum.
 
 ## Install Ruffster
 
